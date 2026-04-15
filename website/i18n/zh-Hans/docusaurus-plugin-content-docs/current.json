@@ -1,0 +1,74 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docs.category.Getting Started": {
+    "message": "Getting Started",
+    "description": "The label for category 'Getting Started' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Using Hermes": {
+    "message": "Using Hermes",
+    "description": "The label for category 'Using Hermes' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Features": {
+    "message": "Features",
+    "description": "The label for category 'Features' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Core": {
+    "message": "Core",
+    "description": "The label for category 'Core' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Automation": {
+    "message": "Automation",
+    "description": "The label for category 'Automation' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Media & Web": {
+    "message": "Media & Web",
+    "description": "The label for category 'Media & Web' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Management": {
+    "message": "Management",
+    "description": "The label for category 'Management' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Advanced": {
+    "message": "Advanced",
+    "description": "The label for category 'Advanced' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Skills": {
+    "message": "Skills",
+    "description": "The label for category 'Skills' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Messaging Platforms": {
+    "message": "Messaging Platforms",
+    "description": "The label for category 'Messaging Platforms' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Integrations": {
+    "message": "Integrations",
+    "description": "The label for category 'Integrations' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Guides & Tutorials": {
+    "message": "Guides & Tutorials",
+    "description": "The label for category 'Guides & Tutorials' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Developer Guide": {
+    "message": "Developer Guide",
+    "description": "The label for category 'Developer Guide' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Architecture": {
+    "message": "Architecture",
+    "description": "The label for category 'Architecture' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Extending": {
+    "message": "Extending",
+    "description": "The label for category 'Extending' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Internals": {
+    "message": "Internals",
+    "description": "The label for category 'Internals' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Reference": {
+    "message": "Reference",
+    "description": "The label for category 'Reference' in sidebar 'docs'"
+  }
+}
