@@ -1,31 +1,31 @@
-# Trajectory Format
+# 轨迹格式
 
-Hermes Agent saves conversation trajectories in ShareGPT-compatible JSONL format
-for use as training data, debugging artifacts, and reinforcement learning datasets.
+Hermes Agent 以 ShareGPT 兼容的 JSONL 格式保存对话轨迹
+用于训练数据、调试工件和强化学习数据集。
 
-Source files: `agent/trajectory.py`, `run_agent.py` (search for `_save_trajectory`), `batch_runner.py`
+源文件：`agent/trajectory.py`, `run_agent.py` (搜索 `_save_trajectory`), `batch_runner.py`
 
 
-## File Naming Convention
+## 文件命名约定
 
-Trajectories are written to files in the current working directory:
+轨迹写入当前工作目录中的文件：
 
-| File | When |
+| 文件 | 何时 |
 |------|------|
-| `trajectory_samples.jsonl` | Conversations that completed successfully (`completed=True`) |
-| `failed_trajectories.jsonl` | Conversations that failed or were interrupted (`completed=False`) |
+| `trajectory_samples.jsonl` | 成功完成的对话 (`completed=True`) |
+| `failed_trajectories.jsonl` | 失败或中断的对话 (`completed=False`) |
 
-The batch runner (`batch_runner.py`) writes to a custom output file per batch
-(e.g., `batch_001_output.jsonl`) with additional metadata fields.
+批处理运行器 (`batch_runner.py`) 为每个批次写入自定义输出文件
+（例如，`batch_001_output.jsonl`）并带有额外的元数据字段。
 
-You can override the filename via the `filename` parameter in `save_trajectory()`.
+您可以通过 `save_trajectory()` 中的 `filename` 参数覆盖文件名。
 
 
-## JSONL Entry Format
+## JSONL 条目格式
 
-Each line in the file is a self-contained JSON object. There are two variants:
+文件中的每一行都是一个自包含的 JSON 对象。有两种变体：
 
-### CLI/Interactive Format (from `_save_trajectory`)
+### CLI/交互式格式（来自 `_save_trajectory`）
 
 ```json
 {
@@ -36,7 +36,7 @@ Each line in the file is a self-contained JSON object. There are two variants:
 }
 ```
 
-### Batch Runner Format (from `batch_runner.py`)
+### 批处理运行器格式（来自 `batch_runner.py`）
 
 ```json
 {

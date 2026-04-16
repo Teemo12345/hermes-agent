@@ -1,42 +1,42 @@
 ---
 sidebar_position: 4
-title: "Provider Runtime Resolution"
-description: "How Hermes resolves providers, credentials, API modes, and auxiliary models at runtime"
+title: "提供商运行时解析"
+description: "Hermes 如何在运行时解析提供商、凭据、API 模式和辅助模型"
 ---
 
-# Provider Runtime Resolution
+# 提供商运行时解析
 
-Hermes has a shared provider runtime resolver used across:
+Hermes 有一个共享的提供商运行时解析器，用于：
 
 - CLI
-- gateway
-- cron jobs
+- 网关
+- cron 作业
 - ACP
-- auxiliary model calls
+- 辅助模型调用
 
-Primary implementation:
+主要实现：
 
-- `hermes_cli/runtime_provider.py` — credential resolution, `_resolve_custom_runtime()`
-- `hermes_cli/auth.py` — provider registry, `resolve_provider()`
-- `hermes_cli/model_switch.py` — shared `/model` switch pipeline (CLI + gateway)
-- `agent/auxiliary_client.py` — auxiliary model routing
+- `hermes_cli/runtime_provider.py` — 凭据解析，`_resolve_custom_runtime()`
+- `hermes_cli/auth.py` — 提供商注册表，`resolve_provider()`
+- `hermes_cli/model_switch.py` — 共享的 `/model` 切换管道（CLI + 网关）
+- `agent/auxiliary_client.py` — 辅助模型路由
 
-If you are trying to add a new first-class inference provider, read [Adding Providers](./adding-providers.md) alongside this page.
+如果您正在尝试添加新的一流推理提供商，请阅读[添加提供商](./adding-providers.md)以及本页面。
 
-## Resolution precedence
+## 解析优先级
 
-At a high level, provider resolution uses:
+在高层级上，提供商解析使用：
 
-1. explicit CLI/runtime request
-2. `config.yaml` model/provider config
-3. environment variables
-4. provider-specific defaults or auto resolution
+1. 显式 CLI/运行时请求
+2. `config.yaml` 模型/提供商配置
+3. 环境变量
+4. 提供商特定的默认值或自动解析
 
-That ordering matters because Hermes treats the saved model/provider choice as the source of truth for normal runs. This prevents a stale shell export from silently overriding the endpoint a user last selected in `hermes model`.
+该顺序很重要，因为 Hermes 将保存的模型/提供商选择视为正常运行的真相来源。这可以防止过时的 shell 导出静默覆盖用户在 `hermes model` 中最后选择的端点。
 
-## Providers
+## 提供商
 
-Current provider families include:
+当前提供商系列包括：
 
 - AI Gateway (Vercel)
 - OpenRouter

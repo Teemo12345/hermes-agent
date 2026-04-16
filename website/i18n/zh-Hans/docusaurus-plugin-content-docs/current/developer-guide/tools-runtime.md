@@ -1,14 +1,14 @@
 ---
 sidebar_position: 9
-title: "Tools Runtime"
-description: "Runtime behavior of the tool registry, toolsets, dispatch, and terminal environments"
+title: "工具运行时"
+description: "工具注册表、工具集、分发和终端环境的运行时行为"
 ---
 
-# Tools Runtime
+# 工具运行时
 
-Hermes tools are self-registering functions grouped into toolsets and executed through a central registry/dispatch system.
+Hermes 工具是自注册函数，分组到工具集中，并通过中央注册表/分发系统执行。
 
-Primary files:
+主要文件：
 
 - `tools/registry.py`
 - `model_tools.py`
@@ -16,38 +16,38 @@ Primary files:
 - `tools/terminal_tool.py`
 - `tools/environments/*`
 
-## Tool registration model
+## 工具注册模型
 
-Each tool module calls `registry.register(...)` at import time.
+每个工具模块在导入时调用 `registry.register(...)`。
 
-`model_tools.py` is responsible for importing/discovering tool modules and building the schema list used by the model.
+`model_tools.py` 负责导入/发现工具模块并构建模型使用的模式列表。
 
-### How `registry.register()` works
+### `registry.register()` 如何工作
 
-Every tool file in `tools/` calls `registry.register()` at module level to declare itself. The function signature is:
+`tools/` 中的每个工具文件在模块级别调用 `registry.register()` 来声明自身。函数签名为：
 
 ```python
 registry.register(
-    name="terminal",               # Unique tool name (used in API schemas)
-    toolset="terminal",            # Toolset this tool belongs to
-    schema={...},                  # OpenAI function-calling schema (description, parameters)
-    handler=handle_terminal,       # The function that executes when the tool is called
-    check_fn=check_terminal,       # Optional: returns True/False for availability
-    requires_env=["SOME_VAR"],     # Optional: env vars needed (for UI display)
-    is_async=False,                # Whether the handler is an async coroutine
-    description="Run commands",    # Human-readable description
-    emoji="💻",                    # Emoji for spinner/progress display
+    name="terminal",               # 唯一工具名称（用于 API 模式）
+    toolset="terminal",            # 此工具所属的工具集
+    schema={...},                  # OpenAI 函数调用模式（描述、参数）
+    handler=handle_terminal,       # 工具被调用时执行的函数
+    check_fn=check_terminal,       # 可选：返回 True/False 表示可用性
+    requires_env=["SOME_VAR"],     # 可选：需要的环境变量（用于 UI 显示）
+    is_async=False,                # 处理器是否为异步协程
+    description="运行命令",        # 人类可读的描述
+    emoji="💻",                    # 用于微调器/进度显示的 emoji
 )
 ```
 
-Each call creates a `ToolEntry` stored in the singleton `ToolRegistry._tools` dict keyed by tool name. If a name collision occurs across toolsets, a warning is logged and the later registration wins.
+每次调用都会创建一个 `ToolEntry`，存储在单例 `ToolRegistry._tools` 字典中，以工具名称为键。如果跨工具集发生名称冲突，会记录警告，后注册的获胜。
 
-### Discovery: `discover_builtin_tools()`
+### 发现：`discover_builtin_tools()`
 
-When `model_tools.py` is imported, it calls `discover_builtin_tools()` from `tools/registry.py`. This function scans every `tools/*.py` file using AST parsing to find modules that contain top-level `registry.register()` calls, then imports them:
+当 `model_tools.py` 被导入时，它会调用 `tools/registry.py` 中的 `discover_builtin_tools()`。此函数使用 AST 解析扫描每个 `tools/*.py` 文件，查找包含顶级 `registry.register()` 调用的模块，然后导入它们：
 
 ```python
-# tools/registry.py (simplified)
+# tools/registry.py (简化)
 def discover_builtin_tools(tools_dir=None):
     tools_path = Path(tools_dir) if tools_dir else Path(__file__).parent
     for path in sorted(tools_path.glob("*.py")):

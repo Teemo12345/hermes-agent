@@ -1,37 +1,37 @@
 ---
 sidebar_position: 3
-title: "Creating Skills"
-description: "How to create skills for Hermes Agent — SKILL.md format, guidelines, and publishing"
+title: "创建技能"
+description: "如何为 Hermes Agent 创建技能 — SKILL.md 格式、指南和发布"
 ---
 
-# Creating Skills
+# 创建技能
 
-Skills are the preferred way to add new capabilities to Hermes Agent. They're easier to create than tools, require no code changes to the agent, and can be shared with the community.
+技能是为 Hermes Agent 添加新功能的首选方式。它们比工具更容易创建，不需要对智能体进行代码更改，并且可以与社区共享。
 
-## Should it be a Skill or a Tool?
+## 应该是技能还是工具？
 
-Make it a **Skill** when:
-- The capability can be expressed as instructions + shell commands + existing tools
-- It wraps an external CLI or API that the agent can call via `terminal` or `web_extract`
-- It doesn't need custom Python integration or API key management baked into the agent
-- Examples: arXiv search, git workflows, Docker management, PDF processing, email via CLI tools
+在以下情况下将其设为**技能**：
+- 该功能可以表示为指令 + shell 命令 + 现有工具
+- 它包装了智能体可以通过 `terminal` 或 `web_extract` 调用的外部 CLI 或 API
+- 它不需要自定义 Python 集成或内置到智能体中的 API 密钥管理
+- 示例：arXiv 搜索、git 工作流、Docker 管理、PDF 处理、通过 CLI 工具的电子邮件
 
-Make it a **Tool** when:
-- It requires end-to-end integration with API keys, auth flows, or multi-component configuration
-- It needs custom processing logic that must execute precisely every time
-- It handles binary data, streaming, or real-time events
-- Examples: browser automation, TTS, vision analysis
+在以下情况下将其设为**工具**：
+- 它需要与 API 密钥、认证流程或多组件配置进行端到端集成
+- 它需要每次都必须精确执行的自定义处理逻辑
+- 它处理二进制数据、流式处理或实时事件
+- 示例：浏览器自动化、TTS、视觉分析
 
-## Skill Directory Structure
+## 技能目录结构
 
-Bundled skills live in `skills/` organized by category. Official optional skills use the same structure in `optional-skills/`:
+捆绑的技能位于按类别组织的 `skills/` 中。官方可选技能在 `optional-skills/` 中使用相同的结构：
 
 ```text
 skills/
 ├── research/
 │   └── arxiv/
-│       ├── SKILL.md              # Required: main instructions
-│       └── scripts/              # Optional: helper scripts
+│       ├── SKILL.md              # 必需：主要指令
+│       └── scripts/              # 可选：辅助脚本
 │           └── search_arxiv.py
 ├── productivity/
 │   └── ocr-and-documents/
@@ -41,12 +41,12 @@ skills/
 └── ...
 ```
 
-## SKILL.md Format
+## SKILL.md 格式
 
 ```markdown
 ---
 name: my-skill
-description: Brief description (shown in skill search results)
+description: 简要描述（显示在技能搜索结果中）
 version: 1.0.0
 author: Your Name
 license: MIT

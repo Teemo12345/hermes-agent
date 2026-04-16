@@ -1,53 +1,53 @@
 ---
 sidebar_position: 3
-title: "Updating & Uninstalling"
-description: "How to update Hermes Agent to the latest version or uninstall it"
+title: "更新与卸载"
+description: "如何将 Hermes Agent 更新到最新版本或卸载它"
 ---
 
-# Updating & Uninstalling
+# 更新与卸载
 
-## Updating
+## 更新
 
-Update to the latest version with a single command:
+使用单个命令更新到最新版本：
 
 ```bash
 hermes update
 ```
 
-This pulls the latest code, updates dependencies, and prompts you to configure any new options that were added since your last update.
+这会拉取最新代码，更新依赖项，并提示您配置自上次更新以来添加的任何新选项。
 
 :::tip
-`hermes update` automatically detects new configuration options and prompts you to add them. If you skipped that prompt, you can manually run `hermes config check` to see missing options, then `hermes config migrate` to interactively add them.
+`hermes update` 会自动检测新的配置选项并提示您添加它们。如果您跳过了该提示，可以手动运行 `hermes config check` 查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
 :::
 
-### What happens during an update
+### 更新期间会发生什么
 
-When you run `hermes update`, the following steps occur:
+当您运行 `hermes update` 时，会发生以下步骤：
 
-1. **Git pull** — pulls the latest code from the `main` branch and updates submodules
-2. **Dependency install** — runs `uv pip install -e ".[all]"` to pick up new or changed dependencies
-3. **Config migration** — detects new config options added since your version and prompts you to set them
-4. **Gateway auto-restart** — if the gateway service is running (systemd on Linux, launchd on macOS), it is **automatically restarted** after the update completes so the new code takes effect immediately
+1. **Git pull** — 从 `main` 分支拉取最新代码并更新子模块
+2. **依赖项安装** — 运行 `uv pip install -e ".[all]"` 以获取新的或更改的依赖项
+3. **配置迁移** — 检测自您版本以来添加的新配置选项并提示您设置它们
+4. **网关自动重启** — 如果网关服务正在运行（Linux 上的 systemd，macOS 上的 launchd），它会在更新完成后**自动重启**，以便新代码立即生效
 
-Expected output looks like:
+预期输出如下：
 
 ```
 $ hermes update
-Updating Hermes Agent...
-📥 Pulling latest code...
-Already up to date.  (or: Updating abc1234..def5678)
-📦 Updating dependencies...
-✅ Dependencies updated
-🔍 Checking for new config options...
-✅ Config is up to date  (or: Found 2 new options — running migration...)
-🔄 Restarting gateway service...
-✅ Gateway restarted
-✅ Hermes Agent updated successfully!
+更新 Hermes Agent...
+📥 拉取最新代码...
+已经是最新的。  (或：更新 abc1234..def5678)
+📦 更新依赖项...
+✅ 依赖项已更新
+🔍 检查新的配置选项...
+✅ 配置是最新的  (或：找到 2 个新选项 — 运行迁移...)
+🔄 重启网关服务...
+✅ 网关已重启
+✅ Hermes Agent 更新成功！
 ```
 
-### Recommended Post-Update Validation
+### 推荐的更新后验证
 
-`hermes update` handles the main update path, but a quick validation confirms everything landed cleanly:
+`hermes update` 处理主要的更新路径，但快速验证可以确认所有内容都已干净地落地：
 
 1. `git status --short` — if the tree is unexpectedly dirty, inspect before continuing
 2. `hermes doctor` — checks config, dependencies, and service health

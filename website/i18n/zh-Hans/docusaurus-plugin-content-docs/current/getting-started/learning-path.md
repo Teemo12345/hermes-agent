@@ -1,53 +1,53 @@
 ---
 sidebar_position: 3
-title: 'Learning Path'
-description: 'Choose your learning path through the Hermes Agent documentation based on your experience level and goals.'
+title: '学习路径'
+description: '根据您的经验水平和目标选择 Hermes Agent 文档的学习路径。'
 ---
 
-# Learning Path
+# 学习路径
 
-Hermes Agent can do a lot — CLI assistant, Telegram/Discord bot, task automation, RL training, and more. This page helps you figure out where to start and what to read based on your experience level and what you're trying to accomplish.
+Hermes Agent 可以做很多事情 — CLI 助手、Telegram/Discord 机器人、任务自动化、RL 训练等等。本页面帮助您根据经验水平和想要实现的目标来确定从哪里开始以及阅读什么内容。
 
-:::tip Start Here
-If you haven't installed Hermes Agent yet, begin with the [Installation guide](/docs/getting-started/installation) and then run through the [Quickstart](/docs/getting-started/quickstart). Everything below assumes you have a working installation.
+:::tip 从这里开始
+如果您还没有安装 Hermes Agent，请从[安装指南](/docs/getting-started/installation)开始，然后运行[快速入门](/docs/getting-started/quickstart)。下面的所有内容都假设您有一个正常工作的安装。
 :::
 
-## How to Use This Page
+## 如何使用本页面
 
-- **Know your level?** Jump to the [experience-level table](#by-experience-level) and follow the reading order for your tier.
-- **Have a specific goal?** Skip to [By Use Case](#by-use-case) and find the scenario that matches.
-- **Just browsing?** Check the [Key Features](#key-features-at-a-glance) table for a quick overview of everything Hermes Agent can do.
+- **知道您的水平？** 跳转到[经验水平表格](#按经验水平)并按照您所在层级的阅读顺序。
+- **有特定目标？** 跳到[按使用场景](#按使用场景)并找到匹配的场景。
+- **只是浏览？** 查看[关键功能概览](#关键功能概览)表格，快速了解 Hermes Agent 的所有功能。
 
-## By Experience Level
+## 按经验水平
 
-| Level | Goal | Recommended Reading | Time Estimate |
+| 水平 | 目标 | 推荐阅读 | 时间估计 |
 |---|---|---|---|
-| **Beginner** | Get up and running, have basic conversations, use built-in tools | [Installation](/docs/getting-started/installation) → [Quickstart](/docs/getting-started/quickstart) → [CLI Usage](/docs/user-guide/cli) → [Configuration](/docs/user-guide/configuration) | ~1 hour |
-| **Intermediate** | Set up messaging bots, use advanced features like memory, cron jobs, and skills | [Sessions](/docs/user-guide/sessions) → [Messaging](/docs/user-guide/messaging) → [Tools](/docs/user-guide/features/tools) → [Skills](/docs/user-guide/features/skills) → [Memory](/docs/user-guide/features/memory) → [Cron](/docs/user-guide/features/cron) | ~2–3 hours |
-| **Advanced** | Build custom tools, create skills, train models with RL, contribute to the project | [Architecture](/docs/developer-guide/architecture) → [Adding Tools](/docs/developer-guide/adding-tools) → [Creating Skills](/docs/developer-guide/creating-skills) → [RL Training](/docs/user-guide/features/rl-training) → [Contributing](/docs/developer-guide/contributing) | ~4–6 hours |
+| **初学者** | 启动并运行，进行基本对话，使用内置工具 | [安装](/docs/getting-started/installation) → [快速入门](/docs/getting-started/quickstart) → [CLI 使用](/docs/user-guide/cli) → [配置](/docs/user-guide/configuration) | ~1 小时 |
+| **中级** | 设置消息机器人，使用高级功能如记忆、cron 作业和技能 | [会话](/docs/user-guide/sessions) → [消息传递](/docs/user-guide/messaging) → [工具](/docs/user-guide/features/tools) → [技能](/docs/user-guide/features/skills) → [记忆](/docs/user-guide/features/memory) → [Cron](/docs/user-guide/features/cron) | ~2–3 小时 |
+| **高级** | 构建自定义工具，创建技能，使用 RL 训练模型，为项目做贡献 | [架构](/docs/developer-guide/architecture) → [添加工具](/docs/developer-guide/adding-tools) → [创建技能](/docs/developer-guide/creating-skills) → [RL 训练](/docs/user-guide/features/rl-training) → [贡献](/docs/developer-guide/contributing) | ~4–6 小时 |
 
-## By Use Case
+## 按使用场景
 
-Pick the scenario that matches what you want to do. Each one links you to the relevant docs in the order you should read them.
+选择与您想要做的事情匹配的场景。每个场景都按照您应该阅读的顺序链接到相关文档。
 
-### "I want a CLI coding assistant"
+### "我想要一个 CLI 编码助手"
 
-Use Hermes Agent as an interactive terminal assistant for writing, reviewing, and running code.
+使用 Hermes Agent 作为交互式终端助手来编写、审查和运行代码。
 
-1. [Installation](/docs/getting-started/installation)
-2. [Quickstart](/docs/getting-started/quickstart)
-3. [CLI Usage](/docs/user-guide/cli)
-4. [Code Execution](/docs/user-guide/features/code-execution)
-5. [Context Files](/docs/user-guide/features/context-files)
-6. [Tips & Tricks](/docs/guides/tips)
+1. [安装](/docs/getting-started/installation)
+2. [快速入门](/docs/getting-started/quickstart)
+3. [CLI 使用](/docs/user-guide/cli)
+4. [代码执行](/docs/user-guide/features/code-execution)
+5. [上下文文件](/docs/user-guide/features/context-files)
+6. [技巧与窍门](/docs/guides/tips)
 
 :::tip
-Pass files directly into your conversation with context files. Hermes Agent can read, edit, and run code in your projects.
+通过上下文文件将文件直接传递到您的对话中。Hermes Agent 可以读取、编辑和运行您项目中的代码。
 :::
 
-### "I want a Telegram/Discord bot"
+### "我想要一个 Telegram/Discord 机器人"
 
-Deploy Hermes Agent as a bot on your favorite messaging platform.
+在您喜欢的消息平台上部署 Hermes Agent 作为机器人。
 
 1. [Installation](/docs/getting-started/installation)
 2. [Configuration](/docs/user-guide/configuration)

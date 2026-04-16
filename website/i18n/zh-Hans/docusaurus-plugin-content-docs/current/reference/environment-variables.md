@@ -1,53 +1,53 @@
 ---
 sidebar_position: 2
-title: "Environment Variables"
-description: "Complete reference of all environment variables used by Hermes Agent"
+title: "环境变量"
+description: "Hermes Agent 使用的所有环境变量的完整参考"
 ---
 
-# Environment Variables Reference
+# 环境变量参考
 
-All variables go in `~/.hermes/.env`. You can also set them with `hermes config set VAR value`.
+所有变量都放在 `~/.hermes/.env` 中。您也可以使用 `hermes config set VAR value` 设置它们。
 
-## LLM Providers
+## LLM 提供商
 
-| Variable | Description |
+| 变量 | 描述 |
 |----------|-------------|
-| `OPENROUTER_API_KEY` | OpenRouter API key (recommended for flexibility) |
-| `OPENROUTER_BASE_URL` | Override the OpenRouter-compatible base URL |
-| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key ([ai-gateway.vercel.sh](https://ai-gateway.vercel.sh)) |
-| `AI_GATEWAY_BASE_URL` | Override AI Gateway base URL (default: `https://ai-gateway.vercel.sh/v1`) |
-| `OPENAI_API_KEY` | API key for custom OpenAI-compatible endpoints (used with `OPENAI_BASE_URL`) |
-| `OPENAI_BASE_URL` | Base URL for custom endpoint (VLLM, SGLang, etc.) |
-| `COPILOT_GITHUB_TOKEN` | GitHub token for Copilot API — first priority (OAuth `gho_*` or fine-grained PAT `github_pat_*`; classic PATs `ghp_*` are **not supported**) |
-| `GH_TOKEN` | GitHub token — second priority for Copilot (also used by `gh` CLI) |
-| `GITHUB_TOKEN` | GitHub token — third priority for Copilot |
-| `HERMES_COPILOT_ACP_COMMAND` | Override Copilot ACP CLI binary path (default: `copilot`) |
-| `COPILOT_CLI_PATH` | Alias for `HERMES_COPILOT_ACP_COMMAND` |
-| `HERMES_COPILOT_ACP_ARGS` | Override Copilot ACP arguments (default: `--acp --stdio`) |
-| `COPILOT_ACP_BASE_URL` | Override Copilot ACP base URL |
-| `GLM_API_KEY` | z.ai / ZhipuAI GLM API key ([z.ai](https://z.ai)) |
-| `ZAI_API_KEY` | Alias for `GLM_API_KEY` |
-| `Z_AI_API_KEY` | Alias for `GLM_API_KEY` |
-| `GLM_BASE_URL` | Override z.ai base URL (default: `https://api.z.ai/api/paas/v4`) |
-| `KIMI_API_KEY` | Kimi / Moonshot AI API key ([moonshot.ai](https://platform.moonshot.ai)) |
-| `KIMI_BASE_URL` | Override Kimi base URL (default: `https://api.moonshot.ai/v1`) |
-| `KIMI_CN_API_KEY` | Kimi / Moonshot China API key ([moonshot.cn](https://platform.moonshot.cn)) |
-| `ARCEEAI_API_KEY` | Arcee AI API key ([chat.arcee.ai](https://chat.arcee.ai/)) |
-| `ARCEE_BASE_URL` | Override Arcee base URL (default: `https://api.arcee.ai/api/v1`) |
-| `MINIMAX_API_KEY` | MiniMax API key — global endpoint ([minimax.io](https://www.minimax.io)) |
-| `MINIMAX_BASE_URL` | Override MiniMax base URL (default: `https://api.minimax.io/v1`) |
-| `MINIMAX_CN_API_KEY` | MiniMax API key — China endpoint ([minimaxi.com](https://www.minimaxi.com)) |
-| `MINIMAX_CN_BASE_URL` | Override MiniMax China base URL (default: `https://api.minimaxi.com/v1`) |
-| `KILOCODE_API_KEY` | Kilo Code API key ([kilo.ai](https://kilo.ai)) |
-| `KILOCODE_BASE_URL` | Override Kilo Code base URL (default: `https://api.kilo.ai/api/gateway`) |
-| `XIAOMI_API_KEY` | Xiaomi MiMo API key ([platform.xiaomimimo.com](https://platform.xiaomimimo.com)) |
-| `XIAOMI_BASE_URL` | Override Xiaomi MiMo base URL (default: `https://api.xiaomimimo.com/v1`) |
-| `HF_TOKEN` | Hugging Face token for Inference Providers ([huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) |
-| `HF_BASE_URL` | Override Hugging Face base URL (default: `https://router.huggingface.co/v1`) |
-| `GOOGLE_API_KEY` | Google AI Studio API key ([aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)) |
-| `GEMINI_API_KEY` | Alias for `GOOGLE_API_KEY` |
-| `GEMINI_BASE_URL` | Override Google AI Studio base URL |
-| `ANTHROPIC_API_KEY` | Anthropic Console API key ([console.anthropic.com](https://console.anthropic.com/)) |
+| `OPENROUTER_API_KEY` | OpenRouter API 密钥（推荐用于灵活性） |
+| `OPENROUTER_BASE_URL` | 覆盖 OpenRouter 兼容的基础 URL |
+| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API 密钥 ([ai-gateway.vercel.sh](https://ai-gateway.vercel.sh)) |
+| `AI_GATEWAY_BASE_URL` | 覆盖 AI Gateway 基础 URL (默认: `https://ai-gateway.vercel.sh/v1`) |
+| `OPENAI_API_KEY` | 自定义 OpenAI 兼容端点的 API 密钥（与 `OPENAI_BASE_URL` 一起使用） |
+| `OPENAI_BASE_URL` | 自定义端点的基础 URL (VLLM, SGLang 等) |
+| `COPILOT_GITHUB_TOKEN` | Copilot API 的 GitHub 令牌 — 第一优先级 (OAuth `gho_*` 或细粒度 PAT `github_pat_*`; 经典 PAT `ghp_*` **不支持**) |
+| `GH_TOKEN` | GitHub 令牌 — Copilot 的第二优先级（也由 `gh` CLI 使用） |
+| `GITHUB_TOKEN` | GitHub 令牌 — Copilot 的第三优先级 |
+| `HERMES_COPILOT_ACP_COMMAND` | 覆盖 Copilot ACP CLI 二进制路径 (默认: `copilot`) |
+| `COPILOT_CLI_PATH` | `HERMES_COPILOT_ACP_COMMAND` 的别名 |
+| `HERMES_COPILOT_ACP_ARGS` | 覆盖 Copilot ACP 参数 (默认: `--acp --stdio`) |
+| `COPILOT_ACP_BASE_URL` | 覆盖 Copilot ACP 基础 URL |
+| `GLM_API_KEY` | z.ai / ZhipuAI GLM API 密钥 ([z.ai](https://z.ai)) |
+| `ZAI_API_KEY` | `GLM_API_KEY` 的别名 |
+| `Z_AI_API_KEY` | `GLM_API_KEY` 的别名 |
+| `GLM_BASE_URL` | 覆盖 z.ai 基础 URL (默认: `https://api.z.ai/api/paas/v4`) |
+| `KIMI_API_KEY` | Kimi / Moonshot AI API 密钥 ([moonshot.ai](https://platform.moonshot.ai)) |
+| `KIMI_BASE_URL` | 覆盖 Kimi 基础 URL (默认: `https://api.moonshot.ai/v1`) |
+| `KIMI_CN_API_KEY` | Kimi / Moonshot 中国 API 密钥 ([moonshot.cn](https://platform.moonshot.cn)) |
+| `ARCEEAI_API_KEY` | Arcee AI API 密钥 ([chat.arcee.ai](https://chat.arcee.ai/)) |
+| `ARCEE_BASE_URL` | 覆盖 Arcee 基础 URL (默认: `https://api.arcee.ai/api/v1`) |
+| `MINIMAX_API_KEY` | MiniMax API 密钥 — 全球端点 ([minimax.io](https://www.minimax.io)) |
+| `MINIMAX_BASE_URL` | 覆盖 MiniMax 基础 URL (默认: `https://api.minimax.io/v1`) |
+| `MINIMAX_CN_API_KEY` | MiniMax API 密钥 — 中国端点 ([minimaxi.com](https://www.minimaxi.com)) |
+| `MINIMAX_CN_BASE_URL` | 覆盖 MiniMax 中国基础 URL (默认: `https://api.minimaxi.com/v1`) |
+| `KILOCODE_API_KEY` | Kilo Code API 密钥 ([kilo.ai](https://kilo.ai)) |
+| `KILOCODE_BASE_URL` | 覆盖 Kilo Code 基础 URL (默认: `https://api.kilo.ai/api/gateway`) |
+| `XIAOMI_API_KEY` | 小米 MiMo API 密钥 ([platform.xiaomimimo.com](https://platform.xiaomimimo.com)) |
+| `XIAOMI_BASE_URL` | 覆盖小米 MiMo 基础 URL (默认: `https://api.xiaomimimo.com/v1`) |
+| `HF_TOKEN` | Hugging Face 推理提供商的令牌 ([huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) |
+| `HF_BASE_URL` | 覆盖 Hugging Face 基础 URL (默认: `https://router.huggingface.co/v1`) |
+| `GOOGLE_API_KEY` | Google AI Studio API 密钥 ([aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)) |
+| `GEMINI_API_KEY` | `GOOGLE_API_KEY` 的别名 |
+| `GEMINI_BASE_URL` | 覆盖 Google AI Studio 基础 URL |
+| `ANTHROPIC_API_KEY` | Anthropic Console API 密钥 ([console.anthropic.com](https://console.anthropic.com/)) |
 | `ANTHROPIC_TOKEN` | Manual or legacy Anthropic OAuth/setup-token override |
 | `DASHSCOPE_API_KEY` | Alibaba Cloud DashScope API key for Qwen models ([modelstudio.console.alibabacloud.com](https://modelstudio.console.alibabacloud.com/)) |
 | `DASHSCOPE_BASE_URL` | Custom DashScope base URL (default: `https://coding-intl.dashscope.aliyuncs.com/v1`) |

@@ -1,53 +1,53 @@
 ---
 sidebar_position: 4
-title: "Contributing"
-description: "How to contribute to Hermes Agent — dev setup, code style, PR process"
+title: "贡献指南"
+description: "如何为 Hermes Agent 做贡献 — 开发设置、代码风格、PR 流程"
 ---
 
-# Contributing
+# 贡献指南
 
-Thank you for contributing to Hermes Agent! This guide covers setting up your dev environment, understanding the codebase, and getting your PR merged.
+感谢您为 Hermes Agent 做贡献！本指南涵盖设置开发环境、理解代码库以及让您的 PR 合并。
 
-## Contribution Priorities
+## 贡献优先级
 
-We value contributions in this order:
+我们按以下顺序重视贡献：
 
-1. **Bug fixes** — crashes, incorrect behavior, data loss
-2. **Cross-platform compatibility** — macOS, different Linux distros, WSL2
-3. **Security hardening** — shell injection, prompt injection, path traversal
-4. **Performance and robustness** — retry logic, error handling, graceful degradation
-5. **New skills** — broadly useful ones (see [Creating Skills](creating-skills.md))
-6. **New tools** — rarely needed; most capabilities should be skills
-7. **Documentation** — fixes, clarifications, new examples
+1. **错误修复** — 崩溃、不正确行为、数据丢失
+2. **跨平台兼容性** — macOS、不同 Linux 发行版、WSL2
+3. **安全加固** — shell 注入、提示注入、路径遍历
+4. **性能和健壮性** — 重试逻辑、错误处理、优雅降级
+5. **新技能** — 广泛有用的技能（参见[创建技能](creating-skills.md)）
+6. **新工具** — 很少需要；大多数功能应该是技能
+7. **文档** — 修复、澄清、新示例
 
-## Common contribution paths
+## 常见贡献路径
 
-- Building a new tool? Start with [Adding Tools](./adding-tools.md)
-- Building a new skill? Start with [Creating Skills](./creating-skills.md)
-- Building a new inference provider? Start with [Adding Providers](./adding-providers.md)
+- 构建新工具？从[添加工具](./adding-tools.md)开始
+- 构建新技能？从[创建技能](./creating-skills.md)开始
+- 构建新推理提供商？从[添加提供商](./adding-providers.md)开始
 
-## Development Setup
+## 开发设置
 
-### Prerequisites
+### 先决条件
 
-| Requirement | Notes |
+| 要求 | 说明 |
 |-------------|-------|
-| **Git** | With `--recurse-submodules` support |
-| **Python 3.11+** | uv will install it if missing |
-| **uv** | Fast Python package manager ([install](https://docs.astral.sh/uv/)) |
-| **Node.js 18+** | Optional — needed for browser tools and WhatsApp bridge |
+| **Git** | 支持 `--recurse-submodules` |
+| **Python 3.11+** | 如果缺少，uv 会安装它 |
+| **uv** | 快速 Python 包管理器（[安装](https://docs.astral.sh/uv/)） |
+| **Node.js 18+** | 可选 — 浏览器工具和 WhatsApp 桥接需要 |
 
-### Clone and Install
+### 克隆和安装
 
 ```bash
 git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git
 cd hermes-agent
 
-# Create venv with Python 3.11
+# 使用 Python 3.11 创建 venv
 uv venv venv --python 3.11
 export VIRTUAL_ENV="$(pwd)/venv"
 
-# Install with all extras (messaging, cron, CLI menus, dev tools)
+# 安装所有额外功能（消息传递、cron、CLI 菜单、开发工具）
 uv pip install -e ".[all,dev]"
 uv pip install -e "./tinker-atropos"
 

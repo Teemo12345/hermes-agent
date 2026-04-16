@@ -2,9 +2,9 @@
 sidebar_position: 7
 ---
 
-# Profile Commands Reference
+# Profile 命令参考
 
-This page covers all commands related to [Hermes profiles](../user-guide/profiles.md). For general CLI commands, see [CLI Commands Reference](./cli-commands.md).
+本页面涵盖与 [Hermes profiles](../user-guide/profiles.md) 相关的所有命令。有关一般 CLI 命令，请参阅 [CLI 命令参考](./cli-commands.md)。
 
 ## `hermes profile`
 
@@ -12,19 +12,19 @@ This page covers all commands related to [Hermes profiles](../user-guide/profile
 hermes profile <subcommand>
 ```
 
-Top-level command for managing profiles. Running `hermes profile` without a subcommand shows help.
+用于管理配置文件的顶级命令。运行 `hermes profile` 而不带子命令会显示帮助。
 
-| Subcommand | Description |
+| 子命令 | 描述 |
 |------------|-------------|
-| `list` | List all profiles. |
-| `use` | Set the active (default) profile. |
-| `create` | Create a new profile. |
-| `delete` | Delete a profile. |
-| `show` | Show details about a profile. |
-| `alias` | Regenerate the shell alias for a profile. |
-| `rename` | Rename a profile. |
-| `export` | Export a profile to a tar.gz archive. |
-| `import` | Import a profile from a tar.gz archive. |
+| `list` | 列出所有配置文件。 |
+| `use` | 设置活动（默认）配置文件。 |
+| `create` | 创建新配置文件。 |
+| `delete` | 删除配置文件。 |
+| `show` | 显示配置文件的详细信息。 |
+| `alias` | 为配置文件重新生成 shell 别名。 |
+| `rename` | 重命名配置文件。 |
+| `export` | 将配置文件导出到 tar.gz 存档。 |
+| `import` | 从 tar.gz 存档导入配置文件。 |
 
 ## `hermes profile list`
 
@@ -32,9 +32,9 @@ Top-level command for managing profiles. Running `hermes profile` without a subc
 hermes profile list
 ```
 
-Lists all profiles. The currently active profile is marked with `*`.
+列出所有配置文件。当前活动的配置文件用 `*` 标记。
 
-**Example:**
+**示例：**
 
 ```bash
 $ hermes profile list
@@ -44,7 +44,7 @@ $ hermes profile list
   personal
 ```
 
-No options.
+无选项。
 
 ## `hermes profile use`
 

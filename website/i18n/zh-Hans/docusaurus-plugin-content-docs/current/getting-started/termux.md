@@ -1,53 +1,53 @@
 ---
 sidebar_position: 3
 title: "Android / Termux"
-description: "Run Hermes Agent directly on an Android phone with Termux"
+description: "使用 Termux 直接在 Android 手机上运行 Hermes Agent"
 ---
 
-# Hermes on Android with Termux
+# 在 Android 上使用 Termux 运行 Hermes
 
-This is the tested path for running Hermes Agent directly on an Android phone through [Termux](https://termux.dev/).
+这是通过 [Termux](https://termux.dev/) 直接在 Android 手机上运行 Hermes Agent 的经过测试的路径。
 
-It gives you a working local CLI on the phone, plus the core extras that are currently known to install cleanly on Android.
+它为您提供手机上可用的本地 CLI，以及目前已知可以在 Android 上干净安装的核心额外功能。
 
-## What is supported in the tested path?
+## 测试路径支持哪些功能？
 
-The tested Termux bundle installs:
-- the Hermes CLI
-- cron support
-- PTY/background terminal support
-- MCP support
-- Honcho memory support
-- ACP support
+经过测试的 Termux 捆绑包安装：
+- Hermes CLI
+- cron 支持
+- PTY/后台终端支持
+- MCP 支持
+- Honcho 记忆支持
+- ACP 支持
 
-Concretely, it maps to:
+具体来说，它映射到：
 
 ```bash
 python -m pip install -e '.[termux]' -c constraints-termux.txt
 ```
 
-## What is not part of the tested path yet?
+## 目前测试路径还不包括哪些功能？
 
-A few features still need desktop/server-style dependencies that are not published for Android, or have not been validated on phones yet:
+一些功能仍然需要桌面/服务器风格的依赖项，这些依赖项尚未为 Android 发布，或者尚未在手机上验证：
 
-- `.[all]` is not supported on Android today
-- the `voice` extra is blocked by `faster-whisper -> ctranslate2`, and `ctranslate2` does not publish Android wheels
-- automatic browser / Playwright bootstrap is skipped in the Termux installer
-- Docker-based terminal isolation is not available inside Termux
+- `.[all]` 目前在 Android 上不受支持
+- `voice` 额外功能被 `faster-whisper -> ctranslate2` 阻止，而 `ctranslate2` 不发布 Android 轮子
+- Termux 安装程序中跳过了自动浏览器 / Playwright 引导
+- Termux 内部不支持基于 Docker 的终端隔离
 
-That does not stop Hermes from working well as a phone-native CLI agent — it just means the recommended mobile install is intentionally narrower than the desktop/server install.
+这并不妨碍 Hermes 作为手机原生 CLI 智能体良好工作 — 只是意味着推荐的移动安装有意比桌面/服务器安装更窄。
 
 ---
 
-## Option 1: One-line installer
+## 选项 1：一行安装程序
 
-Hermes now ships a Termux-aware installer path:
+Hermes 现在提供了一个支持 Termux 的安装程序路径：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
-On Termux, the installer automatically:
+在 Termux 上，安装程序自动：
 - uses `pkg` for system packages
 - creates the venv with `python -m venv`
 - installs `.[termux]` with `pip`

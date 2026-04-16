@@ -1,33 +1,33 @@
 ---
 sidebar_position: 2
-title: "Adding Tools"
-description: "How to add a new tool to Hermes Agent — schemas, handlers, registration, and toolsets"
+title: "添加工具"
+description: "如何向 Hermes Agent 添加新工具 — 模式、处理器、注册和工具集"
 ---
 
-# Adding Tools
+# 添加工具
 
-Before writing a tool, ask yourself: **should this be a [skill](creating-skills.md) instead?**
+在编写工具之前，请问自己：**这应该是一个[技能](creating-skills.md)吗？**
 
-Make it a **Skill** when the capability can be expressed as instructions + shell commands + existing tools (arXiv search, git workflows, Docker management, PDF processing).
+当能力可以表示为指令 + shell 命令 + 现有工具时，将其设为**技能**（arXiv 搜索、git 工作流、Docker 管理、PDF 处理）。
 
-Make it a **Tool** when it requires end-to-end integration with API keys, custom processing logic, binary data handling, or streaming (browser automation, TTS, vision analysis).
+当需要端到端集成 API 密钥、自定义处理逻辑、二进制数据处理或流式处理时，将其设为**工具**（浏览器自动化、TTS、视觉分析）。
 
-## Overview
+## 概述
 
-Adding a tool touches **2 files**:
+添加工具涉及**2 个文件**：
 
-1. **`tools/your_tool.py`** — handler, schema, check function, `registry.register()` call
-2. **`toolsets.py`** — add tool name to `_HERMES_CORE_TOOLS` (or a specific toolset)
+1. **`tools/your_tool.py`** — 处理器、模式、检查函数、`registry.register()` 调用
+2. **`toolsets.py`** — 将工具名称添加到 `_HERMES_CORE_TOOLS`（或特定工具集）
 
-Any `tools/*.py` file with a top-level `registry.register()` call is auto-discovered at startup — no manual import list required.
+任何具有顶级 `registry.register()` 调用的 `tools/*.py` 文件都会在启动时自动发现 — 无需手动导入列表。
 
-## Step 1: Create the Tool File
+## 步骤 1：创建工具文件
 
-Every tool file follows the same structure:
+每个工具文件都遵循相同的结构：
 
 ```python
 # tools/weather_tool.py
-"""Weather Tool -- look up current weather for a location."""
+"""天气工具 — 查找位置的当前天气。"""
 
 import json
 import os
@@ -36,17 +36,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# --- Availability check ---
+# --- 可用性检查 ---
 
 def check_weather_requirements() -> bool:
-    """Return True if the tool's dependencies are available."""
+    """如果工具的依赖项可用，则返回 True。"""
     return bool(os.getenv("WEATHER_API_KEY"))
 
 
-# --- Handler ---
+# --- 处理器 ---
 
 def weather_tool(location: str, units: str = "metric") -> str:
-    """Fetch weather for a location. Returns JSON string."""
+    """获取位置的天气。返回 JSON 字符串。"""
     api_key = os.getenv("WEATHER_API_KEY")
     if not api_key:
         return json.dumps({"error": "WEATHER_API_KEY not configured"})

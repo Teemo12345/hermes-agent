@@ -1,48 +1,48 @@
 ---
 sidebar_position: 2
-title: "Run Local LLMs on Mac"
-description: "Set up a local OpenAI-compatible LLM server on macOS with llama.cpp or MLX, including model selection, memory optimization, and real benchmarks on Apple Silicon"
+title: "在 Mac 上运行本地 LLM"
+description: "使用 llama.cpp 或 MLX 在 macOS 上设置本地 OpenAI 兼容的 LLM 服务器，包括模型选择、内存优化和 Apple Silicon 上的真实基准测试"
 ---
 
-# Run Local LLMs on Mac
+# 在 Mac 上运行本地 LLM
 
-This guide walks you through running a local LLM server on macOS with an OpenAI-compatible API. You get full privacy, zero API costs, and surprisingly good performance on Apple Silicon.
+本指南将引导您在 macOS 上运行具有 OpenAI 兼容 API 的本地 LLM 服务器。您将获得完全的隐私、零 API 成本，以及在 Apple Silicon 上令人惊讶的良好性能。
 
-We cover two backends:
+我们涵盖两个后端：
 
-| Backend | Install | Best at | Format |
+| 后端 | 安装 | 最擅长 | 格式 |
 |---------|---------|---------|--------|
-| **llama.cpp** | `brew install llama.cpp` | Fastest time-to-first-token, quantized KV cache for low memory | GGUF |
-| **omlx** | [omlx.ai](https://omlx.ai) | Fastest token generation, native Metal optimization | MLX (safetensors) |
+| **llama.cpp** | `brew install llama.cpp` | 最快首次令牌时间，量化 KV 缓存适用于低内存 | GGUF |
+| **omlx** | [omlx.ai](https://omlx.ai) | 最快令牌生成，原生 Metal 优化 | MLX (safetensors) |
 
-Both expose an OpenAI-compatible `/v1/chat/completions` endpoint. Hermes works with either one — just point it at `http://localhost:8080` or `http://localhost:8000`.
+两者都暴露一个 OpenAI 兼容的 `/v1/chat/completions` 端点。Hermes 可以与其中任何一个一起工作 — 只需将其指向 `http://localhost:8080` 或 `http://localhost:8000`。
 
-:::info Apple Silicon only
-This guide targets Macs with Apple Silicon (M1 and later). Intel Macs will work with llama.cpp but without GPU acceleration — expect significantly slower performance.
+:::info 仅限 Apple Silicon
+本指南针对具有 Apple Silicon（M1 及更高版本）的 Mac。Intel Mac 将与 llama.cpp 一起工作，但没有 GPU 加速 — 预计性能会显著较慢。
 :::
 
 ---
 
-## Choosing a model
+## 选择模型
 
-For getting started, we recommend **Qwen3.5-9B** — it's a strong reasoning model that fits comfortably in 8GB+ of unified memory with quantization.
+对于入门，我们推荐 **Qwen3.5-9B** — 这是一个强大的推理模型，通过量化可以舒适地适应 8GB+ 的统一内存。
 
-| Variant | Size on disk | RAM needed (128K context) | Backend |
+| 变体 | 磁盘大小 | 所需 RAM（128K 上下文） | 后端 |
 |---------|-------------|---------------------------|---------|
-| Qwen3.5-9B-Q4_K_M (GGUF) | 5.3 GB | ~10 GB with quantized KV cache | llama.cpp |
+| Qwen3.5-9B-Q4_K_M (GGUF) | 5.3 GB | ~10 GB（带量化 KV 缓存） | llama.cpp |
 | Qwen3.5-9B-mlx-lm-mxfp4 (MLX) | ~5 GB | ~12 GB | omlx |
 
-**Memory rule of thumb:** model size + KV cache. A 9B Q4 model is ~5 GB. The KV cache at 128K context with Q4 quantization adds ~4-5 GB. With default (f16) KV cache, that balloons to ~16 GB. The quantized KV cache flags in llama.cpp are the key trick for memory-constrained systems.
+**内存经验法则：** 模型大小 + KV 缓存。一个 9B Q4 模型约为 5 GB。在 128K 上下文下，使用 Q4 量化的 KV 缓存增加约 4-5 GB。使用默认（f16）KV 缓存，这会膨胀到约 16 GB。llama.cpp 中的量化 KV 缓存标志是内存受限系统的关键技巧。
 
-For larger models (27B, 35B), you'll need 32 GB+ of unified memory. The 9B is the sweet spot for 8-16 GB machines.
+对于更大的模型（27B、35B），您将需要 32 GB+ 的统一内存。9B 是 8-16 GB 机器的理想选择。
 
 ---
 
-## Option A: llama.cpp
+## 选项 A：llama.cpp
 
-llama.cpp is the most portable local LLM runtime. On macOS it uses Metal for GPU acceleration out of the box.
+llama.cpp 是最便携的本地 LLM 运行时。在 macOS 上，它默认使用 Metal 进行 GPU 加速。
 
-### Install
+### 安装
 
 ```bash
 brew install llama.cpp

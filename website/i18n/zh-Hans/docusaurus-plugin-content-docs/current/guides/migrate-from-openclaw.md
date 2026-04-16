@@ -1,53 +1,53 @@
 ---
 sidebar_position: 10
-title: "Migrate from OpenClaw"
-description: "Complete guide to migrating your OpenClaw / Clawdbot setup to Hermes Agent — what gets migrated, how config maps, and what to check after."
+title: "从 OpenClaw 迁移"
+description: "从 OpenClaw / Clawdbot 设置迁移到 Hermes Agent 的完整指南 — 迁移什么、配置如何映射以及迁移后要检查什么。"
 ---
 
-# Migrate from OpenClaw
+# 从 OpenClaw 迁移
 
-`hermes claw migrate` imports your OpenClaw (or legacy Clawdbot/Moldbot) setup into Hermes. This guide covers exactly what gets migrated, the config key mappings, and what to verify after migration.
+`hermes claw migrate` 将您的 OpenClaw（或旧版 Clawdbot/Moldbot）设置导入到 Hermes。本指南详细介绍了迁移的内容、配置键映射以及迁移后要验证的内容。
 
-## Quick start
+## 快速开始
 
 ```bash
-# Preview then migrate (always shows a preview first, then asks to confirm)
+# 预览然后迁移（总是先显示预览，然后要求确认）
 hermes claw migrate
 
-# Preview only, no changes
+# 仅预览，无更改
 hermes claw migrate --dry-run
 
-# Full migration including API keys, skip confirmation
+# 完整迁移包括 API 密钥，跳过确认
 hermes claw migrate --preset full --yes
 ```
 
-The migration always shows a full preview of what will be imported before making any changes. Review the list, then confirm to proceed.
+迁移总是在进行任何更改之前显示将要导入的完整预览。查看列表，然后确认继续。
 
-Reads from `~/.openclaw/` by default. Legacy `~/.clawdbot/` or `~/.moltbot/` directories are detected automatically. Same for legacy config filenames (`clawdbot.json`, `moltbot.json`).
+默认从 `~/.openclaw/` 读取。旧版 `~/.clawdbot/` 或 `~/.moltbot/` 目录会自动检测。旧版配置文件名（`clawdbot.json`、`moltbot.json`）也是如此。
 
-## Options
+## 选项
 
-| Option | Description |
+| 选项 | 描述 |
 |--------|-------------|
-| `--dry-run` | Preview only — stop after showing what would be migrated. |
-| `--preset <name>` | `full` (default, includes secrets) or `user-data` (excludes API keys). |
-| `--overwrite` | Overwrite existing Hermes files on conflicts (default: skip). |
-| `--migrate-secrets` | Include API keys (on by default with `--preset full`). |
-| `--source <path>` | Custom OpenClaw directory. |
-| `--workspace-target <path>` | Where to place `AGENTS.md`. |
-| `--skill-conflict <mode>` | `skip` (default), `overwrite`, or `rename`. |
-| `--yes` | Skip the confirmation prompt after preview. |
+| `--dry-run` | 仅预览 — 在显示将要迁移的内容后停止。 |
+| `--preset <name>` | `full`（默认，包括密钥）或 `user-data`（排除 API 密钥）。 |
+| `--overwrite` | 在冲突时覆盖现有的 Hermes 文件（默认：跳过）。 |
+| `--migrate-secrets` | 包括 API 密钥（默认使用 `--preset full` 时启用）。 |
+| `--source <path>` | 自定义 OpenClaw 目录。 |
+| `--workspace-target <path>` | 放置 `AGENTS.md` 的位置。 |
+| `--skill-conflict <mode>` | `skip`（默认）、`overwrite` 或 `rename`。 |
+| `--yes` | 跳过预览后的确认提示。 |
 
-## What gets migrated
+## 迁移内容
 
-### Persona, memory, and instructions
+### 角色、记忆和指令
 
-| What | OpenClaw source | Hermes destination | Notes |
+| 内容 | OpenClaw 源 | Hermes 目标 | 备注 |
 |------|----------------|-------------------|-------|
-| Persona | `workspace/SOUL.md` | `~/.hermes/SOUL.md` | Direct copy |
-| Workspace instructions | `workspace/AGENTS.md` | `AGENTS.md` in `--workspace-target` | Requires `--workspace-target` flag |
-| Long-term memory | `workspace/MEMORY.md` | `~/.hermes/memories/MEMORY.md` | Parsed into entries, merged with existing, deduped. Uses `§` delimiter. |
-| User profile | `workspace/USER.md` | `~/.hermes/memories/USER.md` | Same entry-merge logic as memory. |
+| 角色 | `workspace/SOUL.md` | `~/.hermes/SOUL.md` | 直接复制 |
+| 工作区指令 | `workspace/AGENTS.md` | `AGENTS.md` 在 `--workspace-target` 中 | 需要 `--workspace-target` 标志 |
+| 长期记忆 | `workspace/MEMORY.md` | `~/.hermes/memories/MEMORY.md` | 解析为条目，与现有合并，去重。使用 `§` 分隔符。 |
+| 用户配置文件 | `workspace/USER.md` | `~/.hermes/memories/USER.md` | 与记忆相同的条目合并逻辑。 |
 | Daily memory files | `workspace/memory/*.md` | `~/.hermes/memories/MEMORY.md` | All daily files merged into main memory. |
 
 Workspace files are also checked at `workspace.default/` and `workspace-main/` as fallback paths (OpenClaw renamed `workspace/` to `workspace-main/` in recent versions, and uses `workspace-{agentId}` for multi-agent setups).

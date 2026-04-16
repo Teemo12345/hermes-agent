@@ -1,33 +1,33 @@
-# Session Storage
+# 会话存储
 
-Hermes Agent uses a SQLite database (`~/.hermes/state.db`) to persist session
-metadata, full message history, and model configuration across CLI and gateway
-sessions. This replaces the earlier per-session JSONL file approach.
+Hermes Agent 使用 SQLite 数据库 (`~/.hermes/state.db`) 来持久化会话
+元数据、完整消息历史记录和模型配置，跨越 CLI 和网关
+会话。这取代了早期的每个会话 JSONL 文件方法。
 
-Source file: `hermes_state.py`
+源文件：`hermes_state.py`
 
 
-## Architecture Overview
+## 架构概述
 
 ```
-~/.hermes/state.db (SQLite, WAL mode)
-├── sessions          — Session metadata, token counts, billing
-├── messages          — Full message history per session
-├── messages_fts      — FTS5 virtual table for full-text search
-└── schema_version    — Single-row table tracking migration state
+~/.hermes/state.db (SQLite, WAL 模式)
+├── sessions          — 会话元数据、令牌计数、计费
+├── messages          — 每个会话的完整消息历史记录
+├── messages_fts      — 用于全文搜索的 FTS5 虚拟表
+└── schema_version    — 跟踪迁移状态的单行表
 ```
 
-Key design decisions:
-- **WAL mode** for concurrent readers + one writer (gateway multi-platform)
-- **FTS5 virtual table** for fast text search across all session messages
-- **Session lineage** via `parent_session_id` chains (compression-triggered splits)
-- **Source tagging** (`cli`, `telegram`, `discord`, etc.) for platform filtering
-- Batch runner and RL trajectories are NOT stored here (separate systems)
+关键设计决策：
+- **WAL 模式** 用于并发读取器 + 一个写入器（网关多平台）
+- **FTS5 虚拟表** 用于跨所有会话消息的快速文本搜索
+- **会话谱系** 通过 `parent_session_id` 链（压缩触发的拆分）
+- **源标记** (`cli`, `telegram`, `discord`, 等) 用于平台过滤
+- 批处理运行器和 RL 轨迹不存储在此处（单独的系统）
 
 
-## SQLite Schema
+## SQLite 模式
 
-### Sessions Table
+### Sessions 表
 
 ```sql
 CREATE TABLE IF NOT EXISTS sessions (

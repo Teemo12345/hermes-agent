@@ -1,44 +1,44 @@
 ---
 sidebar_position: 5
-title: "Using Hermes as a Python Library"
-description: "Embed AIAgent in your own Python scripts, web apps, or automation pipelines — no CLI required"
+title: "将 Hermes 用作 Python 库"
+description: "将 AIAgent 嵌入到您自己的 Python 脚本、Web 应用或自动化管道中 — 无需 CLI"
 ---
 
-# Using Hermes as a Python Library
+# 将 Hermes 用作 Python 库
 
-Hermes isn't just a CLI tool. You can import `AIAgent` directly and use it programmatically in your own Python scripts, web applications, or automation pipelines. This guide shows you how.
+Hermes 不仅仅是一个 CLI 工具。您可以直接导入 `AIAgent` 并以编程方式在您自己的 Python 脚本、Web 应用程序或自动化管道中使用它。本指南向您展示如何操作。
 
 ---
 
-## Installation
+## 安装
 
-Install Hermes directly from the repository:
+直接从仓库安装 Hermes：
 
 ```bash
 pip install git+https://github.com/NousResearch/hermes-agent.git
 ```
 
-Or with [uv](https://docs.astral.sh/uv/):
+或使用 [uv](https://docs.astral.sh/uv/)：
 
 ```bash
 uv pip install git+https://github.com/NousResearch/hermes-agent.git
 ```
 
-You can also pin it in your `requirements.txt`:
+您还可以将其固定在您的 `requirements.txt` 中：
 
 ```text
 hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git
 ```
 
 :::tip
-The same environment variables used by the CLI are required when using Hermes as a library. At minimum, set `OPENROUTER_API_KEY` (or `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` if using direct provider access).
+使用 Hermes 作为库时，需要与 CLI 相同的环境变量。至少设置 `OPENROUTER_API_KEY`（或如果使用直接提供商访问，则设置 `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`）。
 :::
 
 ---
 
-## Basic Usage
+## 基本用法
 
-The simplest way to use Hermes is the `chat()` method — pass a message, get a string back:
+使用 Hermes 的最简单方法是 `chat()` 方法 — 传递消息，获取字符串返回：
 
 ```python
 from run_agent import AIAgent

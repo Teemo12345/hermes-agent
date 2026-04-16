@@ -2,45 +2,45 @@
 sidebar_position: 9
 ---
 
-# Adding a Platform Adapter
+# 添加平台适配器
 
-This guide covers adding a new messaging platform to the Hermes gateway. A platform adapter connects Hermes to an external messaging service (Telegram, Discord, WeCom, etc.) so users can interact with the agent through that service.
+本指南介绍如何向 Hermes 网关添加新的消息平台。平台适配器将 Hermes 连接到外部消息服务（Telegram、Discord、企业微信等），使用户可以通过该服务与智能体交互。
 
 :::tip
-Adding a platform adapter touches 20+ files across code, config, and docs. Use this guide as a checklist — the adapter file itself is typically only 40% of the work.
+添加平台适配器涉及代码、配置和文档中的 20+ 个文件。请将此指南用作检查清单 — 适配器文件本身通常只占工作的 40%。
 :::
 
-## Architecture Overview
+## 架构概述
 
 ```
-User ↔ Messaging Platform ↔ Platform Adapter ↔ Gateway Runner ↔ AIAgent
+用户 ↔ 消息平台 ↔ 平台适配器 ↔ 网关运行器 ↔ AIAgent
 ```
 
-Every adapter extends `BasePlatformAdapter` from `gateway/platforms/base.py` and implements:
+每个适配器都继承自 `gateway/platforms/base.py` 中的 `BasePlatformAdapter`，并实现：
 
-- **`connect()`** — Establish connection (WebSocket, long-poll, HTTP server, etc.)
-- **`disconnect()`** — Clean shutdown
-- **`send()`** — Send a text message to a chat
-- **`send_typing()`** — Show typing indicator (optional)
-- **`get_chat_info()`** — Return chat metadata
+- **`connect()`** — 建立连接（WebSocket、长轮询、HTTP 服务器等）
+- **`disconnect()`** — 清理关闭
+- **`send()`** — 向聊天发送文本消息
+- **`send_typing()`** — 显示输入指示器（可选）
+- **`get_chat_info()`** — 返回聊天元数据
 
-Inbound messages are received by the adapter and forwarded via `self.handle_message(event)`, which the base class routes to the gateway runner.
+入站消息由适配器接收，并通过 `self.handle_message(event)` 转发，基类将其路由到网关运行器。
 
-## Step-by-Step Checklist
+## 逐步检查清单
 
-### 1. Platform Enum
+### 1. 平台枚举
 
-Add your platform to the `Platform` enum in `gateway/config.py`:
+将您的平台添加到 `gateway/config.py` 中的 `Platform` 枚举：
 
 ```python
 class Platform(str, Enum):
-    # ... existing platforms ...
+    # ... 现有平台 ...
     NEWPLAT = "newplat"
 ```
 
-### 2. Adapter File
+### 2. 适配器文件
 
-Create `gateway/platforms/newplat.py`:
+创建 `gateway/platforms/newplat.py`：
 
 ```python
 from gateway.config import Platform, PlatformConfig

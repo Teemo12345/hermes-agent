@@ -1,45 +1,45 @@
 ---
 sidebar_position: 11
-title: "Cron Internals"
-description: "How Hermes stores, schedules, edits, pauses, skill-loads, and delivers cron jobs"
+title: "Cron 内部机制"
+description: "Hermes 如何存储、调度、编辑、暂停、技能加载和交付 cron 作业"
 ---
 
-# Cron Internals
+# Cron 内部机制
 
-The cron subsystem provides scheduled task execution — from simple one-shot delays to recurring cron-expression jobs with skill injection and cross-platform delivery.
+cron 子系统提供计划任务执行 — 从简单的一次性延迟到具有技能注入和跨平台交付的重复 cron 表达式作业。
 
-## Key Files
+## 关键文件
 
-| File | Purpose |
+| 文件 | 用途 |
 |------|---------|
-| `cron/jobs.py` | Job model, storage, atomic read/write to `jobs.json` |
-| `cron/scheduler.py` | Scheduler loop — due-job detection, execution, repeat tracking |
-| `tools/cronjob_tools.py` | Model-facing `cronjob` tool registration and handler |
-| `gateway/run.py` | Gateway integration — cron ticking in the long-running loop |
-| `hermes_cli/cron.py` | CLI `hermes cron` subcommands |
+| `cron/jobs.py` | 作业模型、存储、对 `jobs.json` 的原子读写 |
+| `cron/scheduler.py` | 调度器循环 — 到期作业检测、执行、重复跟踪 |
+| `tools/cronjob_tools.py` | 面向模型的 `cronjob` 工具注册和处理器 |
+| `gateway/run.py` | 网关集成 — 在长时间运行循环中的 cron 滴答 |
+| `hermes_cli/cron.py` | CLI `hermes cron` 子命令 |
 
-## Scheduling Model
+## 调度模型
 
-Four schedule formats are supported:
+支持四种调度格式：
 
-| Format | Example | Behavior |
+| 格式 | 示例 | 行为 |
 |--------|---------|----------|
-| **Relative delay** | `30m`, `2h`, `1d` | One-shot, fires after the specified duration |
-| **Interval** | `every 2h`, `every 30m` | Recurring, fires at regular intervals |
-| **Cron expression** | `0 9 * * *` | Standard 5-field cron syntax (minute, hour, day, month, weekday) |
-| **ISO timestamp** | `2025-01-15T09:00:00` | One-shot, fires at the exact time |
+| **相对延迟** | `30m`, `2h`, `1d` | 一次性，在指定持续时间后触发 |
+| **间隔** | `every 2h`, `every 30m` | 重复，以固定间隔触发 |
+| **Cron 表达式** | `0 9 * * *` | 标准 5 字段 cron 语法（分钟、小时、日、月、工作日） |
+| **ISO 时间戳** | `2025-01-15T09:00:00` | 一次性，在确切时间触发 |
 
-The model-facing surface is a single `cronjob` tool with action-style operations: `create`, `list`, `update`, `pause`, `resume`, `run`, `remove`.
+面向模型的表面是一个单一的 `cronjob` 工具，具有操作式操作：`create`, `list`, `update`, `pause`, `resume`, `run`, `remove`。
 
-## Job Storage
+## 作业存储
 
-Jobs are stored in `~/.hermes/cron/jobs.json` with atomic write semantics (write to temp file, then rename). Each job record contains:
+作业存储在 `~/.hermes/cron/jobs.json` 中，具有原子写入语义（写入临时文件，然后重命名）。每个作业记录包含：
 
 ```json
 {
   "id": "a1b2c3d4e5f6",
-  "name": "Daily briefing",
-  "prompt": "Summarize today's AI news and funding rounds",
+  "name": "每日简报",
+  "prompt": "总结今天的 AI 新闻和融资轮次",
   "schedule": {
     "kind": "cron",
     "expr": "0 9 * * *",

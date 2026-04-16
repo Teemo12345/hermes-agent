@@ -1,53 +1,53 @@
 ---
 sidebar_position: 5
-title: "Bundled Skills Catalog"
-description: "Catalog of bundled skills that ship with Hermes Agent"
+title: "捆绑技能目录"
+description: "随 Hermes Agent 提供的捆绑技能目录"
 ---
 
-# Bundled Skills Catalog
+# 捆绑技能目录
 
-Hermes ships with a large built-in skill library copied into `~/.hermes/skills/` on install. This page catalogs the bundled skills that live in the repository under `skills/`.
+Hermes 附带一个大型内置技能库，在安装时复制到 `~/.hermes/skills/`。本页面编目了仓库中位于 `skills/` 下的捆绑技能。
 
 ## apple
 
-Apple/macOS-specific skills — iMessage, Reminders, Notes, FindMy, and macOS automation. These skills only load on macOS systems.
+Apple/macOS 特定技能 — iMessage、提醒事项、备忘录、查找和 macOS 自动化。这些技能仅在 macOS 系统上加载。
 
-| Skill | Description | Path |
+| 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| `apple-notes` | Manage Apple Notes via the memo CLI on macOS (create, view, search, edit). | `apple/apple-notes` |
-| `apple-reminders` | Manage Apple Reminders via remindctl CLI (list, add, complete, delete). | `apple/apple-reminders` |
-| `findmy` | Track Apple devices and AirTags via FindMy.app on macOS using AppleScript and screen capture. | `apple/findmy` |
-| `imessage` | Send and receive iMessages/SMS via the imsg CLI on macOS. | `apple/imessage` |
+| `apple-notes` | 通过 macOS 上的 memo CLI 管理 Apple 备忘录（创建、查看、搜索、编辑）。 | `apple/apple-notes` |
+| `apple-reminders` | 通过 remindctl CLI 管理 Apple 提醒事项（列出、添加、完成、删除）。 | `apple/apple-reminders` |
+| `findmy` | 通过 macOS 上的 FindMy.app 使用 AppleScript 和屏幕捕获跟踪 Apple 设备和 AirTags。 | `apple/findmy` |
+| `imessage` | 通过 macOS 上的 imsg CLI 发送和接收 iMessages/SMS。 | `apple/imessage` |
 
 ## autonomous-ai-agents
 
-Skills for spawning and orchestrating autonomous AI coding agents and multi-agent workflows — running independent agent processes, delegating tasks, and coordinating parallel workstreams.
+用于生成和编排自主 AI 编码智能体及多智能体工作流的技能 — 运行独立的智能体进程、委托任务和协调并行工作流。
 
-| Skill | Description | Path |
+| 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| `claude-code` | Delegate coding tasks to Claude Code (Anthropic's CLI agent). Use for building features, refactoring, PR reviews, and iterative coding. Requires the claude CLI installed. | `autonomous-ai-agents/claude-code` |
-| `codex` | Delegate coding tasks to OpenAI Codex CLI agent. Use for building features, refactoring, PR reviews, and batch issue fixing. Requires the codex CLI and a git repository. | `autonomous-ai-agents/codex` |
-| `hermes-agent-spawning` | Spawn additional Hermes Agent instances as autonomous subprocesses for independent long-running tasks. Supports non-interactive one-shot mode (-q) and interactive PTY mode for multi-turn collaboration. Different from delegate_task — this runs a full separate hermes process. | `autonomous-ai-agents/hermes-agent` |
-| `opencode` | Delegate coding tasks to OpenCode CLI agent for feature implementation, refactoring, PR review, and long-running autonomous sessions. Requires the opencode CLI installed and authenticated. | `autonomous-ai-agents/opencode` |
+| `claude-code` | 将编码任务委托给 Claude Code（Anthropic 的 CLI 智能体）。用于构建功能、重构、PR 审查和迭代编码。需要安装 claude CLI。 | `autonomous-ai-agents/claude-code` |
+| `codex` | 将编码任务委托给 OpenAI Codex CLI 智能体。用于构建功能、重构、PR 审查和批量问题修复。需要安装 codex CLI 和 git 仓库。 | `autonomous-ai-agents/codex` |
+| `hermes-agent-spawning` | 将额外的 Hermes Agent 实例生成为自主子进程，用于独立的长时间运行任务。支持非交互式一次性模式（-q）和交互式 PTY 模式，用于多轮协作。不同于 delegate_task — 这运行一个完整的独立 hermes 进程。 | `autonomous-ai-agents/hermes-agent` |
+| `opencode` | 将编码任务委托给 OpenCode CLI 智能体，用于功能实现、重构、PR 审查和长时间运行的自主会话。需要安装并认证 opencode CLI。 | `autonomous-ai-agents/opencode` |
 
 ## data-science
 
-Skills for data science workflows — interactive exploration, Jupyter notebooks, data analysis, and visualization.
+用于数据科学工作流的技能 — 交互式探索、Jupyter 笔记本、数据分析和可视化。
 
-| Skill | Description | Path |
+| 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| `jupyter-live-kernel` | Use a live Jupyter kernel for stateful, iterative Python execution via hamelnb. Load this skill when the task involves exploration, iteration, or inspecting intermediate results. | `data-science/jupyter-live-kernel` |
+| `jupyter-live-kernel` | 通过 hamelnb 使用实时 Jupyter 内核进行有状态的迭代 Python 执行。当任务涉及探索、迭代或检查中间结果时加载此技能。 | `data-science/jupyter-live-kernel` |
 
 ## creative
 
-Creative content generation — ASCII art, hand-drawn style diagrams, and visual design tools.
+创意内容生成 — ASCII 艺术、手绘风格图和视觉设计工具。
 
-| Skill | Description | Path |
+| 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| `ascii-art` | Generate ASCII art using pyfiglet (571 fonts), cowsay, boxes, toilet, image-to-ascii, remote APIs (asciified, ascii.co.uk), and LLM fallback. No API keys required. | `creative/ascii-art` |
-| `ascii-video` | "Production pipeline for ASCII art video — any format. Converts video/audio/images/generative input into colored ASCII character video output (MP4, GIF, image sequence). Covers: video-to-ASCII conversion, audio-reactive music visualizers, generative ASCII art animations, hybrid… | `creative/ascii-video` |
-| `excalidraw` | Create hand-drawn style diagrams using Excalidraw JSON format. Generate .excalidraw files for architecture diagrams, flowcharts, sequence diagrams, concept maps, and more. Files can be opened at excalidraw.com or uploaded for shareable links. | `creative/excalidraw` |
-| `p5js` | Production pipeline for interactive and generative visual art using p5.js. Create sketches, render them to images/video via headless browser, and serve live previews. Supports canvas animations, data visualizations, and creative coding experiments. | `creative/p5js` |
+| `ascii-art` | 使用 pyfiglet（571 种字体）、cowsay、boxes、toilet、image-to-ascii、远程 API（asciified、ascii.co.uk）和 LLM 回退生成 ASCII 艺术。无需 API 密钥。 | `creative/ascii-art` |
+| `ascii-video` | "ASCII 艺术视频的生产管道 — 任何格式。将视频/音频/图像/生成输入转换为彩色 ASCII 字符视频输出（MP4、GIF、图像序列）。涵盖：视频到 ASCII 转换、音频响应式音乐可视化器、生成式 ASCII 艺术动画、混合… | `creative/ascii-video` |
+| `excalidraw` | 使用 Excalidraw JSON 格式创建手绘风格图。生成 .excalidraw 文件用于架构图、流程图、序列图、概念图等。文件可以在 excalidraw.com 打开或上传以获取可共享链接。 | `creative/excalidraw` |
+| `p5js` | 使用 p5.js 进行交互式和生成式视觉艺术的生产管道。创建草图，通过无头浏览器将其渲染为图像/视频，并提供实时预览。支持画布动画、数据可视化和创意编码实验。 | `creative/p5js` |
 
 ## devops
 

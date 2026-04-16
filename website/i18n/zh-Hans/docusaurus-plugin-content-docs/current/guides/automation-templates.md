@@ -1,53 +1,53 @@
 ---
 sidebar_position: 15
-title: "Automation Templates"
-description: "Ready-to-use automation recipes — scheduled tasks, GitHub event triggers, API webhooks, and multi-skill workflows"
+title: "自动化模板"
+description: "即用型自动化配方 — 定时任务、GitHub 事件触发器、API webhook 和多技能工作流"
 ---
 
-# Automation Templates
+# 自动化模板
 
-Copy-paste recipes for common automation patterns. Each template uses Hermes's built-in [cron scheduler](/docs/user-guide/features/cron) for time-based triggers and [webhook platform](/docs/user-guide/messaging/webhooks) for event-driven triggers.
+常见自动化模式的复制粘贴配方。每个模板都使用 Hermes 内置的 [cron 调度器](/docs/user-guide/features/cron) 进行基于时间的触发器，以及 [webhook 平台](/docs/user-guide/messaging/webhooks) 进行事件驱动的触发器。
 
-Every template works with **any model** — not locked to a single provider.
+每个模板都适用于**任何模型** — 不锁定到单一提供商。
 
-:::tip Three Trigger Types
-| Trigger | How | Tool |
+:::tip 三种触发器类型
+| 触发器 | 方式 | 工具 |
 |---------|-----|------|
-| **Schedule** | Runs on a cadence (hourly, nightly, weekly) | `cronjob` tool or `/cron` slash command |
-| **GitHub Event** | Fires on PR opens, pushes, issues, CI results | Webhook platform (`hermes webhook subscribe`) |
-| **API Call** | External service POSTs JSON to your endpoint | Webhook platform (config.yaml routes or `hermes webhook subscribe`) |
+| **定时** | 按节奏运行（每小时、每晚、每周） | `cronjob` 工具或 `/cron` 斜杠命令 |
+| **GitHub 事件** | 在 PR 打开、推送、问题、CI 结果时触发 | Webhook 平台 (`hermes webhook subscribe`) |
+| **API 调用** | 外部服务向您的端点 POST JSON | Webhook 平台 (config.yaml 路由或 `hermes webhook subscribe`) |
 
-All three support delivery to Telegram, Discord, Slack, SMS, email, GitHub comments, or local files.
+所有三种都支持发送到 Telegram、Discord、Slack、SMS、电子邮件、GitHub 评论或本地文件。
 :::
 
 ---
 
-## Development Workflow
+## 开发工作流
 
-### Nightly Backlog Triage
+### 夜间待办事项分类
 
-Label, prioritize, and summarize new issues every night. Delivers a digest to your team channel.
+每晚标记、优先级排序和总结新问题。向您的团队频道发送摘要。
 
-**Trigger:** Schedule (nightly)
+**触发器：** 定时（每晚）
 
 ```bash
 hermes cron create "0 2 * * *" \
-  "You are a project manager triaging the NousResearch/hermes-agent GitHub repo.
+  "您是一个项目管理者，正在对 NousResearch/hermes-agent GitHub 仓库的问题进行分类。
 
-1. Run: gh issue list --repo NousResearch/hermes-agent --state open --json number,title,labels,author,createdAt --limit 30
-2. Identify issues opened in the last 24 hours
-3. For each new issue:
-   - Suggest a priority label (P0-critical, P1-high, P2-medium, P3-low)
-   - Suggest a category label (bug, feature, docs, security)
-   - Write a one-line triage note
-4. Summarize: total open issues, new today, breakdown by priority
+1. 运行：gh issue list --repo NousResearch/hermes-agent --state open --json number,title,labels,author,createdAt --limit 30
+2. 识别过去 24 小时内打开的问题
+3. 对于每个新问题：
+   - 建议一个优先级标签（P0-关键、P1-高、P2-中、P3-低）
+   - 建议一个类别标签（bug、feature、docs、security）
+   - 写一行分类说明
+4. 总结：总开放问题数、今日新增、按优先级细分
 
-Format as a clean digest. If no new issues, respond with [SILENT]." \
-  --name "Nightly backlog triage" \
+格式化为干净的摘要。如果没有新问题，用 [SILENT] 响应。" \
+  --name "夜间待办事项分类" \
   --deliver telegram
 ```
 
-### Automatic PR Code Review
+### 自动 PR 代码审查
 
 Review every pull request automatically when it's opened. Posts a review comment directly on the PR.
 

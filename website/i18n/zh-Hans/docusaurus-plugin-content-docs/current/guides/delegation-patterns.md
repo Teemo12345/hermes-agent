@@ -1,53 +1,53 @@
 ---
 sidebar_position: 13
-title: "Delegation & Parallel Work"
-description: "When and how to use subagent delegation — patterns for parallel research, code review, and multi-file work"
+title: "委托与并行工作"
+description: "何时以及如何使用子智能体委托 — 并行研究、代码审查和多文件工作的模式"
 ---
 
-# Delegation & Parallel Work
+# 委托与并行工作
 
-Hermes can spawn isolated child agents to work on tasks in parallel. Each subagent gets its own conversation, terminal session, and toolset. Only the final summary comes back — intermediate tool calls never enter your context window.
+Hermes 可以生成隔离的子智能体来并行处理任务。每个子智能体都有自己的对话、终端会话和工具集。只有最终摘要返回 — 中间工具调用永远不会进入您的上下文窗口。
 
-For the full feature reference, see [Subagent Delegation](/docs/user-guide/features/delegation).
-
----
-
-## When to Delegate
-
-**Good candidates for delegation:**
-- Reasoning-heavy subtasks (debugging, code review, research synthesis)
-- Tasks that would flood your context with intermediate data
-- Parallel independent workstreams (research A and B simultaneously)
-- Fresh-context tasks where you want the agent to approach without bias
-
-**Use something else:**
-- Single tool call → just use the tool directly
-- Mechanical multi-step work with logic between steps → `execute_code`
-- Tasks needing user interaction → subagents can't use `clarify`
-- Quick file edits → do them directly
+有关完整功能参考，请参阅[子智能体委托](/docs/user-guide/features/delegation)。
 
 ---
 
-## Pattern: Parallel Research
+## 何时委托
 
-Research three topics simultaneously and get structured summaries back:
+**适合委托的候选任务：**
+- 推理密集的子任务（调试、代码审查、研究综合）
+- 会淹没您上下文中间数据的任务
+- 并行独立的工作流（同时研究 A 和 B）
+- 希望智能体无偏见处理的新上下文任务
+
+**使用其他方法：**
+- 单一工具调用 → 直接使用工具
+- 步骤之间有逻辑的机械多步工作 → `execute_code`
+- 需要用户交互的任务 → 子智能体不能使用 `clarify`
+- 快速文件编辑 → 直接进行
+
+---
+
+## 模式：并行研究
+
+同时研究三个主题并获取结构化摘要：
 
 ```
-Research these three topics in parallel:
-1. Current state of WebAssembly outside the browser
-2. RISC-V server chip adoption in 2025
-3. Practical quantum computing applications
+并行研究以下三个主题：
+1. WebAssembly 在浏览器外的当前状态
+2. 2025 年 RISC-V 服务器芯片采用情况
+3. 实用的量子计算应用
 
-Focus on recent developments and key players.
+关注最近的发展和关键参与者。
 ```
 
-Behind the scenes, Hermes uses:
+在幕后，Hermes 使用：
 
 ```python
 delegate_task(tasks=[
     {
-        "goal": "Research WebAssembly outside the browser in 2025",
-        "context": "Focus on: runtimes (Wasmtime, Wasmer), cloud/edge use cases, WASI progress",
+        "goal": "研究 2025 年浏览器外的 WebAssembly",
+        "context": "关注：运行时（Wasmtime、Wasmer）、云/边缘用例、WASI 进展",
         "toolsets": ["web"]
     },
     {

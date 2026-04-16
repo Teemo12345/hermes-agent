@@ -1,52 +1,51 @@
 ---
 sidebar_position: 6
-title: "Use MCP with Hermes"
-description: "A practical guide to connecting MCP servers to Hermes Agent, filtering their tools, and using them safely in real workflows"
+title: "使用 MCP 与 Hermes"
+description: "将 MCP 服务器连接到 Hermes Agent、过滤其工具并在实际工作流中安全使用的实用指南"
 ---
 
-# Use MCP with Hermes
+# 使用 MCP 与 Hermes
 
-This guide shows how to actually use MCP with Hermes Agent in day-to-day workflows.
+本指南展示了如何在日常工作中实际使用 MCP 与 Hermes Agent。
 
-If the feature page explains what MCP is, this guide is about how to get value from it quickly and safely.
+如果功能页面解释了 MCP 是什么，本指南则是关于如何快速安全地从中获取价值。
 
-## When should you use MCP?
+## 何时应该使用 MCP？
 
-Use MCP when:
-- a tool already exists in MCP form and you do not want to build a native Hermes tool
-- you want Hermes to operate against a local or remote system through a clean RPC layer
-- you want fine-grained per-server exposure control
-- you want to connect Hermes to internal APIs, databases, or company systems without modifying Hermes core
+在以下情况下使用 MCP：
+- 工具已经以 MCP 形式存在，您不想构建原生 Hermes 工具
+- 您希望 Hermes 通过干净的 RPC 层操作本地或远程系统
+- 您想要细粒度的每服务器暴露控制
+- 您希望将 Hermes 连接到内部 API、数据库或公司系统，而无需修改 Hermes 核心
 
-Do not use MCP when:
-- a built-in Hermes tool already solves the job well
-- the server exposes a huge dangerous tool surface and you are not prepared to filter it
-- you only need one very narrow integration and a native tool would be simpler and safer
+在以下情况下不要使用 MCP：
+- 内置的 Hermes 工具已经很好地解决了工作
+- 服务器暴露了巨大的危险工具表面，而您没有准备好过滤它
+- 您只需要一个非常狭窄的集成，原生工具会更简单和安全
 
-## Mental model
+## 心智模型
 
-Think of MCP as an adapter layer:
+将 MCP 视为适配器层：
+- Hermes 仍然是智能体
+- MCP 服务器贡献工具
+- Hermes 在启动或重新加载时发现这些工具
+- 模型可以像普通工具一样使用它们
+- 您控制每个服务器的可见程度
 
-- Hermes remains the agent
-- MCP servers contribute tools
-- Hermes discovers those tools at startup or reload time
-- the model can use them like normal tools
-- you control how much of each server is visible
+最后一部分很重要。良好的 MCP 使用不仅仅是"连接一切"。而是"连接正确的工具，具有最小的有用表面"。
 
-That last part matters. Good MCP usage is not just “connect everything.” It is “connect the right thing, with the smallest useful surface.”
+## 步骤 1：安装 MCP 支持
 
-## Step 1: install MCP support
+如果您使用标准安装脚本安装了 Hermes，MCP 支持已经包含在内（安装程序运行 `uv pip install -e ".[all]"`）。
 
-If you installed Hermes with the standard install script, MCP support is already included (the installer runs `uv pip install -e ".[all]"`).
-
-If you installed without extras and need to add MCP separately:
+如果您在没有额外功能的情况下安装并需要单独添加 MCP：
 
 ```bash
 cd ~/.hermes/hermes-agent
 uv pip install -e ".[mcp]"
 ```
 
-For npm-based servers, make sure Node.js and `npx` are available.
+对于基于 npm 的服务器，请确保 Node.js 和 `npx` 可用。
 
 For many Python MCP servers, `uvx` is a nice default.
 

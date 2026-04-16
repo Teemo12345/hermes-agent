@@ -1,53 +1,53 @@
-# Context Compression and Caching
+# 上下文压缩与缓存
 
-Hermes Agent uses a dual compression system and Anthropic prompt caching to
-manage context window usage efficiently across long conversations.
+Hermes Agent 使用双重压缩系统和 Anthropic 提示缓存来
+在长对话中高效管理上下文窗口使用。
 
-Source files: `agent/context_engine.py` (ABC), `agent/context_compressor.py` (default engine),
-`agent/prompt_caching.py`, `gateway/run.py` (session hygiene), `run_agent.py` (search for `_compress_context`)
+源文件：`agent/context_engine.py` (ABC), `agent/context_compressor.py` (默认引擎),
+`agent/prompt_caching.py`, `gateway/run.py` (会话卫生), `run_agent.py` (搜索 `_compress_context`)
 
 
-## Pluggable Context Engine
+## 可插拔上下文引擎
 
-Context management is built on the `ContextEngine` ABC (`agent/context_engine.py`). The built-in `ContextCompressor` is the default implementation, but plugins can replace it with alternative engines (e.g., Lossless Context Management).
+上下文管理基于 `ContextEngine` ABC (`agent/context_engine.py`) 构建。内置的 `ContextCompressor` 是默认实现，但插件可以替换为替代引擎（例如，无损上下文管理）。
 
 ```yaml
 context:
-  engine: "compressor"    # default — built-in lossy summarization
-  engine: "lcm"           # example — plugin providing lossless context
+  engine: "compressor"    # 默认 — 内置有损摘要
+  engine: "lcm"           # 示例 — 提供无损上下文的插件
 ```
 
-The engine is responsible for:
-- Deciding when compaction should fire (`should_compress()`)
-- Performing compaction (`compress()`)
-- Optionally exposing tools the agent can call (e.g., `lcm_grep`)
-- Tracking token usage from API responses
+引擎负责：
+- 决定何时触发压缩 (`should_compress()`)
+- 执行压缩 (`compress()`)
+- 可选地暴露智能体可以调用的工具（例如，`lcm_grep`）
+- 跟踪 API 响应的令牌使用情况
 
-Selection is config-driven via `context.engine` in `config.yaml`. The resolution order:
-1. Check `plugins/context_engine/<name>/` directory
-2. Check general plugin system (`register_context_engine()`)
-3. Fall back to built-in `ContextCompressor`
+选择通过 `config.yaml` 中的 `context.engine` 进行配置驱动。解析顺序：
+1. 检查 `plugins/context_engine/<name>/` 目录
+2. 检查通用插件系统 (`register_context_engine()`)
+3. 回退到内置的 `ContextCompressor`
 
-Plugin engines are **never auto-activated** — the user must explicitly set `context.engine` to the plugin's name. The default `"compressor"` always uses the built-in.
+插件引擎**从不自动激活** — 用户必须显式将 `context.engine` 设置为插件的名称。默认的 `"compressor"` 始终使用内置引擎。
 
-Configure via `hermes plugins` → Provider Plugins → Context Engine, or edit `config.yaml` directly.
+通过 `hermes plugins` → Provider Plugins → Context Engine 配置，或直接编辑 `config.yaml`。
 
-For building a context engine plugin, see [Context Engine Plugins](/docs/developer-guide/context-engine-plugin).
+要构建上下文引擎插件，请参阅 [上下文引擎插件](/docs/developer-guide/context-engine-plugin)。
 
-## Dual Compression System
+## 双重压缩系统
 
-Hermes has two separate compression layers that operate independently:
+Hermes 有两个独立的压缩层，它们独立运行：
 
 ```
                      ┌──────────────────────────┐
-  Incoming message   │   Gateway Session Hygiene │  Fires at 85% of context
-  ─────────────────► │   (pre-agent, rough est.) │  Safety net for large sessions
+  传入消息           │   网关会话卫生            │ 在上下文 85% 时触发
+  ─────────────────► │   (代理前，粗略估计)      │ 大型会话的安全网
                      └─────────────┬────────────┘
                                    │
                                    ▼
                      ┌──────────────────────────┐
-                     │   Agent ContextCompressor │  Fires at 50% of context (default)
-                     │   (in-loop, real tokens)  │  Normal context management
+                     │   智能体 ContextCompressor │ 在上下文 50% 时触发（默认）
+                     │   (循环内，真实令牌)       │ 正常上下文管理
                      └──────────────────────────┘
 ```
 

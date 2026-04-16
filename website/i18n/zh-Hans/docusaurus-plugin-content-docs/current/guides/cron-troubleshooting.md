@@ -1,52 +1,52 @@
 ---
 sidebar_position: 12
-title: "Cron Troubleshooting"
-description: "Diagnose and fix common Hermes cron issues — jobs not firing, delivery failures, skill loading errors, and performance problems"
+title: "Cron 故障排除"
+description: "诊断和修复常见的 Hermes cron 问题 — 作业未触发、交付失败、技能加载错误和性能问题"
 ---
 
-# Cron Troubleshooting
+# Cron 故障排除
 
-When a cron job isn't behaving as expected, work through these checks in order. Most issues fall into one of four categories: timing, delivery, permissions, or skill loading.
+当 cron 作业未按预期行为时，按顺序进行这些检查。大多数问题属于以下四类之一：定时、交付、权限或技能加载。
 
 ---
 
-## Jobs Not Firing
+## 作业未触发
 
-### Check 1: Verify the job exists and is active
+### 检查 1：验证作业存在且处于活动状态
 
 ```bash
 hermes cron list
 ```
 
-Look for the job and confirm its state is `[active]` (not `[paused]` or `[completed]`). If it shows `[completed]`, the repeat count may be exhausted — edit the job to reset it.
+查找作业并确认其状态为 `[active]`（不是 `[paused]` 或 `[completed]`）。如果显示 `[completed]`，重复次数可能已耗尽 — 编辑作业以重置它。
 
-### Check 2: Confirm the schedule is correct
+### 检查 2：确认调度正确
 
-A misformatted schedule silently defaults to one-shot or is rejected entirely. Test your expression:
+格式错误的调度会静默默认为一次性或完全被拒绝。测试您的表达式：
 
-| Your expression | Should evaluate to |
+| 您的表达式 | 应该评估为 |
 |----------------|-------------------|
-| `0 9 * * *` | 9:00 AM every day |
-| `0 9 * * 1` | 9:00 AM every Monday |
-| `every 2h` | Every 2 hours from now |
-| `30m` | 30 minutes from now |
-| `2025-06-01T09:00:00` | June 1, 2025 at 9:00 AM UTC |
+| `0 9 * * *` | 每天上午 9:00 |
+| `0 9 * * 1` | 每周一上午 9:00 |
+| `every 2h` | 从现在开始每 2 小时 |
+| `30m` | 从现在开始 30 分钟后 |
+| `2025-06-01T09:00:00` | 2025 年 6 月 1 日 UTC 时间 9:00 AM |
 
-If the job fires once and then disappears from the list, it's a one-shot schedule (`30m`, `1d`, or an ISO timestamp) — expected behavior.
+如果作业触发一次然后从列表中消失，这是一个一次性调度（`30m`、`1d` 或 ISO 时间戳）— 预期行为。
 
-### Check 3: Is the gateway running?
+### 检查 3：网关是否在运行？
 
-Cron jobs are fired by the gateway's background ticker thread, which ticks every 60 seconds. A regular CLI chat session does **not** automatically fire cron jobs.
+Cron 作业由网关的后台计时器线程触发，该线程每 60 秒计时一次。常规的 CLI 聊天会话**不会**自动触发 cron 作业。
 
-If you're expecting jobs to fire automatically, you need a running gateway (`hermes gateway` or `hermes serve`). For one-off debugging, you can manually trigger a tick with `hermes cron tick`.
+如果您期望作业自动触发，您需要一个正在运行的网关（`hermes gateway` 或 `hermes serve`）。对于一次性调试，您可以使用 `hermes cron tick` 手动触发计时。
 
-### Check 4: Check the system clock and timezone
+### 检查 4：检查系统时钟和时区
 
-Jobs use the local timezone. If your machine's clock is wrong or in a different timezone than expected, jobs will fire at the wrong times. Verify:
+作业使用本地时区。如果您的机器时钟错误或处于与预期不同的时区，作业将在错误的时间触发。验证：
 
 ```bash
 date
-hermes cron list   # Compare next_run times with local time
+hermes cron list   # 比较 next_run 时间与本地时间
 ```
 
 ---

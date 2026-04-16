@@ -1,50 +1,50 @@
 ---
 sidebar_position: 4
-title: "Tutorial: Team Telegram Assistant"
-description: "Step-by-step guide to setting up a Telegram bot that your whole team can use for code help, research, system admin, and more"
+title: "教程：团队 Telegram 助手"
+description: "设置整个团队可以用于代码帮助、研究、系统管理等功能的 Telegram 机器人的分步指南"
 ---
 
-# Set Up a Team Telegram Assistant
+# 设置团队 Telegram 助手
 
-This tutorial walks you through setting up a Telegram bot powered by Hermes Agent that multiple team members can use. By the end, your team will have a shared AI assistant they can message for help with code, research, system administration, and anything else — secured with per-user authorization.
+本教程将引导您设置一个由 Hermes Agent 驱动的 Telegram 机器人，多个团队成员可以使用。到最后，您的团队将拥有一个共享的 AI 助手，他们可以发送消息寻求代码、研究、系统管理等方面的帮助 — 通过每用户授权进行保护。
 
-## What We're Building
+## 我们要构建什么
 
-A Telegram bot that:
+一个 Telegram 机器人，具有以下功能：
 
-- **Any authorized team member** can DM for help — code reviews, research, shell commands, debugging
-- **Runs on your server** with full tool access — terminal, file editing, web search, code execution
-- **Per-user sessions** — each person gets their own conversation context
-- **Secure by default** — only approved users can interact, with two authorization methods
-- **Scheduled tasks** — daily standups, health checks, and reminders delivered to a team channel
+- **任何授权的团队成员**都可以通过私信寻求帮助 — 代码审查、研究、shell 命令、调试
+- **在您的服务器上运行**，具有完整的工具访问权限 — 终端、文件编辑、网络搜索、代码执行
+- **每用户会话** — 每个人都有自己的对话上下文
+- **默认安全** — 只有批准的用户可以交互，有两种授权方法
+- **定时任务** — 每日站会、健康检查和提醒发送到团队频道
 
 ---
 
-## Prerequisites
+## 先决条件
 
-Before starting, make sure you have:
+在开始之前，请确保您有：
 
-- **Hermes Agent installed** on a server or VPS (not your laptop — the bot needs to stay running). Follow the [installation guide](/docs/getting-started/installation) if you haven't yet.
-- **A Telegram account** for yourself (the bot owner)
-- **An LLM provider configured** — at minimum, an API key for OpenAI, Anthropic, or another supported provider in `~/.hermes/.env`
+- **Hermes Agent 已安装**在服务器或 VPS 上（不是您的笔记本电脑 — 机器人需要保持运行）。如果还没有安装，请遵循[安装指南](/docs/getting-started/installation)。
+- **一个 Telegram 账户**为您自己（机器人所有者）
+- **配置的 LLM 提供商** — 至少是 OpenAI、Anthropic 或其他受支持提供商的 API 密钥，位于 `~/.hermes/.env` 中
 
 :::tip
-A $5/month VPS is plenty for running the gateway. Hermes itself is lightweight — the LLM API calls are what cost money, and those happen remotely.
+每月 5 美元的 VPS 足以运行网关。Hermes 本身是轻量级的 — LLM API 调用是花钱的部分，而这些调用是远程进行的。
 :::
 
 ---
 
-## Step 1: Create a Telegram Bot
+## 步骤 1：创建 Telegram 机器人
 
-Every Telegram bot starts with **@BotFather** — Telegram's official bot for creating bots.
+每个 Telegram 机器人都从 **@BotFather** 开始 — Telegram 的官方机器人创建机器人。
 
-1. **Open Telegram** and search for `@BotFather`, or go to [t.me/BotFather](https://t.me/BotFather)
+1. **打开 Telegram** 并搜索 `@BotFather`，或转到 [t.me/BotFather](https://t.me/BotFather)
 
-2. **Send `/newbot`** — BotFather will ask you two things:
-   - **Display name** — what users see (e.g., `Team Hermes Assistant`)
-   - **Username** — must end in `bot` (e.g., `myteam_hermes_bot`)
+2. **发送 `/newbot`** — BotFather 将询问您两件事：
+   - **显示名称** — 用户看到的内容（例如，`Team Hermes Assistant`）
+   - **用户名** — 必须以 `bot` 结尾（例如，`myteam_hermes_bot`）
 
-3. **Copy the bot token** — BotFather replies with something like:
+3. **复制机器人令牌** — BotFather 回复类似以下内容：
    ```
    Use this token to access the HTTP API:
    7123456789:AAH1bGciOiJSUzI1NiIsInR5cCI6Ikp...

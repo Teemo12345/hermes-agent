@@ -1,52 +1,52 @@
 ---
 sidebar_position: 3
-title: "FAQ & Troubleshooting"
-description: "Frequently asked questions and solutions to common issues with Hermes Agent"
+title: "常见问题与故障排除"
+description: "Hermes Agent 常见问题及其解决方案"
 ---
 
-# FAQ & Troubleshooting
+# 常见问题与故障排除
 
-Quick answers and fixes for the most common questions and issues.
+针对最常见问题和问题的快速答案和修复。
 
 ---
 
-## Frequently Asked Questions
+## 常见问题
 
-### What LLM providers work with Hermes?
+### Hermes 支持哪些 LLM 提供商？
 
-Hermes Agent works with any OpenAI-compatible API. Supported providers include:
+Hermes Agent 可与任何 OpenAI 兼容的 API 配合使用。支持的提供商包括：
 
-- **[OpenRouter](https://openrouter.ai/)** — access hundreds of models through one API key (recommended for flexibility)
-- **Nous Portal** — Nous Research's own inference endpoint
-- **OpenAI** — GPT-4o, o1, o3, etc.
-- **Anthropic** — Claude models (via OpenRouter or compatible proxy)
-- **Google** — Gemini models (via OpenRouter or compatible proxy)
-- **z.ai / ZhipuAI** — GLM models
-- **Kimi / Moonshot AI** — Kimi models
-- **MiniMax** — global and China endpoints
-- **Local models** — via [Ollama](https://ollama.com/), [vLLM](https://docs.vllm.ai/), [llama.cpp](https://github.com/ggerganov/llama.cpp), [SGLang](https://github.com/sgl-project/sglang), or any OpenAI-compatible server
+- **[OpenRouter](https://openrouter.ai/)** — 通过一个 API 密钥访问数百个模型（推荐用于灵活性）
+- **Nous Portal** — Nous Research 自己的推理端点
+- **OpenAI** — GPT-4o、o1、o3 等
+- **Anthropic** — Claude 模型（通过 OpenRouter 或兼容代理）
+- **Google** — Gemini 模型（通过 OpenRouter 或兼容代理）
+- **z.ai / ZhipuAI** — GLM 模型
+- **Kimi / Moonshot AI** — Kimi 模型
+- **MiniMax** — 全球和中国端点
+- **本地模型** — 通过 [Ollama](https://ollama.com/)、[vLLM](https://docs.vllm.ai/)、[llama.cpp](https://github.com/ggerganov/llama.cpp)、[SGLang](https://github.com/sgl-project/sglang) 或任何 OpenAI 兼容服务器
 
-Set your provider with `hermes model` or by editing `~/.hermes/.env`. See the [Environment Variables](./environment-variables.md) reference for all provider keys.
+使用 `hermes model` 或编辑 `~/.hermes/.env` 来设置您的提供商。有关所有提供商密钥，请参阅[环境变量](./environment-variables.md)参考。
 
-### Does it work on Windows?
+### 它能在 Windows 上运行吗？
 
-**Not natively.** Hermes Agent requires a Unix-like environment. On Windows, install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run Hermes from inside it. The standard install command works perfectly in WSL2:
+**不能原生运行。** Hermes Agent 需要类 Unix 环境。在 Windows 上，安装 [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) 并在其中运行 Hermes。标准安装命令在 WSL2 中完美运行：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
-### Does it work on Android / Termux?
+### 它能在 Android / Termux 上运行吗？
 
-Yes — Hermes now has a tested Termux install path for Android phones.
+是的 — Hermes 现在有一个经过测试的 Termux 安装路径，适用于 Android 手机。
 
-Quick install:
+快速安装：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
-For the fully explicit manual steps, supported extras, and current limitations, see the [Termux guide](../getting-started/termux.md).
+有关完全明确的手动步骤、支持的额外功能和当前限制，请参阅 [Termux 指南](../getting-started/termux.md)。
 
 Important caveat: the full `.[all]` extra is not currently available on Android because the `voice` extra depends on `faster-whisper` → `ctranslate2`, and `ctranslate2` does not publish Android wheels. Use the tested `.[termux]` extra instead.
 

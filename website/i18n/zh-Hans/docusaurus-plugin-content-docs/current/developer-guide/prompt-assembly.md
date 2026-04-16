@@ -1,53 +1,53 @@
 ---
 sidebar_position: 5
-title: "Prompt Assembly"
-description: "How Hermes builds the system prompt, preserves cache stability, and injects ephemeral layers"
+title: "提示组装"
+description: "Hermes 如何构建系统提示、保持缓存稳定性并注入临时层"
 ---
 
-# Prompt Assembly
+# 提示组装
 
-Hermes deliberately separates:
+Hermes 有意分离：
 
-- **cached system prompt state**
-- **ephemeral API-call-time additions**
+- **缓存的系统提示状态**
+- **临时的 API 调用时间添加**
 
-This is one of the most important design choices in the project because it affects:
+这是项目中最重要的设计选择之一，因为它影响：
 
-- token usage
-- prompt caching effectiveness
-- session continuity
-- memory correctness
+- 令牌使用
+- 提示缓存有效性
+- 会话连续性
+- 内存正确性
 
-Primary files:
+主要文件：
 
 - `run_agent.py`
 - `agent/prompt_builder.py`
 - `tools/memory_tool.py`
 
-## Cached system prompt layers
+## 缓存的系统提示层
 
-The cached system prompt is assembled in roughly this order:
+缓存的系统提示大致按以下顺序组装：
 
-1. agent identity — `SOUL.md` from `HERMES_HOME` when available, otherwise falls back to `DEFAULT_AGENT_IDENTITY` in `prompt_builder.py`
-2. tool-aware behavior guidance
-3. Honcho static block (when active)
-4. optional system message
-5. frozen MEMORY snapshot
-6. frozen USER profile snapshot
-7. skills index
-8. context files (`AGENTS.md`, `.cursorrules`, `.cursor/rules/*.mdc`) — SOUL.md is **not** included here when it was already loaded as the identity in step 1
-9. timestamp / optional session ID
-10. platform hint
+1. 智能体身份 — 当可用时从 `HERMES_HOME` 获取 `SOUL.md`，否则回退到 `prompt_builder.py` 中的 `DEFAULT_AGENT_IDENTITY`
+2. 工具感知行为指导
+3. Honcho 静态块（激活时）
+4. 可选的系统消息
+5. 冻结的 MEMORY 快照
+6. 冻结的 USER 配置文件快照
+7. 技能索引
+8. 上下文文件（`AGENTS.md`, `.cursorrules`, `.cursor/rules/*.mdc`）— 当 SOUL.md 已在步骤 1 中作为身份加载时，**不**在此处包含
+9. 时间戳 / 可选的会话 ID
+10. 平台提示
 
-When `skip_context_files` is set (e.g., subagent delegation), SOUL.md is not loaded and the hardcoded `DEFAULT_AGENT_IDENTITY` is used instead.
+当设置 `skip_context_files` 时（例如，子智能体委托），不加载 SOUL.md，而是使用硬编码的 `DEFAULT_AGENT_IDENTITY`。
 
-### Concrete example: assembled system prompt
+### 具体示例：组装的系统提示
 
-Here is a simplified view of what the final system prompt looks like when all layers are present (comments show the source of each section):
+以下是所有层都存在时最终系统提示的简化视图（注释显示每个部分的来源）：
 
 ```
-# Layer 1: Agent Identity (from ~/.hermes/SOUL.md)
-You are Hermes, an AI assistant created by Nous Research.
+# 层 1: 智能体身份（来自 ~/.hermes/SOUL.md）
+你是 Hermes，由 Nous Research 创建的 AI 助手。
 You are an expert software engineer and researcher.
 You value correctness, clarity, and efficiency.
 ...

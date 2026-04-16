@@ -1,49 +1,49 @@
 ---
 sidebar_position: 3
-title: "Tutorial: Daily Briefing Bot"
-description: "Build an automated daily briefing bot that researches topics, summarizes findings, and delivers them to Telegram or Discord every morning"
+title: "教程：每日简报机器人"
+description: "构建一个自动化的每日简报机器人，研究主题、总结发现，并每天早上将其发送到 Telegram 或 Discord"
 ---
 
-# Tutorial: Build a Daily Briefing Bot
+# 教程：构建每日简报机器人
 
-In this tutorial, you'll build a personal briefing bot that wakes up every morning, researches topics you care about, summarizes the findings, and delivers a concise briefing straight to your Telegram or Discord.
+在本教程中，您将构建一个个人简报机器人，它每天早上醒来，研究您关心的主题，总结发现，并将简洁的简报直接发送到您的 Telegram 或 Discord。
 
-By the end, you'll have a fully automated workflow combining **web search**, **cron scheduling**, **delegation**, and **messaging delivery** — no code required.
+到最后，您将拥有一个完全自动化的工作流，结合了**网络搜索**、**cron 调度**、**委托**和**消息传递** — 无需编写代码。
 
-## What We're Building
+## 我们要构建什么
 
-Here's the flow:
+以下是流程：
 
-1. **8:00 AM** — The cron scheduler triggers your job
-2. **Hermes spins up** a fresh agent session with your prompt
-3. **Web search** pulls the latest news on your topics
-4. **Summarization** distills it into a clean briefing format
-5. **Delivery** sends the briefing to your Telegram or Discord
+1. **上午 8:00** — cron 调度器触发您的作业
+2. **Hermes 启动**一个带有您提示的新智能体会话
+3. **网络搜索**获取您主题的最新新闻
+4. **摘要**将其提炼成干净的简报格式
+5. **交付**将简报发送到您的 Telegram 或 Discord
 
-The whole thing runs hands-free. You just read your briefing with your morning coffee.
+整个过程无需手动操作。您只需在早晨喝咖啡时阅读您的简报。
 
-## Prerequisites
+## 先决条件
 
-Before starting, make sure you have:
+在开始之前，请确保您有：
 
-- **Hermes Agent installed** — see the [Installation guide](/docs/getting-started/installation)
-- **Gateway running** — the gateway daemon handles cron execution:
+- **Hermes Agent 已安装** — 请参阅[安装指南](/docs/getting-started/installation)
+- **网关正在运行** — 网关守护进程处理 cron 执行：
   ```bash
-  hermes gateway install   # Install as a user service
-  sudo hermes gateway install --system   # Linux servers: boot-time system service
-  # or
-  hermes gateway           # Run in foreground
+  hermes gateway install   # 安装为用户服务
+  sudo hermes gateway install --system   # Linux 服务器：启动时系统服务
+  # 或
+  hermes gateway           # 在前台运行
   ```
-- **Firecrawl API key** — set `FIRECRAWL_API_KEY` in your environment for web search
-- **Messaging configured** (optional but recommended) — [Telegram](/docs/user-guide/messaging/telegram) or Discord set up with a home channel
+- **Firecrawl API 密钥** — 在您的环境中设置 `FIRECRAWL_API_KEY` 用于网络搜索
+- **消息传递已配置**（可选但推荐）— 设置 [Telegram](/docs/user-guide/messaging/telegram) 或 Discord 并配置一个家庭频道
 
-:::tip No messaging? No problem
-You can still follow this tutorial using `deliver: "local"`. Briefings will be saved to `~/.hermes/cron/output/` and you can read them anytime.
+:::tip 没有消息传递？没问题
+您仍然可以使用 `deliver: "local"` 来跟随本教程。简报将保存到 `~/.hermes/cron/output/`，您可以随时阅读它们。
 :::
 
-## Step 1: Test the Workflow Manually
+## 步骤 1：手动测试工作流
 
-Before automating anything, let's make sure the briefing works. Start a chat session:
+在自动化任何内容之前，让我们确保简报工作正常。启动一个聊天会话：
 
 ```bash
 hermes

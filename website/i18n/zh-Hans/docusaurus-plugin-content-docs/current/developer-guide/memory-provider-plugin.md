@@ -1,31 +1,31 @@
 ---
 sidebar_position: 8
-title: "Memory Provider Plugins"
-description: "How to build a memory provider plugin for Hermes Agent"
+title: "记忆提供商插件"
+description: "如何为 Hermes Agent 构建记忆提供商插件"
 ---
 
-# Building a Memory Provider Plugin
+# 构建记忆提供商插件
 
-Memory provider plugins give Hermes Agent persistent, cross-session knowledge beyond the built-in MEMORY.md and USER.md. This guide covers how to build one.
+记忆提供商插件为 Hermes Agent 提供超越内置 MEMORY.md 和 USER.md 的持久化、跨会话知识。本指南介绍如何构建一个。
 
 :::tip
-Memory providers are one of two **provider plugin** types. The other is [Context Engine Plugins](/docs/developer-guide/context-engine-plugin), which replace the built-in context compressor. Both follow the same pattern: single-select, config-driven, managed via `hermes plugins`.
+记忆提供商是两种**提供商插件**类型之一。另一种是[上下文引擎插件](/docs/developer-guide/context-engine-plugin)，它替换内置的上下文压缩器。两者都遵循相同的模式：单选、配置驱动、通过 `hermes plugins` 管理。
 :::
 
-## Directory Structure
+## 目录结构
 
-Each memory provider lives in `plugins/memory/<name>/`:
+每个记忆提供商位于 `plugins/memory/<name>/`：
 
 ```
 plugins/memory/my-provider/
-├── __init__.py      # MemoryProvider implementation + register() entry point
-├── plugin.yaml      # Metadata (name, description, hooks)
-└── README.md        # Setup instructions, config reference, tools
+├── __init__.py      # MemoryProvider 实现 + register() 入口点
+├── plugin.yaml      # 元数据（名称、描述、钩子）
+└── README.md        # 设置说明、配置参考、工具
 ```
 
-## The MemoryProvider ABC
+## MemoryProvider ABC
 
-Your plugin implements the `MemoryProvider` abstract base class from `agent/memory_provider.py`:
+您的插件实现来自 `agent/memory_provider.py` 的 `MemoryProvider` 抽象基类：
 
 ```python
 from agent.memory_provider import MemoryProvider
@@ -36,14 +36,14 @@ class MyMemoryProvider(MemoryProvider):
         return "my-provider"
 
     def is_available(self) -> bool:
-        """Check if this provider can activate. NO network calls."""
+        """检查此提供商是否可以激活。无网络调用。"""
         return bool(os.environ.get("MY_API_KEY"))
 
     def initialize(self, session_id: str, **kwargs) -> None:
-        """Called once at agent startup.
+        """在智能体启动时调用一次。
 
-        kwargs always includes:
-          hermes_home (str): Active HERMES_HOME path. Use for storage.
+        kwargs 始终包含：
+          hermes_home (str): 活动的 HERMES_HOME 路径。用于存储。
         """
         self._api_key = os.environ.get("MY_API_KEY", "")
         self._session_id = session_id

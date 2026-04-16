@@ -1,51 +1,51 @@
 ---
 sidebar_position: 5
-title: "Environments, Benchmarks & Data Generation"
-description: "Building RL training environments, running evaluation benchmarks, and generating SFT data with the Hermes-Agent Atropos integration"
+title: "环境、基准测试与数据生成"
+description: "构建 RL 训练环境、运行评估基准测试，以及使用 Hermes-Agent Atropos 集成生成 SFT 数据"
 ---
 
-# Environments, Benchmarks & Data Generation
+# 环境、基准测试与数据生成
 
-Hermes Agent includes a full environment framework that connects its tool-calling capabilities to the [Atropos](https://github.com/NousResearch/atropos) RL training framework. This enables three workflows:
+Hermes Agent 包含一个完整的环境框架，将其工具调用能力连接到 [Atropos](https://github.com/NousResearch/atropos) RL 训练框架。这实现了三个工作流：
 
-1. **RL Training** — Train language models on multi-turn agentic tasks with GRPO
-2. **Benchmarks** — Evaluate models on standardised agentic benchmarks
-3. **Data Generation** — Generate SFT training data from agent rollouts
+1. **RL 训练** — 在多轮智能体任务上使用 GRPO 训练语言模型
+2. **基准测试** — 在标准化智能体基准测试上评估模型
+3. **数据生成** — 从智能体 rollout 生成 SFT 训练数据
 
-All three share the same core: an **environment** class that defines tasks, runs an agent loop, and scores the output.
+所有三个工作流共享相同的核心：一个定义任务、运行智能体循环并对输出评分的**环境**类。
 
-:::info Repo environments vs RL training tools
-The Python environment framework documented here lives under the repo's `environments/` directory and is the implementation-level API for Hermes/Atropos integration. This is separate from the user-facing `rl_*` tools, which operate as an orchestration surface for remote RL training workflows.
+:::info 仓库环境 vs RL 训练工具
+本文档记录的 Python 环境框架位于仓库的 `environments/` 目录下，是 Hermes/Atropos 集成的实现级 API。这与面向用户的 `rl_*` 工具是分开的，后者作为远程 RL 训练工作流的编排表面。
 :::
 
-:::tip Quick Links
-- **Want to run benchmarks?** Jump to [Available Benchmarks](#available-benchmarks)
-- **Want to train with RL?** See [RL Training Tools](/user-guide/features/rl-training) for the agent-driven interface, or [Running Environments](#running-environments) for manual execution
-- **Want to create a new environment?** See [Creating Environments](#creating-environments)
+:::tip 快速链接
+- **想要运行基准测试？** 跳转到[可用基准测试](#可用基准测试)
+- **想用 RL 训练？** 查看[RL 训练工具](/user-guide/features/rl-training)了解智能体驱动的界面，或[运行环境](#运行环境)了解手动执行
+- **想创建新环境？** 查看[创建环境](#创建环境)
 :::
 
-## Architecture
+## 架构
 
-The environment system is built on a three-layer inheritance chain:
+环境系统构建在三级继承链上：
 
 ```mermaid
 classDiagram
     class BaseEnv {
-      Server management
-      Worker scheduling
-      Wandb logging
+      服务器管理
+      工作器调度
+      Wandb 日志记录
       CLI: serve / process / evaluate
     }
 
     class HermesAgentBaseEnv {
-      Terminal backend configuration
-      Tool resolution
-      Agent loop engine
-      ToolContext access
+      终端后端配置
+      工具解析
+      智能体循环引擎
+      ToolContext 访问
     }
 
     class TerminalTestEnv {
-      Stack testing
+      堆栈测试
     }
 
     class HermesSweEnv {

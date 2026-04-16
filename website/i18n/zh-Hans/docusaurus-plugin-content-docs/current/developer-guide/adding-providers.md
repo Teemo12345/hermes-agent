@@ -1,53 +1,53 @@
 ---
 sidebar_position: 5
-title: "Adding Providers"
-description: "How to add a new inference provider to Hermes Agent — auth, runtime resolution, CLI flows, adapters, tests, and docs"
+title: "添加提供商"
+description: "如何向 Hermes Agent 添加新的推理提供商 — 认证、运行时解析、CLI 流程、适配器、测试和文档"
 ---
 
-# Adding Providers
+# 添加提供商
 
-Hermes can already talk to any OpenAI-compatible endpoint through the custom provider path. Do not add a built-in provider unless you want first-class UX for that service:
+Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端点通信。除非您希望为该服务提供一流的用户体验，否则不要添加内置提供商：
 
-- provider-specific auth or token refresh
-- a curated model catalog
-- setup / `hermes model` menu entries
-- provider aliases for `provider:model` syntax
-- a non-OpenAI API shape that needs an adapter
+- 特定于提供商的认证或令牌刷新
+- 精选的模型目录
+- 设置 / `hermes model` 菜单条目
+- `provider:model` 语法的提供商别名
+- 需要适配器的非 OpenAI API 形状
 
-If the provider is just "another OpenAI-compatible base URL and API key", a named custom provider may be enough.
+如果提供商只是"另一个 OpenAI 兼容的基础 URL 和 API 密钥"，命名自定义提供商可能就足够了。
 
-## The mental model
+## 心智模型
 
-A built-in provider has to line up across a few layers:
+内置提供商必须在几个层级上对齐：
 
-1. `hermes_cli/auth.py` decides how credentials are found.
-2. `hermes_cli/runtime_provider.py` turns that into runtime data:
+1. `hermes_cli/auth.py` 决定如何找到凭据。
+2. `hermes_cli/runtime_provider.py` 将其转换为运行时数据：
    - `provider`
    - `api_mode`
    - `base_url`
    - `api_key`
    - `source`
-3. `run_agent.py` uses `api_mode` to decide how requests are built and sent.
-4. `hermes_cli/models.py` and `hermes_cli/main.py` make the provider show up in the CLI. (`hermes_cli/setup.py` delegates to `main.py` automatically — no changes needed there.)
-5. `agent/auxiliary_client.py` and `agent/model_metadata.py` keep side tasks and token budgeting working.
+3. `run_agent.py` 使用 `api_mode` 决定如何构建和发送请求。
+4. `hermes_cli/models.py` 和 `hermes_cli/main.py` 使提供商显示在 CLI 中。（`hermes_cli/setup.py` 自动委托给 `main.py` — 无需在那里进行更改。）
+5. `agent/auxiliary_client.py` 和 `agent/model_metadata.py` 保持辅助任务和令牌预算工作正常。
 
-The important abstraction is `api_mode`.
+重要的抽象是 `api_mode`。
 
-- Most providers use `chat_completions`.
-- Codex uses `codex_responses`.
-- Anthropic uses `anthropic_messages`.
-- A new non-OpenAI protocol usually means adding a new adapter and a new `api_mode` branch.
+- 大多数提供商使用 `chat_completions`。
+- Codex 使用 `codex_responses`。
+- Anthropic 使用 `anthropic_messages`。
+- 新的非 OpenAI 协议通常意味着添加新的适配器和新的 `api_mode` 分支。
 
-## Choose the implementation path first
+## 首先选择实现路径
 
-### Path A — OpenAI-compatible provider
+### 路径 A — OpenAI 兼容提供商
 
-Use this when the provider accepts standard chat-completions style requests.
+当提供商接受标准聊天完成样式请求时使用此路径。
 
-Typical work:
+典型工作：
 
-- add auth metadata
-- add model catalog / aliases
+- 添加认证元数据
+- 添加模型目录 / 别名
 - add runtime resolution
 - add CLI menu wiring
 - add aux-model defaults

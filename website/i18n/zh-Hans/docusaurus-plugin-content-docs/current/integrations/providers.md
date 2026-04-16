@@ -1,53 +1,53 @@
 ---
-title: "AI Providers"
-sidebar_label: "AI Providers"
+title: "AI 提供商"
+sidebar_label: "AI 提供商"
 sidebar_position: 1
 ---
 
-# AI Providers
+# AI 提供商
 
-This page covers setting up inference providers for Hermes Agent — from cloud APIs like OpenRouter and Anthropic, to self-hosted endpoints like Ollama and vLLM, to advanced routing and fallback configurations. You need at least one provider configured to use Hermes.
+本页面涵盖为 Hermes Agent 设置推理提供商 — 从像 OpenRouter 和 Anthropic 这样的云 API，到像 Ollama 和 vLLM 这样的自托管端点，再到高级路由和故障转移配置。您需要至少配置一个提供商才能使用 Hermes。
 
-## Inference Providers
+## 推理提供商
 
-You need at least one way to connect to an LLM. Use `hermes model` to switch providers and models interactively, or configure directly:
+您需要至少一种连接到 LLM 的方式。使用 `hermes model` 交互式切换提供商和模型，或直接配置：
 
-| Provider | Setup |
+| 提供商 | 设置 |
 |----------|-------|
-| **Nous Portal** | `hermes model` (OAuth, subscription-based) |
-| **OpenAI Codex** | `hermes model` (ChatGPT OAuth, uses Codex models) |
-| **GitHub Copilot** | `hermes model` (OAuth device code flow, `COPILOT_GITHUB_TOKEN`, `GH_TOKEN`, or `gh auth token`) |
-| **GitHub Copilot ACP** | `hermes model` (spawns local `copilot --acp --stdio`) |
-| **Anthropic** | `hermes model` (Claude Pro/Max via Claude Code auth, Anthropic API key, or manual setup-token) |
-| **OpenRouter** | `OPENROUTER_API_KEY` in `~/.hermes/.env` |
-| **AI Gateway** | `AI_GATEWAY_API_KEY` in `~/.hermes/.env` (provider: `ai-gateway`) |
-| **z.ai / GLM** | `GLM_API_KEY` in `~/.hermes/.env` (provider: `zai`) |
-| **Kimi / Moonshot** | `KIMI_API_KEY` in `~/.hermes/.env` (provider: `kimi-coding`) |
-| **Kimi / Moonshot (China)** | `KIMI_CN_API_KEY` in `~/.hermes/.env` (provider: `kimi-coding-cn`; aliases: `kimi-cn`, `moonshot-cn`) |
-| **Arcee AI** | `ARCEEAI_API_KEY` in `~/.hermes/.env` (provider: `arcee`; aliases: `arcee-ai`, `arceeai`) |
-| **MiniMax** | `MINIMAX_API_KEY` in `~/.hermes/.env` (provider: `minimax`) |
-| **MiniMax China** | `MINIMAX_CN_API_KEY` in `~/.hermes/.env` (provider: `minimax-cn`) |
-| **Alibaba Cloud** | `DASHSCOPE_API_KEY` in `~/.hermes/.env` (provider: `alibaba`, aliases: `dashscope`, `qwen`) |
-| **Kilo Code** | `KILOCODE_API_KEY` in `~/.hermes/.env` (provider: `kilocode`) |
-| **Xiaomi MiMo** | `XIAOMI_API_KEY` in `~/.hermes/.env` (provider: `xiaomi`, aliases: `mimo`, `xiaomi-mimo`) |
-| **OpenCode Zen** | `OPENCODE_ZEN_API_KEY` in `~/.hermes/.env` (provider: `opencode-zen`) |
-| **OpenCode Go** | `OPENCODE_GO_API_KEY` in `~/.hermes/.env` (provider: `opencode-go`) |
-| **DeepSeek** | `DEEPSEEK_API_KEY` in `~/.hermes/.env` (provider: `deepseek`) |
-| **Hugging Face** | `HF_TOKEN` in `~/.hermes/.env` (provider: `huggingface`, aliases: `hf`) |
-| **Google / Gemini** | `GOOGLE_API_KEY` (or `GEMINI_API_KEY`) in `~/.hermes/.env` (provider: `gemini`) |
-| **Custom Endpoint** | `hermes model` → choose "Custom endpoint" (saved in `config.yaml`) |
+| **Nous Portal** | `hermes model` (OAuth，基于订阅) |
+| **OpenAI Codex** | `hermes model` (ChatGPT OAuth，使用 Codex 模型) |
+| **GitHub Copilot** | `hermes model` (OAuth 设备代码流，`COPILOT_GITHUB_TOKEN`，`GH_TOKEN`，或 `gh auth token`) |
+| **GitHub Copilot ACP** | `hermes model` (生成本地 `copilot --acp --stdio`) |
+| **Anthropic** | `hermes model` (通过 Claude Code 认证的 Claude Pro/Max，Anthropic API 密钥，或手动设置令牌) |
+| **OpenRouter** | `OPENROUTER_API_KEY` 在 `~/.hermes/.env` 中 |
+| **AI Gateway** | `AI_GATEWAY_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `ai-gateway`) |
+| **z.ai / GLM** | `GLM_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `zai`) |
+| **Kimi / Moonshot** | `KIMI_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `kimi-coding`) |
+| **Kimi / Moonshot (China)** | `KIMI_CN_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `kimi-coding-cn`; 别名: `kimi-cn`, `moonshot-cn`) |
+| **Arcee AI** | `ARCEEAI_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `arcee`; 别名: `arcee-ai`, `arceeai`) |
+| **MiniMax** | `MINIMAX_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `minimax`) |
+| **MiniMax China** | `MINIMAX_CN_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `minimax-cn`) |
+| **Alibaba Cloud** | `DASHSCOPE_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `alibaba`, 别名: `dashscope`, `qwen`) |
+| **Kilo Code** | `KILOCODE_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `kilocode`) |
+| **Xiaomi MiMo** | `XIAOMI_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `xiaomi`, 别名: `mimo`, `xiaomi-mimo`) |
+| **OpenCode Zen** | `OPENCODE_ZEN_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `opencode-zen`) |
+| **OpenCode Go** | `OPENCODE_GO_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `opencode-go`) |
+| **DeepSeek** | `DEEPSEEK_API_KEY` 在 `~/.hermes/.env` 中 (提供商: `deepseek`) |
+| **Hugging Face** | `HF_TOKEN` 在 `~/.hermes/.env` 中 (提供商: `huggingface`, 别名: `hf`) |
+| **Google / Gemini** | `GOOGLE_API_KEY` (或 `GEMINI_API_KEY`) 在 `~/.hermes/.env` 中 (提供商: `gemini`) |
+| **自定义端点** | `hermes model` → 选择"自定义端点" (保存在 `config.yaml` 中) |
 
-:::tip Model key alias
-In the `model:` config section, you can use either `default:` or `model:` as the key name for your model ID. Both `model: { default: my-model }` and `model: { model: my-model }` work identically.
+:::tip 模型键别名
+在 `model:` 配置部分，您可以使用 `default:` 或 `model:` 作为模型 ID 的键名。`model: { default: my-model }` 和 `model: { model: my-model }` 都同样有效。
 :::
 
-:::info Codex Note
-The OpenAI Codex provider authenticates via device code (open a URL, enter a code). Hermes stores the resulting credentials in its own auth store under `~/.hermes/auth.json` and can import existing Codex CLI credentials from `~/.codex/auth.json` when present. No Codex CLI installation is required.
+:::info Codex 说明
+OpenAI Codex 提供商通过设备代码进行认证（打开 URL，输入代码）。Hermes 将生成的凭据存储在其自己的认证存储中，位于 `~/.hermes/auth.json`，并且可以在存在时从 `~/.codex/auth.json` 导入现有的 Codex CLI 凭据。不需要安装 Codex CLI。
 :::
 
 :::warning
-Even when using Nous Portal, Codex, or a custom endpoint, some tools (vision, web summarization, MoA) use a separate "auxiliary" model — by default Gemini Flash via OpenRouter. An `OPENROUTER_API_KEY` enables these tools automatically. You can also configure which model and provider these tools use — see [Auxiliary Models](/docs/user-guide/configuration#auxiliary-models).
-:::
+即使使用 Nous Portal、Codex 或自定义端点，某些工具（视觉、网络摘要、MoA）使用单独的"辅助"模型 — 默认通过 OpenRouter 使用 Gemini Flash。`OPENROUTER_API_KEY` 会自动启用这些工具。您还可以配置这些工具使用哪个模型和提供商 — 参见[辅助模型](/docs/user-guide/configuration#auxiliary-models)。
+:::"}
 
 ### Anthropic (Native)
 

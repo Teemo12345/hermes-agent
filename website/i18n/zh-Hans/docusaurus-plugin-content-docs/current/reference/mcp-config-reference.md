@@ -1,28 +1,28 @@
 ---
 sidebar_position: 8
-title: "MCP Config Reference"
-description: "Reference for Hermes Agent MCP configuration keys, filtering semantics, and utility-tool policy"
+title: "MCP 配置参考"
+description: "Hermes Agent MCP 配置键、过滤语义和实用工具策略的参考"
 ---
 
-# MCP Config Reference
+# MCP 配置参考
 
-This page is the compact reference companion to the main MCP docs.
+本页面是主要 MCP 文档的紧凑参考伴侣。
 
-For conceptual guidance, see:
-- [MCP (Model Context Protocol)](/docs/user-guide/features/mcp)
-- [Use MCP with Hermes](/docs/guides/use-mcp-with-hermes)
+有关概念指导，请参阅：
+- [MCP（模型上下文协议）](/docs/user-guide/features/mcp)
+- [使用 MCP 与 Hermes](/docs/guides/use-mcp-with-hermes)
 
-## Root config shape
+## 根配置结构
 
 ```yaml
 mcp_servers:
   <server_name>:
-    command: "..."      # stdio servers
+    command: "..."      # stdio 服务器
     args: []
     env: {}
 
-    # OR
-    url: "..."          # HTTP servers
+    # 或
+    url: "..."          # HTTP 服务器
     headers: {}
 
     enabled: true
@@ -35,19 +35,19 @@ mcp_servers:
       prompts: true
 ```
 
-## Server keys
+## 服务器键
 
-| Key | Type | Applies to | Meaning |
+| 键 | 类型 | 适用于 | 含义 |
 |---|---|---|---|
-| `command` | string | stdio | Executable to launch |
-| `args` | list | stdio | Arguments for the subprocess |
-| `env` | mapping | stdio | Environment passed to the subprocess |
-| `url` | string | HTTP | Remote MCP endpoint |
-| `headers` | mapping | HTTP | Headers for remote server requests |
-| `enabled` | bool | both | Skip the server entirely when false |
-| `timeout` | number | both | Tool call timeout |
-| `connect_timeout` | number | both | Initial connection timeout |
-| `tools` | mapping | both | Filtering and utility-tool policy |
+| `command` | 字符串 | stdio | 要启动的可执行文件 |
+| `args` | 列表 | stdio | 子进程的参数 |
+| `env` | 映射 | stdio | 传递给子进程的环境 |
+| `url` | 字符串 | HTTP | 远程 MCP 端点 |
+| `headers` | 映射 | HTTP | 远程服务器请求的头部 |
+| `enabled` | 布尔值 | 两者 | 当为 false 时完全跳过服务器 |
+| `timeout` | 数字 | 两者 | 工具调用超时 |
+| `connect_timeout` | 数字 | 两者 | 初始连接超时 |
+| `tools` | 映射 | 两者 | 过滤和实用工具策略 |
 | `auth` | string | HTTP | Authentication method. Set to `oauth` to enable OAuth 2.1 with PKCE |
 | `sampling` | mapping | both | Server-initiated LLM request policy (see MCP guide) |
 

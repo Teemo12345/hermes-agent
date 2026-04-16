@@ -1,53 +1,53 @@
 ---
 sidebar_position: 3
-title: "Nix & NixOS Setup"
-description: "Install and deploy Hermes Agent with Nix — from quick `nix run` to fully declarative NixOS module with container mode"
+title: "Nix & NixOS 设置"
+description: "使用 Nix 安装和部署 Hermes Agent — 从快速的 `nix run` 到完全声明式的 NixOS 模块（带容器模式）"
 ---
 
-# Nix & NixOS Setup
+# Nix & NixOS 设置
 
-Hermes Agent ships a Nix flake with three levels of integration:
+Hermes Agent 附带一个 Nix flake，具有三个集成级别：
 
-| Level | Who it's for | What you get |
+| 级别 | 适合谁 | 您将获得什么 |
 |-------|-------------|--------------|
-| **`nix run` / `nix profile install`** | Any Nix user (macOS, Linux) | Pre-built binary with all deps — then use the standard CLI workflow |
-| **NixOS module (native)** | NixOS server deployments | Declarative config, hardened systemd service, managed secrets |
-| **NixOS module (container)** | Agents that need self-modification | Everything above, plus a persistent Ubuntu container where the agent can `apt`/`pip`/`npm install` |
+| **`nix run` / `nix profile install`** | 任何 Nix 用户（macOS、Linux） | 预构建的二进制文件，包含所有依赖项 — 然后使用标准 CLI 工作流 |
+| **NixOS 模块（原生）** | NixOS 服务器部署 | 声明式配置、强化的 systemd 服务、托管密钥 |
+| **NixOS 模块（容器）** | 需要自我修改的智能体 | 以上所有内容，加上一个持久的 Ubuntu 容器，智能体可以在其中 `apt`/`pip`/`npm install` |
 
-:::info What's different from the standard install
-The `curl | bash` installer manages Python, Node, and dependencies itself. The Nix flake replaces all of that — every Python dependency is a Nix derivation built by [uv2nix](https://github.com/pyproject-nix/uv2nix), and runtime tools (Node.js, git, ripgrep, ffmpeg) are wrapped into the binary's PATH. There is no runtime pip, no venv activation, no `npm install`.
+:::info 与标准安装的区别
+`curl | bash` 安装程序自行管理 Python、Node 和依赖项。Nix flake 替换了所有这些 — 每个 Python 依赖项都是由 [uv2nix](https://github.com/pyproject-nix/uv2nix) 构建的 Nix 派生，运行时工具（Node.js、git、ripgrep、ffmpeg）被包装到二进制文件的 PATH 中。没有运行时 pip，没有 venv 激活，没有 `npm install`。
 
-**For non-NixOS users**, this only changes the install step. Everything after (`hermes setup`, `hermes gateway install`, config editing) works identically to the standard install.
+**对于非 NixOS 用户**，这只会改变安装步骤。之后的一切（`hermes setup`、`hermes gateway install`、配置编辑）与标准安装完全相同。
 
-**For NixOS module users**, the entire lifecycle is different: configuration lives in `configuration.nix`, secrets go through sops-nix/agenix, the service is a systemd unit, and CLI config commands are blocked. You manage hermes the same way you manage any other NixOS service.
+**对于 NixOS 模块用户**，整个生命周期都不同：配置位于 `configuration.nix` 中，密钥通过 sops-nix/agenix 处理，服务是 systemd 单元，CLI 配置命令被阻止。您管理 hermes 的方式与管理任何其他 NixOS 服务相同。
 :::
 
-## Prerequisites
+## 先决条件
 
-- **Nix with flakes enabled** — [Determinate Nix](https://install.determinate.systems) recommended (enables flakes by default)
-- **API keys** for the services you want to use (at minimum: an OpenRouter or Anthropic key)
+- **启用 flake 的 Nix** — 推荐使用 [Determinate Nix](https://install.determinate.systems)（默认启用 flake）
+- 您想要使用的服务的 **API 密钥**（至少：OpenRouter 或 Anthropic 密钥）
 
 ---
 
-## Quick Start (Any Nix User)
+## 快速开始（任何 Nix 用户）
 
-No clone needed. Nix fetches, builds, and runs everything:
+无需克隆。Nix 获取、构建并运行所有内容：
 
 ```bash
-# Run directly (builds on first use, cached after)
+# 直接运行（首次使用时构建，之后缓存）
 nix run github:NousResearch/hermes-agent -- setup
 nix run github:NousResearch/hermes-agent -- chat
 
-# Or install persistently
+# 或持久安装
 nix profile install github:NousResearch/hermes-agent
 hermes setup
 hermes chat
 ```
 
-After `nix profile install`, `hermes`, `hermes-agent`, and `hermes-acp` are on your PATH. From here, the workflow is identical to the [standard installation](./installation.md) — `hermes setup` walks you through provider selection, `hermes gateway install` sets up a launchd (macOS) or systemd user service, and config lives in `~/.hermes/`.
+在 `nix profile install` 之后，`hermes`、`hermes-agent` 和 `hermes-acp` 都在您的 PATH 上。从这里开始，工作流与[标准安装](./installation.md)完全相同 — `hermes setup` 引导您完成提供商选择，`hermes gateway install` 设置 launchd（macOS）或 systemd 用户服务，配置位于 `~/.hermes/` 中。
 
 <details>
-<summary><strong>Building from a local clone</strong></summary>
+<summary><strong>从本地克隆构建</strong></summary>
 
 ```bash
 git clone https://github.com/NousResearch/hermes-agent.git

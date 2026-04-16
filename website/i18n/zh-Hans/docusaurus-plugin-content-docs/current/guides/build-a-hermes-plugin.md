@@ -1,37 +1,37 @@
 ---
 sidebar_position: 9
-sidebar_label: "Build a Plugin"
-title: "Build a Hermes Plugin"
-description: "Step-by-step guide to building a complete Hermes plugin with tools, hooks, data files, and skills"
+sidebar_label: "构建插件"
+title: "构建 Hermes 插件"
+description: "构建完整 Hermes 插件的分步指南，包括工具、钩子、数据文件和技能"
 ---
 
-# Build a Hermes Plugin
+# 构建 Hermes 插件
 
-This guide walks through building a complete Hermes plugin from scratch. By the end you'll have a working plugin with multiple tools, lifecycle hooks, shipped data files, and a bundled skill — everything the plugin system supports.
+本指南将引导您从头开始构建一个完整的 Hermes 插件。到最后，您将拥有一个可工作的插件，包含多个工具、生命周期钩子、打包的数据文件和一个捆绑的技能 — 插件系统支持的所有功能。
 
-## What you're building
+## 您将构建什么
 
-A **calculator** plugin with two tools:
-- `calculate` — evaluate math expressions (`2**16`, `sqrt(144)`, `pi * 5**2`)
-- `unit_convert` — convert between units (`100 F → 37.78 C`, `5 km → 3.11 mi`)
+一个**计算器**插件，包含两个工具：
+- `calculate` — 评估数学表达式 (`2**16`, `sqrt(144)`, `pi * 5**2`)
+- `unit_convert` — 单位转换 (`100 F → 37.78 C`, `5 km → 3.11 mi`)
 
-Plus a hook that logs every tool call, and a bundled skill file.
+加上一个记录每个工具调用的钩子，以及一个捆绑的技能文件。
 
-## Step 1: Create the plugin directory
+## 步骤 1：创建插件目录
 
 ```bash
 mkdir -p ~/.hermes/plugins/calculator
 cd ~/.hermes/plugins/calculator
 ```
 
-## Step 2: Write the manifest
+## 步骤 2：编写清单
 
-Create `plugin.yaml`:
+创建 `plugin.yaml`：
 
 ```yaml
 name: calculator
 version: 1.0.0
-description: Math calculator — evaluate expressions and convert units
+description: 数学计算器 — 评估表达式和转换单位
 provides_tools:
   - calculate
   - unit_convert
@@ -39,15 +39,15 @@ provides_hooks:
   - post_tool_call
 ```
 
-This tells Hermes: "I'm a plugin called calculator, I provide tools and hooks." The `provides_tools` and `provides_hooks` fields are lists of what the plugin registers.
+这告诉 Hermes："我是一个名为 calculator 的插件，我提供工具和钩子。" `provides_tools` 和 `provides_hooks` 字段是插件注册的内容列表。
 
-Optional fields you could add:
+您可以添加的可选字段：
 ```yaml
-author: Your Name
-requires_env:          # gate loading on env vars; prompted during install
-  - SOME_API_KEY       # simple format — plugin disabled if missing
-  - name: OTHER_KEY    # rich format — shows description/url during install
-    description: "Key for the Other service"
+author: 您的姓名
+requires_env:          # 根据环境变量控制加载；在安装期间提示
+  - SOME_API_KEY       # 简单格式 — 如果缺失则禁用插件
+  - name: OTHER_KEY    # 丰富格式 — 在安装期间显示描述/URL
+    description: "Other 服务的密钥"
     url: "https://other.com/keys"
     secret: true
 ```

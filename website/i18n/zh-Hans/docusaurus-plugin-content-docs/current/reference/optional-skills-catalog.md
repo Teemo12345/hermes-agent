@@ -1,27 +1,27 @@
 ---
 sidebar_position: 9
-title: "Optional Skills Catalog"
-description: "Official optional skills shipped with hermes-agent — install via hermes skills install official/<category>/<skill>"
+title: "可选技能目录"
+description: "随 hermes-agent 提供的官方可选技能 — 通过 hermes skills install official/<category>/<skill> 安装"
 ---
 
-# Optional Skills Catalog
+# 可选技能目录
 
-Official optional skills ship with the hermes-agent repository under `optional-skills/` but are **not active by default**. Install them explicitly:
+官方可选技能随 hermes-agent 仓库提供，位于 `optional-skills/` 下，但**默认不激活**。请显式安装它们：
 
 ```bash
 hermes skills install official/<category>/<skill>
 ```
 
-For example:
+例如：
 
 ```bash
 hermes skills install official/blockchain/solana
 hermes skills install official/mlops/flash-attention
 ```
 
-Once installed, the skill appears in the agent's skill list and can be loaded automatically when relevant tasks are detected.
+安装后，技能会出现在智能体的技能列表中，并可以在检测到相关任务时自动加载。
 
-To uninstall:
+要卸载：
 
 ```bash
 hermes skills uninstall <skill-name>
@@ -29,25 +29,25 @@ hermes skills uninstall <skill-name>
 
 ---
 
-## Autonomous AI Agents
+## 自主 AI 智能体
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **blackbox** | Delegate coding tasks to Blackbox AI CLI agent. Multi-model agent with built-in judge that runs tasks through multiple LLMs and picks the best result. |
-| **honcho** | Configure and use Honcho memory with Hermes — cross-session user modeling, multi-profile peer isolation, observation config, and dialectic reasoning. |
+| **blackbox** | 将编码任务委托给 Blackbox AI CLI 智能体。具有内置评判器的多模型智能体，通过多个 LLM 运行任务并选择最佳结果。 |
+| **honcho** | 配置和使用 Honcho 内存与 Hermes — 跨会话用户建模、多配置文件对等隔离、观察配置和辩证推理。 |
 
-## Blockchain
+## 区块链
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **base** | Query Base (Ethereum L2) blockchain data with USD pricing — wallet balances, token info, transaction details, gas analysis, contract inspection, whale detection, and live network stats. No API key required. |
-| **solana** | Query Solana blockchain data with USD pricing — wallet balances, token portfolios, transaction details, NFTs, whale detection, and live network stats. No API key required. |
+| **base** | 查询 Base（以太坊 L2）区块链数据，带美元定价 — 钱包余额、代币信息、交易详情、燃气分析、合约检查、鲸鱼检测和实时网络统计。无需 API 密钥。 |
+| **solana** | 查询 Solana 区块链数据，带美元定价 — 钱包余额、代币组合、交易详情、NFT、鲸鱼检测和实时网络统计。无需 API 密钥。 |
 
-## Communication
+## 通信
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **one-three-one-rule** | Structured communication framework for proposals and decision-making. |
+| **one-three-one-rule** | 用于提案和决策的结构化通信框架。 |
 
 ## Creative
 

@@ -1,29 +1,29 @@
 ---
 sidebar_position: 7
-title: "Gateway Internals"
-description: "How the messaging gateway boots, authorizes users, routes sessions, and delivers messages"
+title: "网关内部机制"
+description: "消息网关如何启动、授权用户、路由会话和传递消息"
 ---
 
-# Gateway Internals
+# 网关内部机制
 
-The messaging gateway is the long-running process that connects Hermes to 14+ external messaging platforms through a unified architecture.
+消息网关是一个长时间运行的进程，通过统一架构将 Hermes 连接到 14+ 个外部消息平台。
 
-## Key Files
+## 关键文件
 
-| File | Purpose |
+| 文件 | 用途 |
 |------|---------|
-| `gateway/run.py` | `GatewayRunner` — main loop, slash commands, message dispatch (~9,000 lines) |
-| `gateway/session.py` | `SessionStore` — conversation persistence and session key construction |
-| `gateway/delivery.py` | Outbound message delivery to target platforms/channels |
-| `gateway/pairing.py` | DM pairing flow for user authorization |
-| `gateway/channel_directory.py` | Maps chat IDs to human-readable names for cron delivery |
-| `gateway/hooks.py` | Hook discovery, loading, and lifecycle event dispatch |
-| `gateway/mirror.py` | Cross-session message mirroring for `send_message` |
-| `gateway/status.py` | Token lock management for profile-scoped gateway instances |
-| `gateway/builtin_hooks/` | Always-registered hooks (e.g., BOOT.md system prompt hook) |
-| `gateway/platforms/` | Platform adapters (one per messaging platform) |
+| `gateway/run.py` | `GatewayRunner` — 主循环、斜杠命令、消息分发（~9,000 行） |
+| `gateway/session.py` | `SessionStore` — 对话持久化和会话密钥构建 |
+| `gateway/delivery.py` | 向目标平台/通道的出站消息传递 |
+| `gateway/pairing.py` | 用于用户授权的 DM 配对流程 |
+| `gateway/channel_directory.py` | 将聊天 ID 映射到人类可读的名称以进行 cron 传递 |
+| `gateway/hooks.py` | 钩子发现、加载和生命周期事件分发 |
+| `gateway/mirror.py` | 用于 `send_message` 的跨会话消息镜像 |
+| `gateway/status.py` | 配置文件范围网关实例的令牌锁管理 |
+| `gateway/builtin_hooks/` | 始终注册的钩子（例如，BOOT.md 系统提示钩子） |
+| `gateway/platforms/` | 平台适配器（每个消息平台一个） |
 
-## Architecture Overview
+## 架构概述
 
 ```text
 ┌─────────────────────────────────────────────────┐
@@ -31,7 +31,7 @@ The messaging gateway is the long-running process that connects Hermes to 14+ ex
 │                                                   │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
 │  │ Telegram  │  │ Discord  │  │  Slack   │  ...  │
-│  │ Adapter   │  │ Adapter  │  │ Adapter  │       │
+│  │ 适配器    │  │ 适配器   │  │ 适配器   │       │
 │  └─────┬─────┘  └─────┬────┘  └─────┬────┘       │
 │        │              │              │             │
 │        └──────────────┼──────────────┘             │
@@ -40,12 +40,12 @@ The messaging gateway is the long-running process that connects Hermes to 14+ ex
 │                       │                            │
 │          ┌────────────┼────────────┐               │
 │          ▼            ▼            ▼               │
-│   Slash command   AIAgent      Queue/BG            │
-│    dispatch       creation     sessions            │
+│   斜杠命令       AIAgent      队列/后台            │
+│    分发         创建         会话                 │
 │                       │                            │
 │                       ▼                            │
 │              SessionStore                          │
-│           (SQLite persistence)                     │
+│           (SQLite 持久化)                          │
 └─────────────────────────────────────────────────┘
 ```
 

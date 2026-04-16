@@ -1,53 +1,53 @@
 ---
 sidebar_position: 1
-title: "CLI Commands Reference"
-description: "Authoritative reference for Hermes terminal commands and command families"
+title: "CLI 命令参考"
+description: "Hermes 终端命令和命令族的权威参考"
 ---
 
-# CLI Commands Reference
+# CLI 命令参考
 
-This page covers the **terminal commands** you run from your shell.
+本页面涵盖您从 shell 运行的**终端命令**。
 
-For in-chat slash commands, see [Slash Commands Reference](./slash-commands.md).
+有关聊天中的斜杠命令，请参阅[斜杠命令参考](./slash-commands.md)。
 
-## Global entrypoint
+## 全局入口点
 
 ```bash
 hermes [global-options] <command> [subcommand/options]
 ```
 
-### Global options
+### 全局选项
 
-| Option | Description |
+| 选项 | 描述 |
 |--------|-------------|
-| `--version`, `-V` | Show version and exit. |
-| `--profile <name>`, `-p <name>` | Select which Hermes profile to use for this invocation. Overrides the sticky default set by `hermes profile use`. |
-| `--resume <session>`, `-r <session>` | Resume a previous session by ID or title. |
-| `--continue [name]`, `-c [name]` | Resume the most recent session, or the most recent session matching a title. |
-| `--worktree`, `-w` | Start in an isolated git worktree for parallel-agent workflows. |
-| `--yolo` | Bypass dangerous-command approval prompts. |
-| `--pass-session-id` | Include the session ID in the agent's system prompt. |
+| `--version`, `-V` | 显示版本并退出。 |
+| `--profile <name>`, `-p <name>` | 选择要用于此调用的 Hermes 配置文件。覆盖由 `hermes profile use` 设置的粘性默认值。 |
+| `--resume <session>`, `-r <session>` | 按 ID 或标题恢复之前的会话。 |
+| `--continue [name]`, `-c [name]` | 恢复最近的会话，或恢复最近匹配标题的会话。 |
+| `--worktree`, `-w` | 在隔离的 git 工作树中启动，用于并行智能体工作流。 |
+| `--yolo` | 绕过危险命令批准提示。 |
+| `--pass-session-id` | 在智能体的系统提示中包含会话 ID。 |
 
-## Top-level commands
+## 顶级命令
 
-| Command | Purpose |
+| 命令 | 用途 |
 |---------|---------|
-| `hermes chat` | Interactive or one-shot chat with the agent. |
-| `hermes model` | Interactively choose the default provider and model. |
-| `hermes gateway` | Run or manage the messaging gateway service. |
-| `hermes setup` | Interactive setup wizard for all or part of the configuration. |
-| `hermes whatsapp` | Configure and pair the WhatsApp bridge. |
-| `hermes auth` | Manage credentials — add, list, remove, reset, set strategy. Handles OAuth flows for Codex/Nous/Anthropic. |
-| `hermes login` / `logout` | **Deprecated** — use `hermes auth` instead. |
-| `hermes status` | Show agent, auth, and platform status. |
-| `hermes cron` | Inspect and tick the cron scheduler. |
-| `hermes webhook` | Manage dynamic webhook subscriptions for event-driven activation. |
-| `hermes doctor` | Diagnose config and dependency issues. |
-| `hermes dump` | Copy-pasteable setup summary for support/debugging. |
-| `hermes debug` | Debug tools — upload logs and system info for support. |
-| `hermes backup` | Back up Hermes home directory to a zip file. |
-| `hermes import` | Restore a Hermes backup from a zip file. |
-| `hermes logs` | View, tail, and filter agent/gateway/error log files. |
+| `hermes chat` | 与智能体进行交互式或一次性聊天。 |
+| `hermes model` | 交互式选择默认提供商和模型。 |
+| `hermes gateway` | 运行或管理消息网关服务。 |
+| `hermes setup` | 所有或部分配置的交互式设置向导。 |
+| `hermes whatsapp` | 配置和配对 WhatsApp 桥接。 |
+| `hermes auth` | 管理凭据 — 添加、列出、删除、重置、设置策略。处理 Codex/Nous/Anthropic 的 OAuth 流程。 |
+| `hermes login` / `logout` | **已弃用** — 改用 `hermes auth`。 |
+| `hermes status` | 显示智能体、认证和平台状态。 |
+| `hermes cron` | 检查并触发 cron 调度器。 |
+| `hermes webhook` | 管理动态 webhook 订阅以进行事件驱动激活。 |
+| `hermes doctor` | 诊断配置和依赖问题。 |
+| `hermes dump` | 用于支持/调试的可复制粘贴设置摘要。 |
+| `hermes debug` | 调试工具 — 上传日志和系统信息以支持。 |
+| `hermes backup` | 将 Hermes 主目录备份到 zip 文件。 |
+| `hermes import` | 从 zip 文件恢复 Hermes 备份。 |
+| `hermes logs` | 查看、跟踪和过滤智能体/网关/错误日志文件。 |
 | `hermes config` | Show, edit, migrate, and query configuration files. |
 | `hermes pairing` | Approve or revoke messaging pairing codes. |
 | `hermes skills` | Browse, install, publish, audit, and configure skills. |

@@ -1,52 +1,52 @@
 ---
 sidebar_position: 1
-title: "Tips & Best Practices"
-description: "Practical advice to get the most out of Hermes Agent — prompt tips, CLI shortcuts, context files, memory, cost optimization, and security"
+title: "技巧与最佳实践"
+description: "充分利用 Hermes Agent 的实用建议 — 提示技巧、CLI 快捷键、上下文文件、记忆、成本优化和安全性"
 ---
 
-# Tips & Best Practices
+# 技巧与最佳实践
 
-A quick-wins collection of practical tips that make you immediately more effective with Hermes Agent. Each section targets a different aspect — scan the headers and jump to what's relevant.
+一系列实用的技巧集合，让您立即更有效地使用 Hermes Agent。每个部分针对不同的方面 — 扫描标题并跳转到相关内容。
 
 ---
 
-## Getting the Best Results
+## 获得最佳结果
 
-### Be Specific About What You Want
+### 具体说明您想要什么
 
-Vague prompts produce vague results. Instead of "fix the code," say "fix the TypeError in `api/handlers.py` on line 47 — the `process_request()` function receives `None` from `parse_body()`." The more context you give, the fewer iterations you need.
+模糊的提示会产生模糊的结果。不要说"修复代码"，而要说"修复 `api/handlers.py` 第 47 行的 TypeError — `process_request()` 函数从 `parse_body()` 接收到 `None`"。您提供的上下文越多，需要的迭代次数就越少。
 
-### Provide Context Up Front
+### 提前提供上下文
 
-Front-load your request with the relevant details: file paths, error messages, expected behavior. One well-crafted message beats three rounds of clarification. Paste error tracebacks directly — the agent can parse them.
+在请求前面加载相关细节：文件路径、错误消息、预期行为。一个精心制作的消息胜过三轮澄清。直接粘贴错误回溯 — 智能体可以解析它们。
 
-### Use Context Files for Recurring Instructions
+### 使用上下文文件处理重复指令
 
-If you find yourself repeating the same instructions ("use tabs not spaces," "we use pytest," "the API is at `/api/v2`"), put them in an `AGENTS.md` file. The agent reads it automatically every session — zero effort after setup.
+如果您发现自己重复相同的指令（"使用制表符而不是空格"、"我们使用 pytest"、"API 在 `/api/v2`"），请将它们放在 `AGENTS.md` 文件中。智能体在每个会话中自动读取它 — 设置后零努力。
 
-### Let the Agent Use Its Tools
+### 让智能体使用其工具
 
-Don't try to hand-hold every step. Say "find and fix the failing test" rather than "open `tests/test_foo.py`, look at line 42, then..." The agent has file search, terminal access, and code execution — let it explore and iterate.
+不要试图手把手指导每一步。说"查找并修复失败的测试"，而不是"打开 `tests/test_foo.py`，查看第 42 行，然后..."。智能体具有文件搜索、终端访问和代码执行功能 — 让它探索和迭代。
 
-### Use Skills for Complex Workflows
+### 使用技能处理复杂工作流
 
-Before writing a long prompt explaining how to do something, check if there's already a skill for it. Type `/skills` to browse available skills, or just invoke one directly like `/axolotl` or `/github-pr-workflow`.
+在编写长提示解释如何做某事之前，检查是否已经有相应的技能。输入 `/skills` 浏览可用技能，或直接调用一个，如 `/axolotl` 或 `/github-pr-workflow`。
 
-## CLI Power User Tips
+## CLI 高级用户技巧
 
-### Multi-Line Input
+### 多行输入
 
-Press **Alt+Enter** (or **Ctrl+J**) to insert a newline without sending. This lets you compose multi-line prompts, paste code blocks, or structure complex requests before hitting Enter to send.
+按 **Alt+Enter**（或 **Ctrl+J**）插入新行而不发送。这使您可以在按 Enter 发送之前编写多行提示、粘贴代码块或构建复杂请求。
 
-### Paste Detection
+### 粘贴检测
 
-The CLI auto-detects multi-line pastes. Just paste a code block or error traceback directly — it won't send each line as a separate message. The paste is buffered and sent as one message.
+CLI 自动检测多行粘贴。只需直接粘贴代码块或错误回溯 — 它不会将每行作为单独的消息发送。粘贴被缓冲并作为一条消息发送。
 
-### Interrupt and Redirect
+### 中断和重定向
 
-Press **Ctrl+C** once to interrupt the agent mid-response. You can then type a new message to redirect it. Double-press Ctrl+C within 2 seconds to force exit. This is invaluable when the agent starts going down the wrong path.
+按 **Ctrl+C** 一次以在响应过程中中断智能体。然后您可以输入新消息来重定向它。在 2 秒内双击 Ctrl+C 以强制退出。当智能体开始走错路时，这非常宝贵。
 
-### Resume Sessions with `-c`
+### 使用 `-c` 恢复会话
 
 Forgot something from your last session? Run `hermes -c` to resume exactly where you left off, with full conversation history restored. You can also resume by title: `hermes -r "my research project"`.
 

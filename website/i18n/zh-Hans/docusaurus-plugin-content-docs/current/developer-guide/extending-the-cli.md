@@ -1,32 +1,32 @@
 ---
 sidebar_position: 8
-title: "Extending the CLI"
-description: "Build wrapper CLIs that extend the Hermes TUI with custom widgets, keybindings, and layout changes"
+title: "扩展 CLI"
+description: "构建包装器 CLI，使用自定义小部件、键绑定和布局更改扩展 Hermes TUI"
 ---
 
-# Extending the CLI
+# 扩展 CLI
 
-Hermes exposes protected extension hooks on `HermesCLI` so wrapper CLIs can add widgets, keybindings, and layout customizations without overriding the 1000+ line `run()` method. This keeps your extension decoupled from internal changes.
+Hermes 在 `HermesCLI` 上暴露受保护的扩展钩子，以便包装器 CLI 可以添加小部件、键绑定和布局自定义，而无需覆盖 1000+ 行的 `run()` 方法。这使您的扩展与内部更改解耦。
 
-## Extension points
+## 扩展点
 
-There are five extension seams available:
+有五个可用的扩展接缝：
 
-| Hook | Purpose | Override when... |
+| 钩子 | 用途 | 何时重写... |
 |------|---------|------------------|
-| `_get_extra_tui_widgets()` | Inject widgets into the layout | You need a persistent UI element (panel, status line, mini-player) |
-| `_register_extra_tui_keybindings(kb, *, input_area)` | Add keyboard shortcuts | You need hotkeys (toggle panels, transport controls, modal shortcuts) |
-| `_build_tui_layout_children(**widgets)` | Full control over widget ordering | You need to reorder or wrap existing widgets (rare) |
-| `process_command()` | Add custom slash commands | You need `/mycommand` handling (pre-existing hook) |
-| `_build_tui_style_dict()` | Custom prompt_toolkit styles | You need custom colors or styling (pre-existing hook) |
+| `_get_extra_tui_widgets()` | 将小部件注入布局 | 您需要持久性 UI 元素（面板、状态行、迷你播放器） |
+| `_register_extra_tui_keybindings(kb, *, input_area)` | 添加键盘快捷键 | 您需要热键（切换面板、传输控制、模态快捷键） |
+| `_build_tui_layout_children(**widgets)` | 完全控制小部件排序 | 您需要重新排序或包装现有小部件（罕见） |
+| `process_command()` | 添加自定义斜杠命令 | 您需要 `/mycommand` 处理（预先存在的钩子） |
+| `_build_tui_style_dict()` | 自定义 prompt_toolkit 样式 | 您需要自定义颜色或样式（预先存在的钩子） |
 
-The first three are new protected hooks. The last two already existed.
+前三个是新的受保护钩子。后两个已经存在。
 
-## Quick start: a wrapper CLI
+## 快速开始：包装器 CLI
 
 ```python
 #!/usr/bin/env python3
-"""my_cli.py — Example wrapper CLI that extends Hermes."""
+"""my_cli.py — 扩展 Hermes 的示例包装器 CLI。"""
 
 from cli import HermesCLI
 from prompt_toolkit.layout import FormattedTextControl, Window
@@ -40,11 +40,11 @@ class MyCLI(HermesCLI):
         self._panel_visible = False
 
     def _get_extra_tui_widgets(self):
-        """Add a toggleable info panel above the status bar."""
+        """在状态栏上方添加可切换的信息面板。"""
         cli_ref = self
         return [
             Window(
-                FormattedTextControl(lambda: "📊 My custom panel content"),
+                FormattedTextControl(lambda: "📊 我的自定义面板内容"),
                 height=1,
                 filter=Condition(lambda: cli_ref._panel_visible),
             ),

@@ -1,53 +1,53 @@
 ---
 sidebar_position: 12
-title: "Working with Skills"
-description: "Find, install, use, and create skills — on-demand knowledge that teaches Hermes new workflows"
+title: "使用技能"
+description: "查找、安装、使用和创建技能 — 按需知识，教会 Hermes 新的工作流程"
 ---
 
-# Working with Skills
+# 使用技能
 
-Skills are on-demand knowledge documents that teach Hermes how to handle specific tasks — from generating ASCII art to managing GitHub PRs. This guide walks you through using them day to day.
+技能是按需知识文档，教会 Hermes 如何处理特定任务 — 从生成 ASCII 艺术到管理 GitHub PR。本指南将引导您日常使用它们。
 
-For the full technical reference, see [Skills System](/docs/user-guide/features/skills).
+有关完整的技术参考，请参阅[技能系统](/docs/user-guide/features/skills)。
 
 ---
 
-## Finding Skills
+## 查找技能
 
-Every Hermes installation ships with bundled skills. See what's available:
+每个 Hermes 安装都附带捆绑的技能。查看可用内容：
 
 ```bash
-# In any chat session:
+# 在任何聊天会话中：
 /skills
 
-# Or from the CLI:
+# 或从 CLI：
 hermes skills list
 ```
 
-This shows a compact list with names and descriptions:
+这将显示一个包含名称和描述的紧凑列表：
 
 ```
-ascii-art         Generate ASCII art using pyfiglet, cowsay, boxes...
-arxiv             Search and retrieve academic papers from arXiv...
-github-pr-workflow Full PR lifecycle — create branches, commit...
-plan              Plan mode — inspect context, write a markdown...
-excalidraw        Create hand-drawn style diagrams using Excalidraw...
+ascii-art         使用 pyfiglet、cowsay、boxes 生成 ASCII 艺术...
+arxiv             从 arXiv 搜索和检索学术论文...
+github-pr-workflow 完整的 PR 生命周期 — 创建分支、提交...
+plan              计划模式 — 检查上下文，编写 markdown...
+excalidraw        使用 Excalidraw 创建手绘风格图表...
 ```
 
-### Searching for a Skill
+### 搜索技能
 
 ```bash
-# Search by keyword
+# 按关键字搜索
 /skills search docker
 /skills search music
 ```
 
-### The Skills Hub
+### 技能中心
 
-Official optional skills (heavier or niche skills not active by default) are available via the Hub:
+官方可选技能（默认不激活的较重或利基技能）可通过中心获得：
 
 ```bash
-# Browse official optional skills
+# 浏览官方可选技能
 /skills browse
 
 # Search the hub

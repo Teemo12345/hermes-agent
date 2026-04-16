@@ -1,101 +1,101 @@
 ---
 sidebar_position: 2
-title: "Slash Commands Reference"
-description: "Complete reference for interactive CLI and messaging slash commands"
+title: "斜杠命令参考"
+description: "交互式 CLI 和消息斜杠命令的完整参考"
 ---
 
-# Slash Commands Reference
+# 斜杠命令参考
 
-Hermes has two slash-command surfaces, both driven by a central `COMMAND_REGISTRY` in `hermes_cli/commands.py`:
+Hermes 有两个斜杠命令界面，都由 `hermes_cli/commands.py` 中的中央 `COMMAND_REGISTRY` 驱动：
 
-- **Interactive CLI slash commands** — dispatched by `cli.py`, with autocomplete from the registry
-- **Messaging slash commands** — dispatched by `gateway/run.py`, with help text and platform menus generated from the registry
+- **交互式 CLI 斜杠命令** — 由 `cli.py` 分发，具有来自注册表的自动完成功能
+- **消息斜杠命令** — 由 `gateway/run.py` 分发，具有从注册表生成的帮助文本和平台菜单
 
-Installed skills are also exposed as dynamic slash commands on both surfaces. That includes bundled skills like `/plan`, which opens plan mode and saves markdown plans under `.hermes/plans/` relative to the active workspace/backend working directory.
+已安装的技能也作为动态斜杠命令暴露在两个界面上。这包括捆绑技能，如 `/plan`，它打开计划模式并将 markdown 计划保存在相对于活动工作区/后端工作目录的 `.hermes/plans/` 下。
 
-## Interactive CLI slash commands
+## 交互式 CLI 斜杠命令
 
-Type `/` in the CLI to open the autocomplete menu. Built-in commands are case-insensitive.
+在 CLI 中输入 `/` 打开自动完成菜单。内置命令不区分大小写。
 
-### Session
+### 会话
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/new` (alias: `/reset`) | Start a new session (fresh session ID + history) |
-| `/clear` | Clear screen and start a new session |
-| `/history` | Show conversation history |
-| `/save` | Save the current conversation |
-| `/retry` | Retry the last message (resend to agent) |
-| `/undo` | Remove the last user/assistant exchange |
-| `/title` | Set a title for the current session (usage: /title My Session Name) |
-| `/compress [focus topic]` | Manually compress conversation context (flush memories + summarize). Optional focus topic narrows what the summary preserves. |
-| `/rollback` | List or restore filesystem checkpoints (usage: /rollback [number]) |
-| `/snapshot [create\|restore <id>\|prune]` (alias: `/snap`) | Create or restore state snapshots of Hermes config/state. `create [label]` saves a snapshot, `restore <id>` reverts to it, `prune [N]` removes old snapshots, or list all with no args. |
-| `/stop` | Kill all running background processes |
-| `/queue <prompt>` (alias: `/q`) | Queue a prompt for the next turn (doesn't interrupt the current agent response). **Note:** `/q` is claimed by both `/queue` and `/quit`; the last registration wins, so `/q` resolves to `/quit` in practice. Use `/queue` explicitly. |
-| `/resume [name]` | Resume a previously-named session |
-| `/status` | Show session info |
-| `/snapshot` (alias: `/snap`) | Create or restore state snapshots of Hermes config/state (usage: /snapshot [create\|restore \<id\>\|prune]) |
-| `/background <prompt>` (alias: `/bg`) | Run a prompt in a separate background session. The agent processes your prompt independently — your current session stays free for other work. Results appear as a panel when the task finishes. See [CLI Background Sessions](/docs/user-guide/cli#background-sessions). |
-| `/btw <question>` | Ephemeral side question using session context (no tools, not persisted). Useful for quick clarifications without affecting the conversation history. |
-| `/plan [request]` | Load the bundled `plan` skill to write a markdown plan instead of executing the work. Plans are saved under `.hermes/plans/` relative to the active workspace/backend working directory. |
-| `/branch [name]` (alias: `/fork`) | Branch the current session (explore a different path) |
+| `/new` (别名: `/reset`) | 开始新会话（新的会话 ID + 历史记录） |
+| `/clear` | 清除屏幕并开始新会话 |
+| `/history` | 显示对话历史 |
+| `/save` | 保存当前对话 |
+| `/retry` | 重试最后一条消息（重新发送给智能体） |
+| `/undo` | 删除最后一个用户/助手交换 |
+| `/title` | 为当前会话设置标题（用法：/title 我的会话名称） |
+| `/compress [focus topic]` | 手动压缩对话上下文（刷新记忆 + 摘要）。可选焦点主题缩小摘要保留的内容。 |
+| `/rollback` | 列出或恢复文件系统检查点（用法：/rollback [number]） |
+| `/snapshot [create\|restore <id>\|prune]` (别名: `/snap`) | 创建或恢复 Hermes 配置/状态的状态快照。`create [label]` 保存快照，`restore <id>` 恢复到它，`prune [N]` 删除旧快照，或无参数列出所有快照。 |
+| `/stop` | 终止所有正在运行的后台进程 |
+| `/queue <prompt>` (别名: `/q`) | 为下一轮排队提示（不中断当前智能体响应）。**注意：** `/q` 被 `/queue` 和 `/quit` 同时声明；最后注册的获胜，因此 `/q` 在实践中解析为 `/quit`。请明确使用 `/queue`。 |
+| `/resume [name]` | 恢复先前命名的会话 |
+| `/status` | 显示会话信息 |
+| `/snapshot` (别名: `/snap`) | 创建或恢复 Hermes 配置/状态的状态快照（用法：/snapshot [create\|restore <id>\|prune]） |
+| `/background <prompt>` (别名: `/bg`) | 在单独的后台会话中运行提示。智能体独立处理您的提示 — 您的当前会话保持空闲用于其他工作。任务完成时结果显示为面板。参见 [CLI 后台会话](/docs/user-guide/cli#background-sessions)。 |
+| `/btw <question>` | 使用会话上下文进行临时旁问题（无工具，不持久化）。用于快速澄清而不影响对话历史。 |
+| `/plan [request]` | 加载捆绑的 `plan` 技能以编写 markdown 计划而不是执行工作。计划保存在相对于活动工作区/后端工作目录的 `.hermes/plans/` 下。 |
+| `/branch [name]` (别名: `/fork`) | 分支当前会话（探索不同路径） |
 
-### Configuration
+### 配置
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/config` | Show current configuration |
-| `/model [model-name]` | Show or change the current model. Supports: `/model claude-sonnet-4`, `/model provider:model` (switch providers), `/model custom:model` (custom endpoint), `/model custom:name:model` (named custom provider), `/model custom` (auto-detect from endpoint). Use `--global` to persist the change to config.yaml. |
-| `/provider` | Show available providers and current provider |
-| `/personality` | Set a predefined personality |
-| `/verbose` | Cycle tool progress display: off → new → all → verbose. Can be [enabled for messaging](#notes) via config. |
-| `/fast` | Toggle fast mode — OpenAI Priority Processing / Anthropic Fast Mode (usage: /fast [normal\|fast\|status]) |
-| `/reasoning` | Manage reasoning effort and display (usage: /reasoning [level\|show\|hide]) |
-| `/fast [normal\|fast\|status]` | Toggle fast mode — OpenAI Priority Processing / Anthropic Fast Mode. Options: `normal`, `fast`, `status`, `on`, `off`. |
-| `/skin` | Show or change the display skin/theme |
-| `/statusbar` (alias: `/sb`) | Toggle the context/model status bar on or off |
-| `/voice [on\|off\|tts\|status]` | Toggle CLI voice mode and spoken playback. Recording uses `voice.record_key` (default: `Ctrl+B`). |
-| `/yolo` | Toggle YOLO mode — skip all dangerous command approval prompts. |
+| `/config` | 显示当前配置 |
+| `/model [model-name]` | 显示或更改当前模型。支持：`/model claude-sonnet-4`，`/model provider:model`（切换提供商），`/model custom:model`（自定义端点），`/model custom:name:model`（命名自定义提供商），`/model custom`（从端点自动检测）。使用 `--global` 将更改持久化到 config.yaml。 |
+| `/provider` | 显示可用提供商和当前提供商 |
+| `/personality` | 设置预定义个性 |
+| `/verbose` | 循环工具进度显示：关闭 → 新 → 所有 → 详细。可以通过配置为[消息启用](#notes)。 |
+| `/fast` | 切换快速模式 — OpenAI 优先级处理 / Anthropic 快速模式（用法：/fast [normal\|fast\|status]） |
+| `/reasoning` | 管理推理努力和显示（用法：/reasoning [level\|show\|hide]） |
+| `/fast [normal\|fast\|status]` | 切换快速模式 — OpenAI 优先级处理 / Anthropic 快速模式。选项：`normal`，`fast`，`status`，`on`，`off`。 |
+| `/skin` | 显示或更改显示皮肤/主题 |
+| `/statusbar` (别名: `/sb`) | 切换上下文/模型状态栏的开关 |
+| `/voice [on\|off\|tts\|status]` | 切换 CLI 语音模式和语音播放。录音使用 `voice.record_key`（默认：`Ctrl+B`）。 |
+| `/yolo` | 切换 YOLO 模式 — 跳过所有危险命令批准提示。 |
 
-### Tools & Skills
+### 工具与技能
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/tools [list\|disable\|enable] [name...]` | Manage tools: list available tools, or disable/enable specific tools for the current session. Disabling a tool removes it from the agent's toolset and triggers a session reset. |
-| `/toolsets` | List available toolsets |
-| `/browser [connect\|disconnect\|status]` | Manage local Chrome CDP connection. `connect` attaches browser tools to a running Chrome instance (default: `ws://localhost:9222`). `disconnect` detaches. `status` shows current connection. Auto-launches Chrome if no debugger is detected. |
-| `/skills` | Search, install, inspect, or manage skills from online registries |
-| `/cron` | Manage scheduled tasks (list, add/create, edit, pause, resume, run, remove) |
-| `/reload-mcp` (alias: `/reload_mcp`) | Reload MCP servers from config.yaml |
-| `/reload` | Reload `.env` variables into the running session (picks up new API keys without restarting) |
-| `/plugins` | List installed plugins and their status |
+| `/tools [list\|disable\|enable] [name...]` | 管理工具：列出可用工具，或为当前会话禁用/启用特定工具。禁用工具会将其从智能体的工具集中移除并触发会话重置。 |
+| `/toolsets` | 列出可用工具集 |
+| `/browser [connect\|disconnect\|status]` | 管理本地 Chrome CDP 连接。`connect` 将浏览器工具附加到正在运行的 Chrome 实例（默认：`ws://localhost:9222`）。`disconnect` 分离。`status` 显示当前连接。如果未检测到调试器，则自动启动 Chrome。 |
+| `/skills` | 从在线注册表搜索、安装、检查或管理技能 |
+| `/cron` | 管理计划任务（列出、添加/创建、编辑、暂停、恢复、运行、删除） |
+| `/reload-mcp` (别名: `/reload_mcp`) | 从 config.yaml 重新加载 MCP 服务器 |
+| `/reload` | 重新加载 `.env` 变量到运行中的会话（获取新的 API 密钥而无需重启） |
+| `/plugins` | 列出已安装的插件及其状态 |
 
-### Info
+### 信息
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/help` | Show this help message |
-| `/usage` | Show token usage, cost breakdown, and session duration |
-| `/insights` | Show usage insights and analytics (last 30 days) |
-| `/platforms` (alias: `/gateway`) | Show gateway/messaging platform status |
-| `/paste` | Check clipboard for an image and attach it |
-| `/image <path>` | Attach a local image file for your next prompt. |
-| `/debug` | Upload debug report (system info + logs) and get shareable links. Also available in messaging. |
-| `/profile` | Show active profile name and home directory |
+| `/help` | 显示此帮助消息 |
+| `/usage` | 显示令牌使用情况、成本细分和会话持续时间 |
+| `/insights` | 显示使用洞察和分析（最近 30 天） |
+| `/platforms` (别名: `/gateway`) | 显示网关/消息平台状态 |
+| `/paste` | 检查剪贴板中的图像并附加它 |
+| `/image <path>` | 为您的下一个提示附加本地图像文件。 |
+| `/debug` | 上传调试报告（系统信息 + 日志）并获取可共享链接。在消息中也可用。 |
+| `/profile` | 显示活动配置文件名称和主目录 |
 
-### Exit
+### 退出
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/quit` | Exit the CLI (also: `/exit`). See note on `/q` under `/queue` above. |
+| `/quit` | 退出 CLI（也可用：`/exit`）。请参阅上面 `/queue` 下的 `/q` 说明。 |
 
-### Dynamic CLI slash commands
+### 动态 CLI 斜杠命令
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/<skill-name>` | Load any installed skill as an on-demand command. Example: `/gif-search`, `/github-pr-workflow`, `/excalidraw`. |
-| `/skills ...` | Search, browse, inspect, install, audit, publish, and configure skills from registries and the official optional-skills catalog. |
+| `/<skill-name>` | 将任何已安装的技能加载为按需命令。示例：`/gif-search`，`/github-pr-workflow`，`/excalidraw`。 |
+| `/skills ...` | 从注册表和官方可选技能目录中搜索、浏览、检查、安装、审计、发布和配置技能。 |
 
 ### Quick Commands
 

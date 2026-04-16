@@ -1,14 +1,14 @@
 ---
 sidebar_position: 2
-title: "ACP Internals"
-description: "How the ACP adapter works: lifecycle, sessions, event bridge, approvals, and tool rendering"
+title: "ACP 内部机制"
+description: "ACP 适配器工作原理：生命周期、会话、事件桥接、审批和工具渲染"
 ---
 
-# ACP Internals
+# ACP 内部机制
 
-The ACP adapter wraps Hermes' synchronous `AIAgent` in an async JSON-RPC stdio server.
+ACP 适配器将 Hermes 的同步 `AIAgent` 包装在一个异步 JSON-RPC stdio 服务器中。
 
-Key implementation files:
+关键实现文件：
 
 - `acp_adapter/entry.py`
 - `acp_adapter/server.py`
@@ -19,7 +19,7 @@ Key implementation files:
 - `acp_adapter/auth.py`
 - `acp_registry/agent.json`
 
-## Boot flow
+## 启动流程
 
 ```text
 hermes acp / hermes-acp / python -m acp_adapter
@@ -30,21 +30,21 @@ hermes acp / hermes-acp / python -m acp_adapter
   -> acp.run_agent(agent)
 ```
 
-Stdout is reserved for ACP JSON-RPC transport. Human-readable logs go to stderr.
+Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 
-## Major components
+## 主要组件
 
 ### `HermesACPAgent`
 
-`acp_adapter/server.py` implements the ACP agent protocol.
+`acp_adapter/server.py` 实现了 ACP 代理协议。
 
-Responsibilities:
+职责：
 
-- initialize / authenticate
-- new/load/resume/fork/list/cancel session methods
-- prompt execution
-- session model switching
-- wiring sync AIAgent callbacks into ACP async notifications
+- 初始化 / 身份验证
+- 新建/加载/恢复/分支/列出/取消会话方法
+- 提示执行
+- 会话模型切换
+- 将同步 AIAgent 回调连接到 ACP 异步通知
 
 ### `SessionManager`
 
