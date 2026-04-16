@@ -350,6 +350,6 @@ Cron 作业在完全新的智能体会话中运行。提示必须包含智能体
 
 **GOOD:** `"SSH into server 192.168.1.100 as user 'deploy', check if nginx is running with 'systemctl status nginx', and verify https://example.com returns HTTP 200."`
 
-## Security
+## 安全性
 
-Scheduled task prompts are scanned for prompt-injection and credential-exfiltration patterns at creation and update time. Prompts containing invisible Unicode tricks, SSH backdoor attempts, or obvious secret-exfiltration payloads are blocked.
+计划任务提示在创建和更新时会扫描提示注入和凭证窃取模式。包含不可见 Unicode 技巧、SSH 后门尝试或明显的秘密窃取有效载荷的提示会被阻止。

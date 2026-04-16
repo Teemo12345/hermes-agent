@@ -48,26 +48,26 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 
 有关完全明确的手动步骤、支持的额外功能和当前限制，请参阅 [Termux 指南](../getting-started/termux.md)。
 
-Important caveat: the full `.[all]` extra is not currently available on Android because the `voice` extra depends on `faster-whisper` → `ctranslate2`, and `ctranslate2` does not publish Android wheels. Use the tested `.[termux]` extra instead.
+重要说明：完整的 `.[all]` 扩展目前在 Android 上不可用，因为 `voice` 扩展依赖于 `faster-whisper` → `ctranslate2`，而 `ctranslate2` 不发布 Android 轮包。请使用经过测试的 `.[termux]` 扩展代替。
 
-### Is my data sent anywhere?
+### 我的数据会被发送到哪里？
 
-API calls go **only to the LLM provider you configure** (e.g., OpenRouter, your local Ollama instance). Hermes Agent does not collect telemetry, usage data, or analytics. Your conversations, memory, and skills are stored locally in `~/.hermes/`.
+API 调用**只发送到您配置的 LLM 提供商**（例如，OpenRouter、本地 Ollama 实例）。Hermes Agent 不收集遥测数据、使用数据或分析数据。您的对话、记忆和技能都存储在本地的 `~/.hermes/` 目录中。
 
-### Can I use it offline / with local models?
+### 我可以离线使用或使用本地模型吗？
 
-Yes. Run `hermes model`, select **Custom endpoint**, and enter your server's URL:
+可以。运行 `hermes model`，选择**自定义端点**，然后输入您服务器的 URL：
 
 ```bash
 hermes model
-# Select: Custom endpoint (enter URL manually)
-# API base URL: http://localhost:11434/v1
-# API key: ollama
-# Model name: qwen3.5:27b
-# Context length: 32768   ← set this to match your server's actual context window
+# 选择：自定义端点（手动输入 URL）
+# API 基础 URL：http://localhost:11434/v1
+# API 密钥：ollama
+# 模型名称：qwen3.5:27b
+# 上下文长度：32768   ← 设置为与服务器实际上下文窗口匹配
 ```
 
-Or configure it directly in `config.yaml`:
+或者直接在 `config.yaml` 中配置：
 
 ```yaml
 model:
@@ -76,192 +76,192 @@ model:
   base_url: http://localhost:11434/v1
 ```
 
-Hermes persists the endpoint, provider, and base URL in `config.yaml` so it survives restarts. If your local server has exactly one model loaded, `/model custom` auto-detects it. You can also set `provider: custom` in config.yaml — it's a first-class provider, not an alias for anything else.
+Hermes 会将端点、提供商和基础 URL 保存在 `config.yaml` 中，以便在重启后仍然有效。如果您的本地服务器只加载了一个模型，`/model custom` 会自动检测它。您也可以在 config.yaml 中设置 `provider: custom` — 这是一个一等提供商，不是任何其他东西的别名。
 
-This works with Ollama, vLLM, llama.cpp server, SGLang, LocalAI, and others. See the [Configuration guide](../user-guide/configuration.md) for details.
+这适用于 Ollama、vLLM、llama.cpp 服务器、SGLang、LocalAI 等。有关详细信息，请参阅[配置指南](../user-guide/configuration.md)。
 
-:::tip Ollama users
-If you set a custom `num_ctx` in Ollama (e.g., `ollama run --num_ctx 16384`), make sure to set the matching context length in Hermes — Ollama's `/api/show` reports the model's *maximum* context, not the effective `num_ctx` you configured.
+:::tip Ollama 用户
+如果您在 Ollama 中设置了自定义 `num_ctx`（例如，`ollama run --num_ctx 16384`），请确保在 Hermes 中设置匹配的上下文长度 — Ollama 的 `/api/show` 报告模型的*最大*上下文，而不是您配置的有效 `num_ctx`。
 :::
 
-:::tip Timeouts with local models
-Hermes auto-detects local endpoints and relaxes streaming timeouts (read timeout raised from 120s to 1800s, stale stream detection disabled). If you still hit timeouts on very large contexts, set `HERMES_STREAM_READ_TIMEOUT=1800` in your `.env`. See the [Local LLM guide](../guides/local-llm-on-mac.md#timeouts) for details.
+:::tip 本地模型的超时
+Hermes 会自动检测本地端点并放宽流式传输超时（读取超时从 120 秒提高到 1800 秒，禁用过时流检测）。如果在非常大的上下文中仍然遇到超时，请在 `.env` 中设置 `HERMES_STREAM_READ_TIMEOUT=1800`。有关详细信息，请参阅[本地 LLM 指南](../guides/local-llm-on-mac.md#timeouts)。
 :::
 
-### How much does it cost?
+### 它需要多少费用？
 
-Hermes Agent itself is **free and open-source** (MIT license). You pay only for the LLM API usage from your chosen provider. Local models are completely free to run.
+Hermes Agent 本身是**免费和开源的**（MIT 许可证）。您只需为来自所选提供商的 LLM API 使用付费。本地模型完全免费运行。
 
-### Can multiple people use one instance?
+### 多个人可以使用一个实例吗？
 
-Yes. The [messaging gateway](../user-guide/messaging/index.md) lets multiple users interact with the same Hermes Agent instance via Telegram, Discord, Slack, WhatsApp, or Home Assistant. Access is controlled through allowlists (specific user IDs) and DM pairing (first user to message claims access).
+可以。[消息网关](../user-guide/messaging/index.md)允许多个用户通过 Telegram、Discord、Slack、WhatsApp 或 Home Assistant 与同一个 Hermes Agent 实例交互。访问通过允许列表（特定用户 ID）和 DM 配对（第一个发消息的用户获得访问权限）进行控制。
 
-### What's the difference between memory and skills?
+### 记忆和技能有什么区别？
 
-- **Memory** stores **facts** — things the agent knows about you, your projects, and preferences. Memories are retrieved automatically based on relevance.
-- **Skills** store **procedures** — step-by-step instructions for how to do things. Skills are recalled when the agent encounters a similar task.
+- **记忆**存储**事实** — 代理了解的关于您、您的项目和偏好的事情。记忆会根据相关性自动检索。
+- **技能**存储**程序** — 如何做事的分步说明。当代理遇到类似任务时，会回忆起技能。
 
-Both persist across sessions. See [Memory](../user-guide/features/memory.md) and [Skills](../user-guide/features/skills.md) for details.
+两者都在会话之间持久存在。有关详细信息，请参阅[记忆](../user-guide/features/memory.md)和[技能](../user-guide/features/skills.md)。
 
-### Can I use it in my own Python project?
+### 我可以在自己的 Python 项目中使用它吗？
 
-Yes. Import the `AIAgent` class and use Hermes programmatically:
+可以。导入 `AIAgent` 类并以编程方式使用 Hermes：
 
 ```python
 from run_agent import AIAgent
 
 agent = AIAgent(model="openrouter/nous/hermes-3-llama-3.1-70b")
-response = agent.chat("Explain quantum computing briefly")
+response = agent.chat("简要解释量子计算")
 ```
 
-See the [Python Library guide](../user-guide/features/code-execution.md) for full API usage.
+有关完整的 API 使用，请参阅[Python 库指南](../user-guide/features/code-execution.md)。
 
 ---
 
-## Troubleshooting
+## 故障排除
 
-### Installation Issues
+### 安装问题
 
-#### `hermes: command not found` after installation
+#### 安装后出现 `hermes: command not found`
 
-**Cause:** Your shell hasn't reloaded the updated PATH.
+**原因：** 您的 shell 尚未重新加载更新的 PATH。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Reload your shell profile
+# 重新加载您的 shell 配置
 source ~/.bashrc    # bash
 source ~/.zshrc     # zsh
 
-# Or start a new terminal session
+# 或启动一个新的终端会话
 ```
 
-If it still doesn't work, verify the install location:
+如果仍然不起作用，请验证安装位置：
 ```bash
 which hermes
 ls ~/.local/bin/hermes
 ```
 
 :::tip
-The installer adds `~/.local/bin` to your PATH. If you use a non-standard shell config, add `export PATH="$HOME/.local/bin:$PATH"` manually.
+安装程序会将 `~/.local/bin` 添加到您的 PATH。如果您使用非标准的 shell 配置，请手动添加 `export PATH="$HOME/.local/bin:$PATH"`。
 :::
 
-#### Python version too old
+#### Python 版本太旧
 
-**Cause:** Hermes requires Python 3.11 or newer.
+**原因：** Hermes 需要 Python 3.11 或更新版本。
 
-**Solution:**
+**解决方案：**
 ```bash
-python3 --version   # Check current version
+python3 --version   # 检查当前版本
 
-# Install a newer Python
+# 安装更新的 Python
 sudo apt install python3.12   # Ubuntu/Debian
 brew install python@3.12      # macOS
 ```
 
-The installer handles this automatically — if you see this error during manual installation, upgrade Python first.
+安装程序会自动处理这个问题 — 如果您在手动安装过程中看到此错误，请先升级 Python。
 
 #### `uv: command not found`
 
-**Cause:** The `uv` package manager isn't installed or not in PATH.
+**原因：** `uv` 包管理器未安装或不在 PATH 中。
 
-**Solution:**
+**解决方案：**
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 ```
 
-#### Permission denied errors during install
+#### 安装期间出现权限被拒绝错误
 
-**Cause:** Insufficient permissions to write to the install directory.
+**原因：** 没有足够的权限写入安装目录。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Don't use sudo with the installer — it installs to ~/.local/bin
-# If you previously installed with sudo, clean up:
+# 不要在安装程序中使用 sudo — 它安装到 ~/.local/bin
+# 如果您之前使用 sudo 安装，请清理：
 sudo rm /usr/local/bin/hermes
-# Then re-run the standard installer
+# 然后重新运行标准安装程序
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
 ---
 
-### Provider & Model Issues
+### 提供商和模型问题
 
-#### API key not working
+#### API 密钥不起作用
 
-**Cause:** Key is missing, expired, incorrectly set, or for the wrong provider.
+**原因：** 密钥丢失、过期、设置不正确或适用于错误的提供商。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Check your configuration
+# 检查您的配置
 hermes config show
 
-# Re-configure your provider
+# 重新配置您的提供商
 hermes model
 
-# Or set directly
+# 或直接设置
 hermes config set OPENROUTER_API_KEY sk-or-v1-xxxxxxxxxxxx
 ```
 
 :::warning
-Make sure the key matches the provider. An OpenAI key won't work with OpenRouter and vice versa. Check `~/.hermes/.env` for conflicting entries.
+确保密钥与提供商匹配。OpenAI 密钥不能与 OpenRouter 一起使用，反之亦然。检查 `~/.hermes/.env` 是否有冲突条目。
 :::
 
-#### Model not available / model not found
+#### 模型不可用 / 未找到模型
 
-**Cause:** The model identifier is incorrect or not available on your provider.
+**原因：** 模型标识符不正确或在您的提供商上不可用。
 
-**Solution:**
+**解决方案：**
 ```bash
-# List available models for your provider
+# 列出您的提供商可用的模型
 hermes model
 
-# Set a valid model
+# 设置有效的模型
 hermes config set HERMES_MODEL openrouter/nous/hermes-3-llama-3.1-70b
 
-# Or specify per-session
+# 或按会话指定
 hermes chat --model openrouter/meta-llama/llama-3.1-70b-instruct
 ```
 
-#### Rate limiting (429 errors)
+#### 速率限制（429 错误）
 
-**Cause:** You've exceeded your provider's rate limits.
+**原因：** 您已超出提供商的速率限制。
 
-**Solution:** Wait a moment and retry. For sustained usage, consider:
-- Upgrading your provider plan
-- Switching to a different model or provider
-- Using `hermes chat --provider <alternative>` to route to a different backend
+**解决方案：** 稍等片刻后重试。对于持续使用，考虑：
+- 升级您的提供商计划
+- 切换到不同的模型或提供商
+- 使用 `hermes chat --provider <alternative>` 路由到不同的后端
 
-#### Context length exceeded
+#### 超出上下文长度
 
-**Cause:** The conversation has grown too long for the model's context window, or Hermes detected the wrong context length for your model.
+**原因：** 对话对于模型的上下文窗口来说太长，或者 Hermes 为您的模型检测到了错误的上下文长度。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Compress the current session
+# 压缩当前会话
 /compress
 
-# Or start a fresh session
+# 或开始新会话
 hermes chat
 
-# Use a model with a larger context window
+# 使用具有更大上下文窗口的模型
 hermes chat --model openrouter/google/gemini-3-flash-preview
 ```
 
-If this happens on the first long conversation, Hermes may have the wrong context length for your model. Check what it detected:
+如果这发生在第一个长对话中，Hermes 可能对您的模型有错误的上下文长度。检查它检测到了什么：
 
-Look at the CLI startup line — it shows the detected context length (e.g., `📊 Context limit: 128000 tokens`). You can also check with `/usage` during a session.
+查看 CLI 启动行 — 它显示检测到的上下文长度（例如，`📊 Context limit: 128000 tokens`）。您也可以在会话期间使用 `/usage` 进行检查。
 
-To fix context detection, set it explicitly:
+要修复上下文检测，请显式设置它：
 
 ```yaml
-# In ~/.hermes/config.yaml
+# 在 ~/.hermes/config.yaml 中
 model:
   default: your-model-name
-  context_length: 131072  # your model's actual context window
+  context_length: 131072  # 您模型的实际上下文窗口
 ```
 
-Or for custom endpoints, add it per-model:
+或者对于自定义端点，按模型添加：
 
 ```yaml
 custom_providers:
@@ -272,157 +272,157 @@ custom_providers:
         context_length: 32768
 ```
 
-See [Context Length Detection](../integrations/providers.md#context-length-detection) for how auto-detection works and all override options.
+有关自动检测如何工作以及所有覆盖选项，请参阅[上下文长度检测](../integrations/providers.md#context-length-detection)。
 
 ---
 
-### Terminal Issues
+### 终端问题
 
-#### Command blocked as dangerous
+#### 命令被阻止为危险
 
-**Cause:** Hermes detected a potentially destructive command (e.g., `rm -rf`, `DROP TABLE`). This is a safety feature.
+**原因：** Hermes 检测到潜在的破坏性命令（例如，`rm -rf`、`DROP TABLE`）。这是一个安全功能。
 
-**Solution:** When prompted, review the command and type `y` to approve it. You can also:
-- Ask the agent to use a safer alternative
-- See the full list of dangerous patterns in the [Security docs](../user-guide/security.md)
+**解决方案：** 当提示时，查看命令并输入 `y` 以批准它。您也可以：
+- 要求代理使用更安全的替代方案
+- 在[安全文档](../user-guide/security.md)中查看完整的危险模式列表
 
 :::tip
-This is working as intended — Hermes never silently runs destructive commands. The approval prompt shows you exactly what will execute.
+这是预期的工作方式 — Hermes 从不静默运行破坏性命令。批准提示会显示将要执行的确切内容。
 :::
 
-#### `sudo` not working via messaging gateway
+#### 通过消息网关 `sudo` 不工作
 
-**Cause:** The messaging gateway runs without an interactive terminal, so `sudo` cannot prompt for a password.
+**原因：** 消息网关在没有交互式终端的情况下运行，因此 `sudo` 无法提示输入密码。
 
-**Solution:**
-- Avoid `sudo` in messaging — ask the agent to find alternatives
-- If you must use `sudo`, configure passwordless sudo for specific commands in `/etc/sudoers`
-- Or switch to the terminal interface for administrative tasks: `hermes chat`
+**解决方案：**
+- 在消息传递中避免使用 `sudo` — 要求代理找到替代方案
+- 如果必须使用 `sudo`，在 `/etc/sudoers` 中为特定命令配置无密码 sudo
+- 或切换到终端界面进行管理任务：`hermes chat`
 
-#### Docker backend not connecting
+#### Docker 后端未连接
 
-**Cause:** Docker daemon isn't running or the user lacks permissions.
+**原因：** Docker 守护程序未运行或用户缺少权限。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Check Docker is running
+# 检查 Docker 是否运行
 docker info
 
-# Add your user to the docker group
+# 将您的用户添加到 docker 组
 sudo usermod -aG docker $USER
 newgrp docker
 
-# Verify
+# 验证
 docker run hello-world
 ```
 
 ---
 
-### Messaging Issues
+### 消息传递问题
 
-#### Bot not responding to messages
+#### 机器人不响应消息
 
-**Cause:** The bot isn't running, isn't authorized, or your user isn't in the allowlist.
+**原因：** 机器人未运行、未授权或您的用户不在允许列表中。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Check if the gateway is running
+# 检查网关是否运行
 hermes gateway status
 
-# Start the gateway
+# 启动网关
 hermes gateway start
 
-# Check logs for errors
+# 检查错误日志
 cat ~/.hermes/logs/gateway.log | tail -50
 ```
 
-#### Messages not delivering
+#### 消息未送达
 
-**Cause:** Network issues, bot token expired, or platform webhook misconfiguration.
+**原因：** 网络问题、机器人令牌过期或平台 webhook 配置错误。
 
-**Solution:**
-- Verify your bot token is valid with `hermes gateway setup`
-- Check gateway logs: `cat ~/.hermes/logs/gateway.log | tail -50`
-- For webhook-based platforms (Slack, WhatsApp), ensure your server is publicly accessible
+**解决方案：**
+- 使用 `hermes gateway setup` 验证您的机器人令牌是否有效
+- 检查网关日志：`cat ~/.hermes/logs/gateway.log | tail -50`
+- 对于基于 webhook 的平台（Slack、WhatsApp），确保您的服务器可公开访问
 
-#### Allowlist confusion — who can talk to the bot?
+#### 允许列表混淆 — 谁可以与机器人交谈？
 
-**Cause:** Authorization mode determines who gets access.
+**原因：** 授权模式决定谁获得访问权限。
 
-**Solution:**
+**解决方案：**
 
-| Mode | How it works |
+| 模式 | 工作原理 |
 |------|-------------|
-| **Allowlist** | Only user IDs listed in config can interact |
-| **DM pairing** | First user to message in DM claims exclusive access |
-| **Open** | Anyone can interact (not recommended for production) |
+| **允许列表** | 只有配置中列出的用户 ID 可以交互 |
+| **DM 配对** | 第一个在 DM 中发消息的用户获得独占访问权限 |
+| **开放** | 任何人都可以交互（不推荐用于生产） |
 
-Configure in `~/.hermes/config.yaml` under your gateway's settings. See the [Messaging docs](../user-guide/messaging/index.md).
+在 `~/.hermes/config.yaml` 中的网关设置下配置。请参阅[消息传递文档](../user-guide/messaging/index.md)。
 
-#### Gateway won't start
+#### 网关无法启动
 
-**Cause:** Missing dependencies, port conflicts, or misconfigured tokens.
+**原因：** 缺少依赖项、端口冲突或令牌配置错误。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Install messaging dependencies
-pip install "hermes-agent[telegram]"   # or [discord], [slack], [whatsapp]
+# 安装消息传递依赖项
+pip install "hermes-agent[telegram]"   # 或 [discord], [slack], [whatsapp]
 
-# Check for port conflicts
+# 检查端口冲突
 lsof -i :8080
 
-# Verify configuration
+# 验证配置
 hermes config show
 ```
 
-#### WSL: Gateway keeps disconnecting or `hermes gateway start` fails
+#### WSL：网关不断断开连接或 `hermes gateway start` 失败
 
-**Cause:** WSL's systemd support is unreliable. Many WSL2 installations don't have systemd enabled, and even when enabled, services may not survive WSL restarts or Windows idle shutdowns.
+**原因：** WSL 的 systemd 支持不可靠。许多 WSL2 安装没有启用 systemd，即使启用了，服务也可能无法在 WSL 重启或 Windows 空闲关闭后存活。
 
-**Solution:** Use foreground mode instead of the systemd service:
+**解决方案：** 使用前台模式而不是 systemd 服务：
 
 ```bash
-# Option 1: Direct foreground (simplest)
+# 选项 1：直接前台（最简单）
 hermes gateway run
 
-# Option 2: Persistent via tmux (survives terminal close)
+# 选项 2：通过 tmux 持久化（在终端关闭后存活）
 tmux new -s hermes 'hermes gateway run'
-# Reattach later: tmux attach -t hermes
+# 稍后重新附加：tmux attach -t hermes
 
-# Option 3: Background via nohup
+# 选项 3：通过 nohup 在后台运行
 nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &
 ```
 
-If you want to try systemd anyway, make sure it's enabled:
+如果您仍然想尝试 systemd，请确保它已启用：
 
-1. Open `/etc/wsl.conf` (create it if it doesn't exist)
-2. Add:
+1. 打开 `/etc/wsl.conf`（如果不存在则创建）
+2. 添加：
    ```ini
    [boot]
    systemd=true
    ```
-3. From PowerShell: `wsl --shutdown`
-4. Reopen your WSL terminal
-5. Verify: `systemctl is-system-running` should say "running" or "degraded"
+3. 从 PowerShell：`wsl --shutdown`
+4. 重新打开您的 WSL 终端
+5. 验证：`systemctl is-system-running` 应该显示 "running" 或 "degraded"
 
-:::tip Auto-start on Windows boot
-For reliable auto-start, use Windows Task Scheduler to launch WSL + the gateway on login:
-1. Create a task that runs `wsl -d Ubuntu -- bash -lc 'hermes gateway run'`
-2. Set it to trigger on user logon
+:::tip Windows 启动时自动启动
+为了可靠的自动启动，使用 Windows 任务计划程序在登录时启动 WSL + 网关：
+1. 创建一个任务，运行 `wsl -d Ubuntu -- bash -lc 'hermes gateway run'`
+2. 将其设置为在用户登录时触发
 :::
 
-#### macOS: Node.js / ffmpeg / other tools not found by gateway
+#### macOS：网关找不到 Node.js / ffmpeg / 其他工具
 
-**Cause:** launchd services inherit a minimal PATH (`/usr/bin:/bin:/usr/sbin:/sbin`) that doesn't include Homebrew, nvm, cargo, or other user-installed tool directories. This commonly breaks the WhatsApp bridge (`node not found`) or voice transcription (`ffmpeg not found`).
+**原因：** launchd 服务继承了最小的 PATH (`/usr/bin:/bin:/usr/sbin:/sbin`)，不包括 Homebrew、nvm、cargo 或其他用户安装的工具目录。这通常会破坏 WhatsApp 桥接（`node not found`）或语音转录（`ffmpeg not found`）。
 
-**Solution:** The gateway captures your shell PATH when you run `hermes gateway install`. If you installed tools after setting up the gateway, re-run the install to capture the updated PATH:
+**解决方案：** 当您运行 `hermes gateway install` 时，网关会捕获您的 shell PATH。如果您在设置网关后安装了工具，请重新运行安装以捕获更新的 PATH：
 
 ```bash
-hermes gateway install    # Re-snapshots your current PATH
-hermes gateway start      # Detects the updated plist and reloads
+hermes gateway install    # 重新快照您当前的 PATH
+hermes gateway start      # 检测更新的 plist 并重新加载
 ```
 
-You can verify the plist has the correct PATH:
+您可以验证 plist 是否具有正确的 PATH：
 ```bash
 /usr/libexec/PlistBuddy -c "Print :EnvironmentVariables:PATH" \
   ~/Library/LaunchAgents/ai.hermes.gateway.plist
@@ -430,73 +430,73 @@ You can verify the plist has the correct PATH:
 
 ---
 
-### Performance Issues
+### 性能问题
 
-#### Slow responses
+#### 响应缓慢
 
-**Cause:** Large model, distant API server, or heavy system prompt with many tools.
+**原因：** 大型模型、遥远的 API 服务器或带有许多工具的沉重系统提示。
 
-**Solution:**
-- Try a faster/smaller model: `hermes chat --model openrouter/meta-llama/llama-3.1-8b-instruct`
-- Reduce active toolsets: `hermes chat -t "terminal"`
-- Check your network latency to the provider
-- For local models, ensure you have enough GPU VRAM
+**解决方案：**
+- 尝试更快/更小的模型：`hermes chat --model openrouter/meta-llama/llama-3.1-8b-instruct`
+- 减少活动工具集：`hermes chat -t "terminal"`
+- 检查您到提供商的网络延迟
+- 对于本地模型，确保您有足够的 GPU VRAM
 
-#### High token usage
+#### 高令牌使用
 
-**Cause:** Long conversations, verbose system prompts, or many tool calls accumulating context.
+**原因：** 长对话、冗长的系统提示或许多工具调用积累上下文。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Compress the conversation to reduce tokens
+# 压缩对话以减少令牌
 /compress
 
-# Check session token usage
+# 检查会话令牌使用情况
 /usage
 ```
 
 :::tip
-Use `/compress` regularly during long sessions. It summarizes the conversation history and reduces token usage significantly while preserving context.
+在长会话期间定期使用 `/compress`。它会总结对话历史并在保留上下文的同时显著减少令牌使用。
 :::
 
-#### Session getting too long
+#### 会话变得太长
 
-**Cause:** Extended conversations accumulate messages and tool outputs, approaching context limits.
+**原因：** 延长的对话会积累消息和工具输出，接近上下文限制。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Compress current session (preserves key context)
+# 压缩当前会话（保留关键上下文）
 /compress
 
-# Start a new session with a reference to the old one
+# 开始新会话并引用旧会话
 hermes chat
 
-# Resume a specific session later if needed
+# 如果需要，稍后恢复特定会话
 hermes chat --continue
 ```
 
 ---
 
-### MCP Issues
+### MCP 问题
 
-#### MCP server not connecting
+#### MCP 服务器未连接
 
-**Cause:** Server binary not found, wrong command path, or missing runtime.
+**原因：** 找不到服务器二进制文件、命令路径错误或缺少运行时。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Ensure MCP dependencies are installed (already included in standard install)
+# 确保 MCP 依赖项已安装（已包含在标准安装中）
 cd ~/.hermes/hermes-agent && uv pip install -e ".[mcp]"
 
-# For npm-based servers, ensure Node.js is available
+# 对于基于 npm 的服务器，确保 Node.js 可用
 node --version
 npx --version
 
-# Test the server manually
+# 手动测试服务器
 npx -y @modelcontextprotocol/server-filesystem /tmp
 ```
 
-Verify your `~/.hermes/config.yaml` MCP configuration:
+验证您的 `~/.hermes/config.yaml` MCP 配置：
 ```yaml
 mcp_servers:
   filesystem:
@@ -504,268 +504,268 @@ mcp_servers:
     args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/docs"]
 ```
 
-#### Tools not showing up from MCP server
+#### MCP 服务器的工具未显示
 
-**Cause:** Server started but tool discovery failed, tools were filtered out by config, or the server does not support the MCP capability you expected.
+**原因：** 服务器已启动但工具发现失败，工具被配置过滤掉，或者服务器不支持您期望的 MCP 功能。
 
-**Solution:**
-- Check gateway/agent logs for MCP connection errors
-- Ensure the server responds to the `tools/list` RPC method
-- Review any `tools.include`, `tools.exclude`, `tools.resources`, `tools.prompts`, or `enabled` settings under that server
-- Remember that resource/prompt utility tools are only registered when the session actually supports those capabilities
-- Use `/reload-mcp` after changing config
+**解决方案：**
+- 检查网关/代理日志中的 MCP 连接错误
+- 确保服务器响应 `tools/list` RPC 方法
+- 查看该服务器下的任何 `tools.include`、`tools.exclude`、`tools.resources`、`tools.prompts` 或 `enabled` 设置
+- 记住，资源/提示实用工具仅在会话实际支持这些功能时才会注册
+- 在更改配置后使用 `/reload-mcp`
 
 ```bash
-# Verify MCP servers are configured
+# 验证 MCP 服务器是否已配置
 hermes config show | grep -A 12 mcp_servers
 
-# Restart Hermes or reload MCP after config changes
+# 重启 Hermes 或在配置更改后重新加载 MCP
 hermes chat
 ```
 
-See also:
-- [MCP (Model Context Protocol)](/docs/user-guide/features/mcp)
-- [Use MCP with Hermes](/docs/guides/use-mcp-with-hermes)
-- [MCP Config Reference](/docs/reference/mcp-config-reference)
+另请参阅：
+- [MCP（模型上下文协议）](/docs/user-guide/features/mcp)
+- [在 Hermes 中使用 MCP](/docs/guides/use-mcp-with-hermes)
+- [MCP 配置参考](/docs/reference/mcp-config-reference)
 
-#### MCP timeout errors
+#### MCP 超时错误
 
-**Cause:** The MCP server is taking too long to respond, or it crashed during execution.
+**原因：** MCP 服务器响应时间过长，或在执行过程中崩溃。
 
-**Solution:**
-- Increase the timeout in your MCP server config if supported
-- Check if the MCP server process is still running
-- For remote HTTP MCP servers, check network connectivity
+**解决方案：**
+- 如果支持，增加 MCP 服务器配置中的超时
+- 检查 MCP 服务器进程是否仍在运行
+- 对于远程 HTTP MCP 服务器，检查网络连接
 
 :::warning
-If an MCP server crashes mid-request, Hermes will report a timeout. Check the server's own logs (not just Hermes logs) to diagnose the root cause.
+如果 MCP 服务器在请求中途崩溃，Hermes 将报告超时。检查服务器自己的日志（而不仅仅是 Hermes 日志）以诊断根本原因。
 :::
 
 ---
 
-## Profiles
+## 配置文件
 
-### How do profiles differ from just setting HERMES_HOME?
+### 配置文件与仅设置 HERMES_HOME 有何不同？
 
-Profiles are a managed layer on top of `HERMES_HOME`. You *could* manually set `HERMES_HOME=/some/path` before every command, but profiles handle all the plumbing for you: creating the directory structure, generating shell aliases (`hermes-work`), tracking the active profile in `~/.hermes/active_profile`, and syncing skill updates across all profiles automatically. They also integrate with tab completion so you don't have to remember paths.
+配置文件是 `HERMES_HOME` 之上的管理层。您*可以*在每个命令之前手动设置 `HERMES_HOME=/some/path`，但配置文件会为您处理所有管道：创建目录结构、生成 shell 别名（`hermes-work`）、在 `~/.hermes/active_profile` 中跟踪活动配置文件，以及自动跨所有配置文件同步技能更新。它们还与标签补全集成，因此您不必记住路径。
 
-### Can two profiles share the same bot token?
+### 两个配置文件可以共享同一个机器人令牌吗？
 
-No. Each messaging platform (Telegram, Discord, etc.) requires exclusive access to a bot token. If two profiles try to use the same token simultaneously, the second gateway will fail to connect. Create a separate bot per profile — for Telegram, talk to [@BotFather](https://t.me/BotFather) to make additional bots.
+不可以。每个消息传递平台（Telegram、Discord 等）都需要对机器人令牌的独占访问权。如果两个配置文件尝试同时使用同一个令牌，第二个网关将无法连接。为每个配置文件创建一个单独的机器人 — 对于 Telegram，与 [@BotFather](https://t.me/BotFather) 交谈以创建额外的机器人。
 
-### Do profiles share memory or sessions?
+### 配置文件是否共享记忆或会话？
 
-No. Each profile has its own memory store, session database, and skills directory. They are completely isolated. If you want to start a new profile with existing memories and sessions, use `hermes profile create newname --clone-all` to copy everything from the current profile.
+不可以。每个配置文件都有自己的记忆存储、会话数据库和技能目录。它们完全隔离。如果您想使用现有的记忆和会话开始新的配置文件，请使用 `hermes profile create newname --clone-all` 从当前配置文件复制所有内容。
 
-### What happens when I run `hermes update`?
+### 当我运行 `hermes update` 时会发生什么？
 
-`hermes update` pulls the latest code and reinstalls dependencies **once** (not per-profile). It then syncs updated skills to all profiles automatically. You only need to run `hermes update` once — it covers every profile on the machine.
+`hermes update` 拉取最新代码并**一次**（不是每个配置文件）重新安装依赖项。然后它自动将更新的技能同步到所有配置文件。您只需要运行 `hermes update` 一次 — 它覆盖机器上的每个配置文件。
 
-### Can I move a profile to a different machine?
+### 我可以将配置文件移动到不同的机器吗？
 
-Yes. Export the profile to a portable archive and import it on the other machine:
+可以。将配置文件导出到便携式存档并在另一台机器上导入：
 
 ```bash
-# On the source machine
+# 在源机器上
 hermes profile export work ./work-backup.tar.gz
 
-# Copy the file to the target machine, then:
+# 将文件复制到目标机器，然后：
 hermes profile import ./work-backup.tar.gz work
 ```
 
-The imported profile will have all config, memories, sessions, and skills from the export. You may need to update paths or re-authenticate with providers if the new machine has a different setup.
+导入的配置文件将包含导出中的所有配置、记忆、会话和技能。如果新机器有不同的设置，您可能需要更新路径或重新验证提供商。
 
-### How many profiles can I run?
+### 我可以运行多少个配置文件？
 
-There is no hard limit. Each profile is just a directory under `~/.hermes/profiles/`. The practical limit depends on your disk space and how many concurrent gateways your system can handle (each gateway is a lightweight Python process). Running dozens of profiles is fine; each idle profile uses no resources.
+没有硬限制。每个配置文件只是 `~/.hermes/profiles/` 下的一个目录。实际限制取决于您的磁盘空间和系统可以处理的并发网关数量（每个网关都是一个轻量级 Python 进程）。运行几十个配置文件是可以的；每个空闲配置文件不使用任何资源。
 
 ---
 
-## Workflows & Patterns
+## 工作流程和模式
 
-### Using different models for different tasks (multi-model workflows)
+### 为不同任务使用不同模型（多模型工作流程）
 
-**Scenario:** You use GPT-5.4 as your daily driver, but Gemini or Grok writes better social media content. Manually switching models every time is tedious.
+**场景：** 您使用 GPT-5.4 作为日常驱动，但 Gemini 或 Grok 编写更好的社交媒体内容。每次手动切换模型很繁琐。
 
-**Solution: Delegation config.** Hermes can route subagents to a different model automatically. Set this in `~/.hermes/config.yaml`:
+**解决方案：委托配置。** Hermes 可以自动将子代理路由到不同的模型。在 `~/.hermes/config.yaml` 中设置：
 
 ```yaml
 delegation:
-  model: "google/gemini-3-flash-preview"   # subagents use this model
-  provider: "openrouter"                    # provider for subagents
+  model: "google/gemini-3-flash-preview"   # 子代理使用此模型
+  provider: "openrouter"                    # 子代理的提供商
 ```
 
-Now when you tell Hermes "write me a Twitter thread about X" and it spawns a `delegate_task` subagent, that subagent runs on Gemini instead of your main model. Your primary conversation stays on GPT-5.4.
+现在，当您告诉 Hermes "为我写一条关于 X 的 Twitter 线程" 并生成 `delegate_task` 子代理时，该子代理在 Gemini 上运行，而不是在您的主模型上。您的主要对话保持在 GPT-5.4 上。
 
-You can also be explicit in your prompt: *"Delegate a task to write social media posts about our product launch. Use your subagent for the actual writing."* The agent will use `delegate_task`, which automatically picks up the delegation config.
+您也可以在提示中明确说明：*"委托一个任务来为我们的产品发布撰写社交媒体帖子。使用您的子代理进行实际写作。"* 代理将使用 `delegate_task`，它会自动获取委托配置。
 
-For one-off model switches without delegation, use `/model` in the CLI:
+对于无需委托的一次性模型切换，在 CLI 中使用 `/model`：
 
 ```bash
-/model google/gemini-3-flash-preview    # switch for this session
-# ... write your content ...
-/model openai/gpt-5.4                   # switch back
+/model google/gemini-3-flash-preview    # 为此会话切换
+# ... 编写您的内容 ...
+/model openai/gpt-5.4                   # 切换回
 ```
 
-See [Subagent Delegation](../user-guide/features/delegation.md) for more on how delegation works.
+有关委托如何工作的更多信息，请参阅[子代理委托](../user-guide/features/delegation.md)。
 
-### Running multiple agents on one WhatsApp number (per-chat binding)
+### 在一个 WhatsApp 号码上运行多个代理（按聊天绑定）
 
-**Scenario:** In OpenClaw, you had multiple independent agents bound to specific WhatsApp chats — one for a family shopping list group, another for your private chat. Can Hermes do this?
+**场景：** 在 OpenClaw 中，您有多个独立的代理绑定到特定的 WhatsApp 聊天 — 一个用于家庭购物清单组，另一个用于您的私人聊天。Hermes 可以做到这一点吗？
 
-**Current limitation:** Hermes profiles each require their own WhatsApp number/session. You cannot bind multiple profiles to different chats on the same WhatsApp number — the WhatsApp bridge (Baileys) uses one authenticated session per number.
+**当前限制：** Hermes 配置文件每个都需要自己的 WhatsApp 号码/会话。您不能将多个配置文件绑定到同一个 WhatsApp 号码上的不同聊天 — WhatsApp 桥接（Baileys）每个号码使用一个经过身份验证的会话。
 
-**Workarounds:**
+**解决方法：**
 
-1. **Use a single profile with personality switching.** Create different `AGENTS.md` context files or use the `/personality` command to change behavior per chat. The agent sees which chat it's in and can adapt.
+1. **使用具有人格切换的单个配置文件。** 创建不同的 `AGENTS.md` 上下文文件或使用 `/personality` 命令来按聊天更改行为。代理会看到它所在的聊天并可以适应。
 
-2. **Use cron jobs for specialized tasks.** For a shopping list tracker, set up a cron job that monitors a specific chat and manages the list — no separate agent needed.
+2. **为专门任务使用 cron 作业。** 对于购物清单跟踪器，设置一个 cron 作业来监控特定聊天并管理列表 — 不需要单独的代理。
 
-3. **Use separate numbers.** If you need truly independent agents, pair each profile with its own WhatsApp number. Virtual numbers from services like Google Voice work for this.
+3. **使用单独的号码。** 如果您需要真正独立的代理，为每个配置文件配对自己的 WhatsApp 号码。来自 Google Voice 等服务的虚拟号码适用于此。
 
-4. **Use Telegram or Discord instead.** These platforms support per-chat binding more naturally — each Telegram group or Discord channel gets its own session, and you can run multiple bot tokens (one per profile) on the same account.
+4. **改用 Telegram 或 Discord。** 这些平台更自然地支持按聊天绑定 — 每个 Telegram 组或 Discord 频道都有自己的会话，您可以在同一个帐户上运行多个机器人令牌（每个配置文件一个）。
 
-See [Profiles](../user-guide/profiles.md) and [WhatsApp setup](../user-guide/messaging/whatsapp.md) for more details.
+有关更多详细信息，请参阅[配置文件](../user-guide/profiles.md)和[WhatsApp 设置](../user-guide/messaging/whatsapp.md)。
 
-### Controlling what shows up in Telegram (hiding logs and reasoning)
+### 控制在 Telegram 中显示的内容（隐藏日志和推理）
 
-**Scenario:** You see gateway exec logs, Hermes reasoning, and tool call details in Telegram instead of just the final output.
+**场景：** 您在 Telegram 中看到网关执行日志、Hermes 推理和工具调用详细信息，而不仅仅是最终输出。
 
-**Solution:** The `display.tool_progress` setting in `config.yaml` controls how much tool activity is shown:
+**解决方案：** `config.yaml` 中的 `display.tool_progress` 设置控制显示多少工具活动：
 
 ```yaml
 display:
-  tool_progress: "off"   # options: off, new, all, verbose
+  tool_progress: "off"   # 选项：off, new, all, verbose
 ```
 
-- **`off`** — Only the final response. No tool calls, no reasoning, no logs.
-- **`new`** — Shows new tool calls as they happen (brief one-liners).
-- **`all`** — Shows all tool activity including results.
-- **`verbose`** — Full detail including tool arguments and outputs.
+- **`off`** — 仅最终响应。无工具调用，无推理，无日志。
+- **`new`** — 在工具调用发生时显示（简短的一行）。
+- **`all`** — 显示所有工具活动，包括结果。
+- **`verbose`** — 完整详细信息，包括工具参数和输出。
 
-For messaging platforms, `off` or `new` is usually what you want. After editing `config.yaml`, restart the gateway for changes to take effect.
+对于消息传递平台，通常需要 `off` 或 `new`。编辑 `config.yaml` 后，重启网关以使更改生效。
 
-You can also toggle this per-session with the `/verbose` command (if enabled):
+您也可以使用 `/verbose` 命令（如果启用）按会话切换：
 
 ```yaml
 display:
-  tool_progress_command: true   # enables /verbose in the gateway
+  tool_progress_command: true   # 在网关中启用 /verbose
 ```
 
-### Managing skills on Telegram (slash command limit)
+### 在 Telegram 上管理技能（斜杠命令限制）
 
-**Scenario:** Telegram has a 100 slash command limit, and your skills are pushing past it. You want to disable skills you don't need on Telegram, but `hermes skills config` settings don't seem to take effect.
+**场景：** Telegram 有 100 个斜杠命令限制，而您的技能正在接近这个限制。您想在 Telegram 上禁用不需要的技能，但 `hermes skills config` 设置似乎没有生效。
 
-**Solution:** Use `hermes skills config` to disable skills per-platform. This writes to `config.yaml`:
+**解决方案：** 使用 `hermes skills config` 按平台禁用技能。这会写入 `config.yaml`：
 
 ```yaml
 skills:
-  disabled: []                    # globally disabled skills
+  disabled: []                    # 全局禁用的技能
   platform_disabled:
-    telegram: [skill-a, skill-b]  # disabled only on telegram
+    telegram: [skill-a, skill-b]  # 仅在 telegram 上禁用
 ```
 
-After changing this, **restart the gateway** (`hermes gateway restart` or kill and relaunch). The Telegram bot command menu rebuilds on startup.
+更改后，**重启网关**（`hermes gateway restart` 或终止并重新启动）。Telegram 机器人命令菜单在启动时重建。
 
 :::tip
-Skills with very long descriptions are truncated to 40 characters in the Telegram menu to stay within payload size limits. If skills aren't appearing, it may be a total payload size issue rather than the 100 command count limit — disabling unused skills helps with both.
+具有很长描述的技能在 Telegram 菜单中会被截断为 40 个字符，以保持在有效负载大小限制内。如果技能没有出现，可能是总有效负载大小问题，而不是 100 个命令计数限制 — 禁用未使用的技能对两者都有帮助。
 :::
 
-### Shared thread sessions (multiple users, one conversation)
+### 共享线程会话（多用户，一个对话）
 
-**Scenario:** You have a Telegram or Discord thread where multiple people mention the bot. You want all mentions in that thread to be part of one shared conversation, not separate per-user sessions.
+**场景：** 您有一个 Telegram 或 Discord 线程，其中多个人提及机器人。您希望该线程中的所有提及都属于一个共享对话，而不是单独的每个用户会话。
 
-**Current behavior:** Hermes creates sessions keyed by user ID on most platforms, so each person gets their own conversation context. This is by design for privacy and context isolation.
+**当前行为：** Hermes 在大多数平台上按用户 ID 创建会话，因此每个人都有自己的对话上下文。这是出于隐私和上下文隔离的设计。
 
-**Workarounds:**
+**解决方法：**
 
-1. **Use Slack.** Slack sessions are keyed by thread, not by user. Multiple users in the same thread share one conversation — exactly the behavior you're describing. This is the most natural fit.
+1. **使用 Slack。** Slack 会话按线程而不是用户键控。同一线程中的多个用户共享一个对话 — 正是您描述的行为。这是最自然的选择。
 
-2. **Use a group chat with a single user.** If one person is the designated "operator" who relays questions, the session stays unified. Others can read along.
+2. **使用具有单个用户的群聊。** 如果一个人是指定的"操作员"，负责转达问题，会话保持统一。其他人可以一起阅读。
 
-3. **Use a Discord channel.** Discord sessions are keyed by channel, so all users in the same channel share context. Use a dedicated channel for the shared conversation.
+3. **使用 Discord 频道。** Discord 会话按频道键控，因此同一频道中的所有用户共享上下文。为共享对话使用专用频道。
 
-### Exporting Hermes to another machine
+### 将 Hermes 导出到另一台机器
 
-**Scenario:** You've built up skills, cron jobs, and memories on one machine and want to move everything to a new dedicated Linux box.
+**场景：** 您在一台机器上建立了技能、cron 作业和记忆，想将所有内容移动到新的专用 Linux 机器上。
 
-**Solution:**
+**解决方案：**
 
-1. Install Hermes Agent on the new machine:
+1. 在新机器上安装 Hermes Agent：
    ```bash
    curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
    ```
 
-2. Copy your entire `~/.hermes/` directory **except** the `hermes-agent` subdirectory (that's the code repo — the new install has its own):
+2. 复制您的整个 `~/.hermes/` 目录**除了** `hermes-agent` 子目录（那是代码库 — 新安装有自己的）：
    ```bash
-   # On the source machine
+   # 在源机器上
    rsync -av --exclude='hermes-agent' ~/.hermes/ newmachine:~/.hermes/
    ```
 
-   Or use profile export/import:
+   或使用配置文件导出/导入：
    ```bash
-   # On source machine
+   # 在源机器上
    hermes profile export default ./hermes-backup.tar.gz
 
-   # On target machine
+   # 在目标机器上
    hermes profile import ./hermes-backup.tar.gz default
    ```
 
-3. On the new machine, run `hermes setup` to verify API keys and provider config are working. Re-authenticate any messaging platforms (especially WhatsApp, which uses QR pairing).
+3. 在新机器上，运行 `hermes setup` 以验证 API 密钥和提供商配置是否正常工作。重新验证任何消息传递平台（尤其是使用 QR 配对的 WhatsApp）。
 
-The `~/.hermes/` directory contains everything: `config.yaml`, `.env`, `SOUL.md`, `memories/`, `skills/`, `state.db` (sessions), `cron/`, and any custom plugins. The code itself lives in `~/.hermes/hermes-agent/` and is installed fresh.
+`~/.hermes/` 目录包含所有内容：`config.yaml`、`.env`、`SOUL.md`、`memories/`、`skills/`、`state.db`（会话）、`cron/` 和任何自定义插件。代码本身位于 `~/.hermes/hermes-agent/` 中，是全新安装的。
 
-### Permission denied when reloading shell after install
+### 安装后重新加载 shell 时权限被拒绝
 
-**Scenario:** After running the Hermes installer, `source ~/.zshrc` gives a permission denied error.
+**场景：** 运行 Hermes 安装程序后，`source ~/.zshrc` 给出权限被拒绝错误。
 
-**Cause:** This usually happens when `~/.zshrc` (or `~/.bashrc`) has incorrect file permissions, or when the installer couldn't write to it cleanly. It's not a Hermes-specific issue — it's a shell config permissions problem.
+**原因：** 这通常发生在 `~/.zshrc`（或 `~/.bashrc`）具有不正确的文件权限，或者安装程序无法干净地写入它时。这不是 Hermes 特定的问题 — 这是 shell 配置权限问题。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Check permissions
+# 检查权限
 ls -la ~/.zshrc
 
-# Fix if needed (should be -rw-r--r-- or 644)
+# 如有需要修复（应为 -rw-r--r-- 或 644）
 chmod 644 ~/.zshrc
 
-# Then reload
+# 然后重新加载
 source ~/.zshrc
 
-# Or just open a new terminal window — it picks up PATH changes automatically
+# 或只是打开一个新的终端窗口 — 它会自动获取 PATH 更改
 ```
 
-If the installer added the PATH line but permissions are wrong, you can add it manually:
+如果安装程序添加了 PATH 行但权限错误，您可以手动添加：
 ```bash
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 ```
 
-### Error 400 on first agent run
+### 第一次代理运行时出现错误 400
 
-**Scenario:** Setup completes fine, but the first chat attempt fails with HTTP 400.
+**场景：** 设置完成良好，但第一次聊天尝试失败，出现 HTTP 400。
 
-**Cause:** Usually a model name mismatch — the configured model doesn't exist on your provider, or the API key doesn't have access to it.
+**原因：** 通常是模型名称不匹配 — 配置的模型在您的提供商上不存在，或者 API 密钥没有访问权限。
 
-**Solution:**
+**解决方案：**
 ```bash
-# Check what model and provider are configured
+# 检查配置了什么模型和提供商
 hermes config show | head -20
 
-# Re-run model selection
+# 重新运行模型选择
 hermes model
 
-# Or test with a known-good model
+# 或使用已知良好的模型进行测试
 hermes chat -q "hello" --model anthropic/claude-sonnet-4.6
 ```
 
-If using OpenRouter, make sure your API key has credits. A 400 from OpenRouter often means the model requires a paid plan or the model ID has a typo.
+如果使用 OpenRouter，请确保您的 API 密钥有信用。来自 OpenRouter 的 400 通常意味着模型需要付费计划或模型 ID 有拼写错误。
 
 ---
 
-## Still Stuck?
+## 仍然卡住？
 
-If your issue isn't covered here:
+如果您的问题未在此处涵盖：
 
-1. **Search existing issues:** [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
-2. **Ask the community:** [Nous Research Discord](https://discord.gg/nousresearch)
-3. **File a bug report:** Include your OS, Python version (`python3 --version`), Hermes version (`hermes --version`), and the full error message
+1. **搜索现有问题：** [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
+2. **向社区提问：** [Nous Research Discord](https://discord.gg/nousresearch)
+3. **提交错误报告：** 包括您的操作系统、Python 版本 (`python3 --version`)、Hermes 版本 (`hermes --version`) 和完整的错误消息

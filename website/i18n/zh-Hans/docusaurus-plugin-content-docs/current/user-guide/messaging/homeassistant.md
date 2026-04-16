@@ -1,136 +1,136 @@
 ---
 title: Home Assistant
-description: Control your smart home with Hermes Agent via Home Assistant integration.
+description: 通过 Home Assistant 集成使用 Hermes Agent 控制您的智能家居。
 sidebar_label: Home Assistant
 sidebar_position: 5
 ---
 
-# Home Assistant Integration
+# Home Assistant 集成
 
-Hermes Agent integrates with [Home Assistant](https://www.home-assistant.io/) in two ways:
+Hermes Agent 通过两种方式与 [Home Assistant](https://www.home-assistant.io/) 集成：
 
-1. **Gateway platform** — subscribes to real-time state changes via WebSocket and responds to events
-2. **Smart home tools** — four LLM-callable tools for querying and controlling devices via the REST API
+1. **网关平台** — 通过 WebSocket 订阅实时状态变化并响应事件
+2. **智能家居工具** — 四个可通过 LLM 调用的工具，用于通过 REST API 查询和控制设备
 
-## Setup
+## 设置
 
-### 1. Create a Long-Lived Access Token
+### 1. 创建长期访问令牌
 
-1. Open your Home Assistant instance
-2. Go to your **Profile** (click your name in the sidebar)
-3. Scroll to **Long-Lived Access Tokens**
-4. Click **Create Token**, give it a name like "Hermes Agent"
-5. Copy the token
+1. 打开您的 Home Assistant 实例
+2. 转到您的**个人资料**（点击侧边栏中的您的姓名）
+3. 滚动到**长期访问令牌**
+4. 点击**创建令牌**，为其命名为 "Hermes Agent"
+5. 复制令牌
 
-### 2. Configure Environment Variables
+### 2. 配置环境变量
 
 ```bash
-# Add to ~/.hermes/.env
+# 添加到 ~/.hermes/.env
 
-# Required: your Long-Lived Access Token
+# 必需：您的长期访问令牌
 HASS_TOKEN=your-long-lived-access-token
 
-# Optional: HA URL (default: http://homeassistant.local:8123)
+# 可选：HA URL（默认：http://homeassistant.local:8123）
 HASS_URL=http://192.168.1.100:8123
 ```
 
 :::info
-The `homeassistant` toolset is automatically enabled when `HASS_TOKEN` is set. Both the gateway platform and the device control tools activate from this single token.
+当设置了 `HASS_TOKEN` 时，`homeassistant` 工具集会自动启用。网关平台和设备控制工具都从这个单一令牌激活。
 :::
 
-### 3. Start the Gateway
+### 3. 启动网关
 
 ```bash
 hermes gateway
 ```
 
-Home Assistant will appear as a connected platform alongside any other messaging platforms (Telegram, Discord, etc.).
+Home Assistant 将作为连接的平台出现在任何其他消息平台（Telegram、Discord 等）旁边。
 
-## Available Tools
+## 可用工具
 
-Hermes Agent registers four tools for smart home control:
+Hermes Agent 注册了四个用于智能家居控制的工具：
 
 ### `ha_list_entities`
 
-List Home Assistant entities, optionally filtered by domain or area.
+列出 Home Assistant 实体，可选择按域或区域过滤。
 
-**Parameters:**
-- `domain` *(optional)* — Filter by entity domain: `light`, `switch`, `climate`, `sensor`, `binary_sensor`, `cover`, `fan`, `media_player`, etc.
-- `area` *(optional)* — Filter by area/room name (matches against friendly names): `living room`, `kitchen`, `bedroom`, etc.
+**参数：**
+- `domain` *(可选)* — 按实体域过滤：`light`、`switch`、`climate`、`sensor`、`binary_sensor`、`cover`、`fan`、`media_player` 等
+- `area` *(可选)* — 按区域/房间名称过滤（匹配友好名称）：`living room`、`kitchen`、`bedroom` 等
 
-**Example:**
+**示例：**
 ```
-List all lights in the living room
+列出客厅中的所有灯光
 ```
 
-Returns entity IDs, states, and friendly names.
+返回实体 ID、状态和友好名称。
 
 ### `ha_get_state`
 
-Get detailed state of a single entity, including all attributes (brightness, color, temperature setpoint, sensor readings, etc.).
+获取单个实体的详细状态，包括所有属性（亮度、颜色、温度设定值、传感器读数等）。
 
-**Parameters:**
-- `entity_id` *(required)* — The entity to query, e.g., `light.living_room`, `climate.thermostat`, `sensor.temperature`
+**参数：**
+- `entity_id` *(必需)* — 要查询的实体，例如 `light.living_room`、`climate.thermostat`、`sensor.temperature`
 
-**Example:**
+**示例：**
 ```
-What's the current state of climate.thermostat?
+climate.thermostat 的当前状态是什么？
 ```
 
-Returns: state, all attributes, last changed/updated timestamps.
+返回：状态、所有属性、最后更改/更新时间戳。
 
 ### `ha_list_services`
 
-List available services (actions) for device control. Shows what actions can be performed on each device type and what parameters they accept.
+列出可用的服务（操作）用于设备控制。显示可在每种设备类型上执行的操作以及它们接受的参数。
 
-**Parameters:**
-- `domain` *(optional)* — Filter by domain, e.g., `light`, `climate`, `switch`
+**参数：**
+- `domain` *(可选)* — 按域过滤，例如 `light`、`climate`、`switch`
 
-**Example:**
+**示例：**
 ```
-What services are available for climate devices?
+气候设备有哪些可用服务？
 ```
 
 ### `ha_call_service`
 
-Call a Home Assistant service to control a device.
+调用 Home Assistant 服务来控制设备。
 
-**Parameters:**
-- `domain` *(required)* — Service domain: `light`, `switch`, `climate`, `cover`, `media_player`, `fan`, `scene`, `script`
-- `service` *(required)* — Service name: `turn_on`, `turn_off`, `toggle`, `set_temperature`, `set_hvac_mode`, `open_cover`, `close_cover`, `set_volume_level`
-- `entity_id` *(optional)* — Target entity, e.g., `light.living_room`
-- `data` *(optional)* — Additional parameters as a JSON object
+**参数：**
+- `domain` *(必需)* — 服务域：`light`、`switch`、`climate`、`cover`、`media_player`、`fan`、`scene`、`script`
+- `service` *(必需)* — 服务名称：`turn_on`、`turn_off`、`toggle`、`set_temperature`、`set_hvac_mode`、`open_cover`、`close_cover`、`set_volume_level`
+- `entity_id` *(可选)* — 目标实体，例如 `light.living_room`
+- `data` *(可选)* — 作为 JSON 对象的附加参数
 
-**Examples:**
+**示例：**
 
 ```
-Turn on the living room lights
+打开客厅灯光
 → ha_call_service(domain="light", service="turn_on", entity_id="light.living_room")
 ```
 
 ```
-Set the thermostat to 22 degrees in heat mode
+将恒温器设置为 22 度，加热模式
 → ha_call_service(domain="climate", service="set_temperature",
     entity_id="climate.thermostat", data={"temperature": 22, "hvac_mode": "heat"})
 ```
 
 ```
-Set living room lights to blue at 50% brightness
+将客厅灯光设置为蓝色，亮度 50%
 → ha_call_service(domain="light", service="turn_on",
     entity_id="light.living_room", data={"brightness": 128, "color_name": "blue"})
 ```
 
-## Gateway Platform: Real-Time Events
+## 网关平台：实时事件
 
-The Home Assistant gateway adapter connects via WebSocket and subscribes to `state_changed` events. When a device state changes and matches your filters, it's forwarded to the agent as a message.
+Home Assistant 网关适配器通过 WebSocket 连接并订阅 `state_changed` 事件。当设备状态更改并匹配您的过滤器时，它会作为消息转发给代理。
 
-### Event Filtering
+### 事件过滤
 
-:::warning Required Configuration
-By default, **no events are forwarded**. You must configure at least one of `watch_domains`, `watch_entities`, or `watch_all` to receive events. Without filters, a warning is logged at startup and all state changes are silently dropped.
+:::warning 必需配置
+默认情况下，**不转发任何事件**。您必须配置 `watch_domains`、`watch_entities` 或 `watch_all` 中的至少一个来接收事件。没有过滤器，启动时会记录警告，所有状态更改都会被静默丢弃。
 :::
 
-Configure which events the agent sees in `~/.hermes/config.yaml` under the Home Assistant platform's `extra` section:
+在 `~/.hermes/config.yaml` 中 Home Assistant 平台的 `extra` 部分配置代理看到的事件：
 
 ```yaml
 platforms:
@@ -151,69 +151,69 @@ platforms:
       cooldown_seconds: 30
 ```
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `watch_domains` | *(none)* | Only watch these entity domains (e.g., `climate`, `light`, `binary_sensor`) |
-| `watch_entities` | *(none)* | Only watch these specific entity IDs |
-| `watch_all` | `false` | Set to `true` to receive **all** state changes (not recommended for most setups) |
-| `ignore_entities` | *(none)* | Always ignore these entities (applied before domain/entity filters) |
-| `cooldown_seconds` | `30` | Minimum seconds between events for the same entity |
+| 设置 | 默认值 | 描述 |
+|------|--------|------|
+| `watch_domains` | *(无)* | 仅监视这些实体域（例如 `climate`、`light`、`binary_sensor`） |
+| `watch_entities` | *(无)* | 仅监视这些特定实体 ID |
+| `watch_all` | `false` | 设置为 `true` 以接收**所有**状态更改（不建议用于大多数设置） |
+| `ignore_entities` | *(无)* | 始终忽略这些实体（在域/实体过滤器之前应用） |
+| `cooldown_seconds` | `30` | 同一实体事件之间的最小秒数 |
 
 :::tip
-Start with a focused set of domains — `climate`, `binary_sensor`, and `alarm_control_panel` cover the most useful automations. Add more as needed. Use `ignore_entities` to suppress noisy sensors like CPU temperature or uptime counters.
+从一组集中的域开始 — `climate`、`binary_sensor` 和 `alarm_control_panel` 涵盖了最有用的自动化。根据需要添加更多。使用 `ignore_entities` 来抑制嘈杂的传感器，如 CPU 温度或运行时间计数器。
 :::
 
-### Event Formatting
+### 事件格式化
 
-State changes are formatted as human-readable messages based on domain:
+状态更改根据域格式化为人类可读的消息：
 
-| Domain | Format |
-|--------|--------|
-| `climate` | "HVAC mode changed from 'off' to 'heat' (current: 21, target: 23)" |
-| `sensor` | "changed from 21°C to 22°C" |
-| `binary_sensor` | "triggered" / "cleared" |
-| `light`, `switch`, `fan` | "turned on" / "turned off" |
-| `alarm_control_panel` | "alarm state changed from 'armed_away' to 'triggered'" |
-| *(other)* | "changed from 'old' to 'new'" |
+| 域 | 格式 |
+|------|------|
+| `climate` | "HVAC 模式从 'off' 更改为 'heat'（当前：21，目标：23）" |
+| `sensor` | "从 21°C 更改为 22°C" |
+| `binary_sensor` | "触发" / "清除" |
+| `light`、`switch`、`fan` | "打开" / "关闭" |
+| `alarm_control_panel` | "警报状态从 'armed_away' 更改为 'triggered'" |
+| *(其他)* | "从 '旧' 更改为 '新'" |
 
-### Agent Responses
+### 代理响应
 
-Outbound messages from the agent are delivered as **Home Assistant persistent notifications** (via `persistent_notification.create`). These appear in the HA notification panel with the title "Hermes Agent".
+代理的出站消息作为 **Home Assistant 持久通知** 传递（通过 `persistent_notification.create`）。这些会出现在 HA 通知面板中，标题为 "Hermes Agent"。
 
-### Connection Management
+### 连接管理
 
-- **WebSocket** with 30-second heartbeat for real-time events
-- **Automatic reconnection** with backoff: 5s → 10s → 30s → 60s
-- **REST API** for outbound notifications (separate session to avoid WebSocket conflicts)
-- **Authorization** — HA events are always authorized (no user allowlist needed, since the `HASS_TOKEN` authenticates the connection)
+- **WebSocket** 带有 30 秒心跳以获取实时事件
+- **自动重连** 带有退避：5s → 10s → 30s → 60s
+- **REST API** 用于出站通知（单独会话以避免 WebSocket 冲突）
+- **授权** — HA 事件始终授权（不需要用户允许列表，因为 `HASS_TOKEN` 对连接进行身份验证）
 
-## Security
+## 安全性
 
-The Home Assistant tools enforce security restrictions:
+Home Assistant 工具强制执行安全限制：
 
-:::warning Blocked Domains
-The following service domains are **blocked** to prevent arbitrary code execution on the HA host:
+:::warning 已阻止的域
+以下服务域被**阻止**以防止在 HA 主机上执行任意代码：
 
-- `shell_command` — arbitrary shell commands
-- `command_line` — sensors/switches that execute commands
-- `python_script` — scripted Python execution
-- `pyscript` — broader scripting integration
-- `hassio` — addon control, host shutdown/reboot
-- `rest_command` — HTTP requests from HA server (SSRF vector)
+- `shell_command` — 任意 shell 命令
+- `command_line` — 执行命令的传感器/开关
+- `python_script` — 脚本化 Python 执行
+- `pyscript` — 更广泛的脚本集成
+- `hassio` — 插件控制、主机关闭/重启
+- `rest_command` — 来自 HA 服务器的 HTTP 请求（SSRF 向量）
 
-Attempting to call services in these domains returns an error.
+尝试调用这些域中的服务会返回错误。
 :::
 
-Entity IDs are validated against the pattern `^[a-z_][a-z0-9_]*\.[a-z0-9_]+$` to prevent injection attacks.
+实体 ID 针对模式 `^[a-z_][a-z0-9_]*\.[a-z0-9_]+$` 进行验证，以防止注入攻击。
 
-## Example Automations
+## 示例自动化
 
-### Morning Routine
+### 晨间例程
 
 ```
-User: Start my morning routine
+用户：开始我的晨间例程
 
-Agent:
+代理：
 1. ha_call_service(domain="light", service="turn_on",
      entity_id="light.bedroom", data={"brightness": 128})
 2. ha_call_service(domain="climate", service="set_temperature",
@@ -222,31 +222,31 @@ Agent:
      entity_id="media_player.kitchen_speaker")
 ```
 
-### Security Check
+### 安全检查
 
 ```
-User: Is the house secure?
+用户：房子安全吗？
 
-Agent:
+代理：
 1. ha_list_entities(domain="binary_sensor")
-     → checks door/window sensors
+     → 检查门/窗传感器
 2. ha_get_state(entity_id="alarm_control_panel.home")
-     → checks alarm status
+     → 检查警报状态
 3. ha_list_entities(domain="lock")
-     → checks lock states
-4. Reports: "All doors closed, alarm is armed_away, all locks engaged."
+     → 检查锁状态
+4. 报告："所有门关闭，警报已布防，所有锁已锁定。"
 ```
 
-### Reactive Automation (via Gateway Events)
+### 反应式自动化（通过网关事件）
 
-When connected as a gateway platform, the agent can react to events:
+当作为网关平台连接时，代理可以对事件做出反应：
 
 ```
-[Home Assistant] Front Door: triggered (was cleared)
+[Home Assistant] 前门：触发（已清除）
 
-Agent automatically:
+代理自动：
 1. ha_get_state(entity_id="binary_sensor.front_door")
 2. ha_call_service(domain="light", service="turn_on",
      entity_id="light.hallway")
-3. Sends notification: "Front door opened. Hallway lights turned on."
+3. 发送通知："前门已打开。走廊灯已打开。"
 ```

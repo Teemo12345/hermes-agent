@@ -1,151 +1,151 @@
 ---
 sidebar_position: 10
 title: "DingTalk"
-description: "Set up Hermes Agent as a DingTalk chatbot"
+description: "将 Hermes Agent 设置为钉钉聊天机器人"
 ---
 
-# DingTalk Setup
+# 钉钉设置
 
-Hermes Agent integrates with DingTalk (钉钉) as a chatbot, letting you chat with your AI assistant through direct messages or group chats. The bot connects via DingTalk's Stream Mode — a long-lived WebSocket connection that requires no public URL or webhook server — and replies using markdown-formatted messages through DingTalk's session webhook API.
+Hermes Agent 作为聊天机器人集成到钉钉中，让您通过直接消息或群聊与您的 AI 助手聊天。机器人通过钉钉的 Stream Mode 连接 — 一个长寿命的 WebSocket 连接，不需要公共 URL 或 webhook 服务器 — 并通过钉钉的会话 webhook API 使用 markdown 格式的消息回复。
 
-Before setup, here's the part most people want to know: how Hermes behaves once it's in your DingTalk workspace.
+在设置之前，这里是大多数人想知道的：Hermes 在您的钉钉工作区中的行为。
 
-## How Hermes Behaves
+## Hermes 的行为
 
-| Context | Behavior |
+| 上下文 | 行为 |
 |---------|----------|
-| **DMs (1:1 chat)** | Hermes responds to every message. No `@mention` needed. Each DM has its own session. |
-| **Group chats** | Hermes responds when you `@mention` it. Without a mention, Hermes ignores the message. |
-| **Shared groups with multiple users** | By default, Hermes isolates session history per user inside the group. Two people talking in the same group do not share one transcript unless you explicitly disable that. |
+| **私聊（1:1 聊天）** | Hermes 响应每条消息。不需要 `@提及`。每个私聊都有自己的会话。 |
+| **群聊** | 当您 `@提及` 它时，Hermes 会响应。没有提及，Hermes 会忽略消息。 |
+| **与多个用户共享群聊** | 默认情况下，Hermes 在群内为每个用户隔离会话历史记录。两个人在同一个群聊中交谈不会共享一个转录本，除非您明确禁用它。 |
 
-### Session Model in DingTalk
+### 钉钉中的会话模型
 
-By default:
+默认情况下：
 
-- each DM gets its own session
-- each user in a shared group chat gets their own session inside that group
+- 每个私聊获得自己的会话
+- 共享群聊中的每个用户在该群内获得自己的会话
 
-This is controlled by `config.yaml`:
+这由 `config.yaml` 控制：
 
 ```yaml
 group_sessions_per_user: true
 ```
 
-Set it to `false` only if you explicitly want one shared conversation for the entire group:
+只有当您明确希望整个群聊有一个共享对话时，才将其设置为 `false`：
 
 ```yaml
 group_sessions_per_user: false
 ```
 
-This guide walks you through the full setup process — from creating your DingTalk bot to sending your first message.
+本指南引导您完成完整的设置过程 — 从创建钉钉机器人到发送第一条消息。
 
-## Prerequisites
+## 先决条件
 
-Install the required Python packages:
+安装所需的 Python 包：
 
 ```bash
 pip install dingtalk-stream httpx
 ```
 
-- `dingtalk-stream` — DingTalk's official SDK for Stream Mode (WebSocket-based real-time messaging)
-- `httpx` — async HTTP client used for sending replies via session webhooks
+- `dingtalk-stream` — 钉钉官方的 Stream Mode SDK（基于 WebSocket 的实时消息传递）
+- `httpx` — 用于通过会话 webhook 发送回复的异步 HTTP 客户端
 
-## Step 1: Create a DingTalk App
+## 步骤 1：创建钉钉应用
 
-1. Go to the [DingTalk Developer Console](https://open-dev.dingtalk.com/).
-2. Log in with your DingTalk admin account.
-3. Click **Application Development** → **Custom Apps** → **Create App via H5 Micro-App** (or **Robot** depending on your console version).
-4. Fill in:
-   - **App Name**: e.g., `Hermes Agent`
-   - **Description**: optional
-5. After creating, navigate to **Credentials & Basic Info** to find your **Client ID** (AppKey) and **Client Secret** (AppSecret). Copy both.
+1. 前往 [钉钉开发者控制台](https://open-dev.dingtalk.com/)。
+2. 使用您的钉钉管理员账户登录。
+3. 点击 **应用开发** → **自定义应用** → **通过 H5 微应用创建应用**（或根据您的控制台版本选择 **机器人**）。
+4. 填写：
+   - **应用名称**：例如，`Hermes Agent`
+   - **描述**：可选
+5. 创建后，导航到 **凭证与基础信息** 以找到您的 **Client ID**（AppKey）和 **Client Secret**（AppSecret）。复制两者。
 
-:::warning[Credentials shown only once]
-The Client Secret is only displayed once when you create the app. If you lose it, you'll need to regenerate it. Never share these credentials publicly or commit them to Git.
+:::warning[凭证只显示一次]
+Client Secret 仅在创建应用时显示一次。如果您丢失了它，需要重新生成。永远不要公开分享这些凭证或将其提交到 Git。
 :::
 
-## Step 2: Enable the Robot Capability
+## 步骤 2：启用机器人能力
 
-1. In your app's settings page, go to **Add Capability** → **Robot**.
-2. Enable the robot capability.
-3. Under **Message Reception Mode**, select **Stream Mode** (recommended — no public URL needed).
+1. 在您的应用设置页面中，前往 **添加能力** → **机器人**。
+2. 启用机器人能力。
+3. 在 **消息接收模式** 下，选择 **Stream Mode**（推荐 — 不需要公共 URL）。
 
 :::tip
-Stream Mode is the recommended setup. It uses a long-lived WebSocket connection initiated from your machine, so you don't need a public IP, domain name, or webhook endpoint. This works behind NAT, firewalls, and on local machines.
+Stream Mode 是推荐的设置。它使用从您的机器发起的长寿命 WebSocket 连接，因此您不需要公共 IP、域名或 webhook 端点。这在 NAT、防火墙后面和本地机器上都能工作。
 :::
 
-## Step 3: Find Your DingTalk User ID
+## 步骤 3：查找您的钉钉用户 ID
 
-Hermes Agent uses your DingTalk User ID to control who can interact with the bot. DingTalk User IDs are alphanumeric strings set by your organization's admin.
+Hermes Agent 使用您的钉钉用户 ID 来控制谁可以与机器人交互。钉钉用户 ID 是由您组织的管理员设置的字母数字字符串。
 
-To find yours:
+要找到您的：
 
-1. Ask your DingTalk organization admin — User IDs are configured in the DingTalk admin console under **Contacts** → **Members**.
-2. Alternatively, the bot logs the `sender_id` for each incoming message. Start the gateway, send the bot a message, then check the logs for your ID.
+1. 询问您的钉钉组织管理员 — 用户 ID 在钉钉管理控制台的 **通讯录** → **成员** 下配置。
+2. 或者，机器人会记录每条传入消息的 `sender_id`。启动网关，向机器人发送消息，然后在日志中检查您的 ID。
 
-## Step 4: Configure Hermes Agent
+## 步骤 4：配置 Hermes Agent
 
-### Option A: Interactive Setup (Recommended)
+### 选项 A：交互式设置（推荐）
 
-Run the guided setup command:
+运行引导设置命令：
 
 ```bash
 hermes gateway setup
 ```
 
-Select **DingTalk** when prompted, then paste your Client ID, Client Secret, and allowed user IDs when asked.
+当提示时选择 **DingTalk**，然后在询问时粘贴您的 Client ID、Client Secret 和允许的用户 ID。
 
-### Option B: Manual Configuration
+### 选项 B：手动配置
 
-Add the following to your `~/.hermes/.env` file:
+将以下内容添加到您的 `~/.hermes/.env` 文件：
 
 ```bash
-# Required
+# 必需
 DINGTALK_CLIENT_ID=your-app-key
 DINGTALK_CLIENT_SECRET=your-app-secret
 
-# Security: restrict who can interact with the bot
+# 安全：限制谁可以与机器人交互
 DINGTALK_ALLOWED_USERS=user-id-1
 
-# Multiple allowed users (comma-separated)
+# 多个允许的用户（逗号分隔）
 # DINGTALK_ALLOWED_USERS=user-id-1,user-id-2
 ```
 
-Optional behavior settings in `~/.hermes/config.yaml`:
+`~/.hermes/config.yaml` 中的可选行为设置：
 
 ```yaml
 group_sessions_per_user: true
 ```
 
-- `group_sessions_per_user: true` keeps each participant's context isolated inside shared group chats
+- `group_sessions_per_user: true` 在共享群聊中保持每个参与者的上下文隔离
 
-### Start the Gateway
+### 启动网关
 
-Once configured, start the DingTalk gateway:
+配置完成后，启动钉钉网关：
 
 ```bash
 hermes gateway
 ```
 
-The bot should connect to DingTalk's Stream Mode within a few seconds. Send it a message — either a DM or in a group where it's been added — to test.
+机器人应该在几秒钟内连接到钉钉的 Stream Mode。向它发送消息 — 无论是私聊还是在已添加它的群聊中 — 进行测试。
 
 :::tip
-You can run `hermes gateway` in the background or as a systemd service for persistent operation. See the deployment docs for details.
+您可以在后台或作为 systemd 服务运行 `hermes gateway` 以实现持久操作。有关详细信息，请参阅部署文档。
 :::
 
-## Troubleshooting
+## 故障排除
 
-### Bot is not responding to messages
+### 机器人不响应消息
 
-**Cause**: The robot capability isn't enabled, or `DINGTALK_ALLOWED_USERS` doesn't include your User ID.
+**原因**：机器人能力未启用，或者 `DINGTALK_ALLOWED_USERS` 不包含您的用户 ID。
 
-**Fix**: Verify the robot capability is enabled in your app settings and that Stream Mode is selected. Check that your User ID is in `DINGTALK_ALLOWED_USERS`. Restart the gateway.
+**解决方法**：验证您的应用设置中是否启用了机器人能力，并选择了 Stream Mode。检查您的用户 ID 是否在 `DINGTALK_ALLOWED_USERS` 中。重启网关。
 
-### "dingtalk-stream not installed" error
+### "dingtalk-stream not installed" 错误
 
-**Cause**: The `dingtalk-stream` Python package is not installed.
+**原因**：未安装 `dingtalk-stream` Python 包。
 
-**Fix**: Install it:
+**解决方法**：安装它：
 
 ```bash
 pip install dingtalk-stream httpx
@@ -153,40 +153,40 @@ pip install dingtalk-stream httpx
 
 ### "DINGTALK_CLIENT_ID and DINGTALK_CLIENT_SECRET required"
 
-**Cause**: The credentials aren't set in your environment or `.env` file.
+**原因**：凭证未在您的环境或 `.env` 文件中设置。
 
-**Fix**: Verify `DINGTALK_CLIENT_ID` and `DINGTALK_CLIENT_SECRET` are set correctly in `~/.hermes/.env`. The Client ID is your AppKey, and the Client Secret is your AppSecret from the DingTalk Developer Console.
+**解决方法**：验证 `DINGTALK_CLIENT_ID` 和 `DINGTALK_CLIENT_SECRET` 在 `~/.hermes/.env` 中设置正确。Client ID 是您的 AppKey，Client Secret 是您从钉钉开发者控制台获得的 AppSecret。
 
-### Stream disconnects / reconnection loops
+### 流断开连接 / 重连循环
 
-**Cause**: Network instability, DingTalk platform maintenance, or credential issues.
+**原因**：网络不稳定、钉钉平台维护或凭证问题。
 
-**Fix**: The adapter automatically reconnects with exponential backoff (2s → 5s → 10s → 30s → 60s). Check that your credentials are valid and your app hasn't been deactivated. Verify your network allows outbound WebSocket connections.
+**解决方法**：适配器使用指数退避自动重连（2s → 5s → 10s → 30s → 60s）。检查您的凭证是否有效，您的应用是否未被停用。验证您的网络允许出站 WebSocket 连接。
 
-### Bot is offline
+### 机器人离线
 
-**Cause**: The Hermes gateway isn't running, or it failed to connect.
+**原因**：Hermes 网关未运行，或连接失败。
 
-**Fix**: Check that `hermes gateway` is running. Look at the terminal output for error messages. Common issues: wrong credentials, app deactivated, `dingtalk-stream` or `httpx` not installed.
+**解决方法**：检查 `hermes gateway` 是否在运行。查看终端输出以获取错误消息。常见问题：错误的凭证、应用被停用、未安装 `dingtalk-stream` 或 `httpx`。
 
 ### "No session_webhook available"
 
-**Cause**: The bot tried to reply but doesn't have a session webhook URL. This typically happens if the webhook expired or the bot was restarted between receiving the message and sending the reply.
+**原因**：机器人尝试回复但没有会话 webhook URL。这通常发生在 webhook 过期或机器人在接收消息和发送回复之间重启的情况下。
 
-**Fix**: Send a new message to the bot — each incoming message provides a fresh session webhook for replies. This is a normal DingTalk limitation; the bot can only reply to messages it has received recently.
+**解决方法**：向机器人发送新消息 — 每条传入消息都会提供一个用于回复的新会话 webhook。这是钉钉的正常限制；机器人只能回复它最近收到的消息。
 
-## Security
+## 安全性
 
 :::warning
-Always set `DINGTALK_ALLOWED_USERS` to restrict who can interact with the bot. Without it, the gateway denies all users by default as a safety measure. Only add User IDs of people you trust — authorized users have full access to the agent's capabilities, including tool use and system access.
+始终设置 `DINGTALK_ALLOWED_USERS` 以限制谁可以与机器人交互。没有它，网关默认拒绝所有用户作为安全措施。只添加您信任的人的用户 ID — 授权用户可以完全访问智能体的功能，包括工具使用和系统访问。
 :::
 
-For more information on securing your Hermes Agent deployment, see the [Security Guide](../security.md).
+有关保护您的 Hermes Agent 部署的更多信息，请参阅 [安全指南](../security.md)。
 
-## Notes
+## 注意事项
 
-- **Stream Mode**: No public URL, domain name, or webhook server needed. The connection is initiated from your machine via WebSocket, so it works behind NAT and firewalls.
-- **Markdown responses**: Replies are formatted in DingTalk's markdown format for rich text display.
-- **Message deduplication**: The adapter deduplicates messages with a 5-minute window to prevent processing the same message twice.
-- **Auto-reconnection**: If the stream connection drops, the adapter automatically reconnects with exponential backoff.
-- **Message length limit**: Responses are capped at 20,000 characters per message. Longer responses are truncated.
+- **Stream Mode**：不需要公共 URL、域名或 webhook 服务器。连接通过 WebSocket 从您的机器发起，因此在 NAT 和防火墙后面也能工作。
+- **Markdown 响应**：回复使用钉钉的 markdown 格式进行富文本显示。
+- **消息去重**：适配器使用 5 分钟窗口对消息进行去重，以防止重复处理相同的消息。
+- **自动重连**：如果流连接断开，适配器会使用指数退避自动重连。
+- **消息长度限制**：每条消息的响应上限为 20,000 字符。较长的响应会被截断。

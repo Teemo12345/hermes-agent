@@ -48,27 +48,27 @@ llama.cpp 是最便携的本地 LLM 运行时。在 macOS 上，它默认使用 
 brew install llama.cpp
 ```
 
-This gives you the `llama-server` command globally.
+这会在全局范围内为您提供 `llama-server` 命令。
 
-### Download the model
+### 下载模型
 
-You need a GGUF-format model. The easiest source is Hugging Face via the `huggingface-cli`:
+您需要一个 GGUF 格式的模型。最简单的来源是通过 `huggingface-cli` 从 Hugging Face 获取：
 
 ```bash
 brew install huggingface-cli
 ```
 
-Then download:
+然后下载：
 
 ```bash
 huggingface-cli download unsloth/Qwen3.5-9B-GGUF Qwen3.5-9B-Q4_K_M.gguf --local-dir ~/models
 ```
 
-:::tip Gated models
-Some models on Hugging Face require authentication. Run `huggingface-cli login` first if you get a 401 or 404 error.
+:::tip  gated 模型
+Hugging Face 上的一些模型需要身份验证。如果您收到 401 或 404 错误，请先运行 `huggingface-cli login`。
 :::
 
-### Start the server
+### 启动服务器
 
 ```bash
 llama-server -m ~/models/Qwen3.5-9B-Q4_K_M.gguf \
@@ -81,40 +81,40 @@ llama-server -m ~/models/Qwen3.5-9B-Q4_K_M.gguf \
   --host 0.0.0.0
 ```
 
-Here's what each flag does:
+以下是每个标志的作用：
 
-| Flag | Purpose |
+| 标志 | 用途 |
 |------|---------|
-| `-ngl 99` | Offload all layers to GPU (Metal). Use a high number to ensure nothing stays on CPU. |
-| `-c 131072` | Context window size (128K tokens). Reduce this if you're low on memory. |
-| `-np 1` | Number of parallel slots. Keep at 1 for single-user use — more slots split your memory budget. |
-| `-fa on` | Flash attention. Reduces memory usage and speeds up long-context inference. |
-| `--cache-type-k q4_0` | Quantize the key cache to 4-bit. **This is the big memory saver.** |
-| `--cache-type-v q4_0` | Quantize the value cache to 4-bit. Together with the above, this cuts KV cache memory by ~75% vs f16. |
-| `--host 0.0.0.0` | Listen on all interfaces. Use `127.0.0.1` if you don't need network access. |
+| `-ngl 99` | 将所有层卸载到 GPU (Metal)。使用一个高数字以确保没有任何内容留在 CPU 上。 |
+| `-c 131072` | 上下文窗口大小（128K 令牌）。如果内存不足，减少此值。 |
+| `-np 1` | 并行槽位数。单用户使用时保持为 1 — 更多槽位会分割您的内存预算。 |
+| `-fa on` | 闪存注意力。减少内存使用并加速长上下文推理。 |
+| `--cache-type-k q4_0` | 将键缓存量化为 4 位。**这是节省内存的关键。** |
+| `--cache-type-v q4_0` | 将值缓存量化为 4 位。与上述一起，这将 KV 缓存内存减少约 75%（与 f16 相比）。 |
+| `--host 0.0.0.0` | 监听所有接口。如果不需要网络访问，使用 `127.0.0.1`。 |
 
-The server is ready when you see:
+当您看到以下输出时，服务器已准备就绪：
 
 ```
 main: server is listening on http://0.0.0.0:8080
 srv  update_slots: all slots are idle
 ```
 
-### Memory optimization for constrained systems
+### 受限系统的内存优化
 
-The `--cache-type-k q4_0 --cache-type-v q4_0` flags are the most important optimization for systems with limited memory. Here's the impact at 128K context:
+`--cache-type-k q4_0 --cache-type-v q4_0` 标志是内存有限系统最重要的优化。在 128K 上下文下的影响如下：
 
-| KV cache type | KV cache memory (128K ctx, 9B model) |
+| KV 缓存类型 | KV 缓存内存（128K 上下文，9B 模型） |
 |---------------|--------------------------------------|
-| f16 (default) | ~16 GB |
+| f16（默认） | ~16 GB |
 | q8_0 | ~8 GB |
 | **q4_0** | **~4 GB** |
 
-On an 8 GB Mac, use `q4_0` KV cache and reduce context to `-c 32768` (32K). On 16 GB, you can comfortably do 128K context. On 32 GB+, you can run larger models or multiple parallel slots.
+在 8 GB Mac 上，使用 `q4_0` KV 缓存并将上下文减少到 `-c 32768`（32K）。在 16 GB 上，您可以舒适地使用 128K 上下文。在 32 GB+ 上，您可以运行更大的模型或多个并行槽位。
 
-If you're still running out of memory, reduce context size first (`-c`), then try a smaller quantization (Q3_K_M instead of Q4_K_M).
+如果您仍然内存不足，首先减少上下文大小 (`-c`)，然后尝试更小的量化（Q3_K_M 而不是 Q4_K_M）。
 
-### Test it
+### 测试
 
 ```bash
 curl -s http://localhost:8080/v1/chat/completions \
@@ -126,9 +126,9 @@ curl -s http://localhost:8080/v1/chat/completions \
   }' | jq .choices[0].message.content
 ```
 
-### Get the model name
+### 获取模型名称
 
-If you forget the model name, query the models endpoint:
+如果您忘记了模型名称，查询模型端点：
 
 ```bash
 curl -s http://localhost:8080/v1/models | jq '.data[].id'
@@ -136,23 +136,23 @@ curl -s http://localhost:8080/v1/models | jq '.data[].id'
 
 ---
 
-## Option B: MLX via omlx
+## 选项 B：通过 omlx 使用 MLX
 
-[omlx](https://omlx.ai) is a macOS-native app that manages and serves MLX models. MLX is Apple's own machine learning framework, optimized specifically for Apple Silicon's unified memory architecture.
+[omlx](https://omlx.ai) 是一个 macOS 原生应用，用于管理和提供 MLX 模型。MLX 是 Apple 自己的机器学习框架，专门针对 Apple Silicon 的统一内存架构进行了优化。
 
-### Install
+### 安装
 
-Download and install from [omlx.ai](https://omlx.ai). It provides a GUI for model management and a built-in server.
+从 [omlx.ai](https://omlx.ai) 下载并安装。它提供了模型管理的 GUI 和内置服务器。
 
-### Download the model
+### 下载模型
 
-Use the omlx app to browse and download models. Search for `Qwen3.5-9B-mlx-lm-mxfp4` and download it. Models are stored locally (typically in `~/.omlx/models/`).
+使用 omlx 应用浏览和下载模型。搜索 `Qwen3.5-9B-mlx-lm-mxfp4` 并下载它。模型存储在本地（通常在 `~/.omlx/models/` 中）。
 
-### Start the server
+### 启动服务器
 
-omlx serves models on `http://127.0.0.1:8000` by default. Start serving from the app UI, or use the CLI if available.
+omlx 默认在 `http://127.0.0.1:8000` 上提供模型。从应用 UI 开始提供，或使用可用的 CLI。
 
-### Test it
+### 测试
 
 ```bash
 curl -s http://127.0.0.1:8000/v1/chat/completions \
@@ -164,9 +164,9 @@ curl -s http://127.0.0.1:8000/v1/chat/completions \
   }' | jq .choices[0].message.content
 ```
 
-### List available models
+### 列出可用模型
 
-omlx can serve multiple models simultaneously:
+omlx 可以同时提供多个模型：
 
 ```bash
 curl -s http://127.0.0.1:8000/v1/models | jq '.data[].id'
@@ -174,67 +174,67 @@ curl -s http://127.0.0.1:8000/v1/models | jq '.data[].id'
 
 ---
 
-## Benchmarks: llama.cpp vs MLX
+## 基准测试：llama.cpp vs MLX
 
-Both backends tested on the same machine (Apple M5 Max, 128 GB unified memory) running the same model (Qwen3.5-9B) at comparable quantization levels (Q4_K_M for GGUF, mxfp4 for MLX). Five diverse prompts, three runs each, backends tested sequentially to avoid resource contention.
+两个后端在同一台机器（Apple M5 Max，128 GB 统一内存）上测试，运行相同的模型（Qwen3.5-9B），在可比的量化级别（GGUF 的 Q4_K_M，MLX 的 mxfp4）。五个不同的提示，每个运行三次，后端按顺序测试以避免资源竞争。
 
-### Results
+### 结果
 
-| Metric | llama.cpp (Q4_K_M) | MLX (mxfp4) | Winner |
+| 指标 | llama.cpp (Q4_K_M) | MLX (mxfp4) | 赢家 |
 |--------|-------------------|-------------|--------|
-| **TTFT (avg)** | **67 ms** | 289 ms | llama.cpp (4.3x faster) |
-| **TTFT (p50)** | **66 ms** | 286 ms | llama.cpp (4.3x faster) |
-| **Generation (avg)** | 70 tok/s | **96 tok/s** | MLX (37% faster) |
-| **Generation (p50)** | 70 tok/s | **96 tok/s** | MLX (37% faster) |
-| **Total time (512 tokens)** | 7.3s | **5.5s** | MLX (25% faster) |
+| **TTFT（平均）** | **67 ms** | 289 ms | llama.cpp（快 4.3 倍） |
+| **TTFT（p50）** | **66 ms** | 286 ms | llama.cpp（快 4.3 倍） |
+| **生成速度（平均）** | 70 tok/s | **96 tok/s** | MLX（快 37%） |
+| **生成速度（p50）** | 70 tok/s | **96 tok/s** | MLX（快 37%） |
+| **总时间（512 令牌）** | 7.3s | **5.5s** | MLX（快 25%） |
 
-### What this means
+### 这意味着什么
 
-- **llama.cpp** excels at prompt processing — its flash attention + quantized KV cache pipeline gets you the first token in ~66ms. If you're building interactive applications where perceived responsiveness matters (chatbots, autocomplete), this is a meaningful advantage.
+- **llama.cpp** 在提示处理方面表现出色 — 其闪存注意力 + 量化 KV 缓存管道在约 66ms 内为您提供第一个令牌。如果您正在构建感知响应性很重要的交互式应用程序（聊天机器人、自动完成），这是一个有意义的优势。
 
-- **MLX** generates tokens ~37% faster once it gets going. For batch workloads, long-form generation, or any task where total completion time matters more than initial latency, MLX finishes sooner.
+- **MLX** 一旦开始，生成令牌的速度快约 37%。对于批处理工作负载、长篇生成或任何总完成时间比初始延迟更重要的任务，MLX 完成得更快。
 
-- Both backends are **extremely consistent** — variance across runs was negligible. You can rely on these numbers.
+- 两个后端都 **非常一致** — 运行之间的差异可以忽略不计。您可以依赖这些数字。
 
-### Which one should you pick?
+### 您应该选择哪一个？
 
-| Use case | Recommendation |
+| 使用场景 | 推荐 |
 |----------|---------------|
-| Interactive chat, low-latency tools | llama.cpp |
-| Long-form generation, bulk processing | MLX (omlx) |
-| Memory-constrained (8-16 GB) | llama.cpp (quantized KV cache is unmatched) |
-| Serving multiple models simultaneously | omlx (built-in multi-model support) |
-| Maximum compatibility (Linux too) | llama.cpp |
+| 交互式聊天，低延迟工具 | llama.cpp |
+| 长篇生成，批量处理 | MLX (omlx) |
+| 内存受限（8-16 GB） | llama.cpp（量化 KV 缓存无与伦比） |
+| 同时提供多个模型 | omlx（内置多模型支持） |
+| 最大兼容性（也支持 Linux） | llama.cpp |
 
 ---
 
-## Connect to Hermes
+## 连接到 Hermes
 
-Once your local server is running:
+一旦您的本地服务器运行：
 
 ```bash
 hermes model
 ```
 
-Select **Custom endpoint** and follow the prompts. It will ask for the base URL and model name — use the values from whichever backend you set up above.
+选择 **自定义端点** 并按照提示操作。它会询问基本 URL 和模型名称 — 使用您上面设置的任何后端的值。
 
 ---
 
-## Timeouts
+## 超时
 
-Hermes automatically detects local endpoints (localhost, LAN IPs) and relaxes its streaming timeouts. No configuration needed for most setups.
+Hermes 自动检测本地端点（localhost、LAN IP）并放宽其流式传输超时。大多数设置不需要配置。
 
-If you still hit timeout errors (e.g. very large contexts on slow hardware), you can override the streaming read timeout:
+如果您仍然遇到超时错误（例如，在慢速硬件上的非常大的上下文），您可以覆盖流式读取超时：
 
 ```bash
-# In your .env — raise from the 120s default to 30 minutes
+# 在您的 .env 中 — 从 120s 默认值提高到 30 分钟
 HERMES_STREAM_READ_TIMEOUT=1800
 ```
 
-| Timeout | Default | Local auto-adjustment | Env var override |
+| 超时 | 默认值 | 本地自动调整 | 环境变量覆盖 |
 |---------|---------|----------------------|------------------|
-| Stream read (socket-level) | 120s | Raised to 1800s | `HERMES_STREAM_READ_TIMEOUT` |
-| Stale stream detection | 180s | Disabled entirely | `HERMES_STREAM_STALE_TIMEOUT` |
-| API call (non-streaming) | 1800s | No change needed | `HERMES_API_TIMEOUT` |
+| 流式读取（套接字级别） | 120s | 提高到 1800s | `HERMES_STREAM_READ_TIMEOUT` |
+|  stale 流检测 | 180s | 完全禁用 | `HERMES_STREAM_STALE_TIMEOUT` |
+| API 调用（非流式） | 1800s | 无需更改 | `HERMES_API_TIMEOUT` |
 
-The stream read timeout is the one most likely to cause issues — it's the socket-level deadline for receiving the next chunk of data. During prefill on large contexts, local models may produce no output for minutes while processing the prompt. The auto-detection handles this transparently.
+流式读取超时是最可能导致问题的 — 它是接收下一个数据块的套接字级截止日期。在大型上下文的预填充期间，本地模型可能在处理提示时数分钟内不产生任何输出。自动检测透明地处理这种情况。

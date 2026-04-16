@@ -202,163 +202,163 @@ hermes honcho sync   # 扫描所有配置文件，为任何缺失的配置文件
 
 ### OpenViking
 
-Context database by Volcengine (ByteDance) with filesystem-style knowledge hierarchy, tiered retrieval, and automatic memory extraction into 6 categories.
+火山引擎（字节跳动）的上下文数据库，具有文件系统风格的知识层次结构、分层检索和自动将记忆提取到 6 个类别中。
 
 | | |
 |---|---|
-| **Best for** | Self-hosted knowledge management with structured browsing |
-| **Requires** | `pip install openviking` + running server |
-| **Data storage** | Self-hosted (local or cloud) |
-| **Cost** | Free (open-source, AGPL-3.0) |
+| **最适合** | 具有结构化浏览的自托管知识管理 |
+| **要求** | `pip install openviking` + 运行中的服务器 |
+| **数据存储** | 自托管（本地或云） |
+| **成本** | 免费（开源，AGPL-3.0） |
 
-**Tools:** `viking_search` (semantic search), `viking_read` (tiered: abstract/overview/full), `viking_browse` (filesystem navigation), `viking_remember` (store facts), `viking_add_resource` (ingest URLs/docs)
+**工具：** `viking_search`（语义搜索）、`viking_read`（分层：摘要/概述/完整）、`viking_browse`（文件系统导航）、`viking_remember`（存储事实）、`viking_add_resource`（摄取 URL/文档）
 
-**Setup:**
+**设置：**
 ```bash
-# Start the OpenViking server first
+# 首先启动 OpenViking 服务器
 pip install openviking
 openviking-server
 
-# Then configure Hermes
-hermes memory setup    # select "openviking"
-# Or manually:
+# 然后配置 Hermes
+hermes memory setup    # 选择 "openviking"
+# 或手动：
 hermes config set memory.provider openviking
 echo "OPENVIKING_ENDPOINT=http://localhost:1933" >> ~/.hermes/.env
 ```
 
-**Key features:**
-- Tiered context loading: L0 (~100 tokens) → L1 (~2k) → L2 (full)
-- Automatic memory extraction on session commit (profile, preferences, entities, events, cases, patterns)
-- `viking://` URI scheme for hierarchical knowledge browsing
+**关键特性：**
+- 分层上下文加载：L0（约 100 个令牌）→ L1（约 2k）→ L2（完整）
+- 会话提交时自动记忆提取（配置文件、偏好、实体、事件、案例、模式）
+- `viking://` URI 方案用于层次化知识浏览
 
 ---
 
 ### Mem0
 
-Server-side LLM fact extraction with semantic search, reranking, and automatic deduplication.
+服务器端 LLM 事实提取，具有语义搜索、重排序和自动去重功能。
 
 | | |
 |---|---|
-| **Best for** | Hands-off memory management — Mem0 handles extraction automatically |
-| **Requires** | `pip install mem0ai` + API key |
-| **Data storage** | Mem0 Cloud |
-| **Cost** | Mem0 pricing |
+| **最适合** | 无需手动干预的记忆管理 — Mem0 自动处理提取 |
+| **要求** | `pip install mem0ai` + API 密钥 |
+| **数据存储** | Mem0 Cloud |
+| **成本** | Mem0 定价 |
 
-**Tools:** `mem0_profile` (all stored memories), `mem0_search` (semantic search + reranking), `mem0_conclude` (store verbatim facts)
+**工具：** `mem0_profile`（所有存储的记忆）、`mem0_search`（语义搜索 + 重排序）、`mem0_conclude`（存储逐字事实）
 
-**Setup:**
+**设置：**
 ```bash
-hermes memory setup    # select "mem0"
-# Or manually:
+hermes memory setup    # 选择 "mem0"
+# 或手动：
 hermes config set memory.provider mem0
 echo "MEM0_API_KEY=your-key" >> ~/.hermes/.env
 ```
 
-**Config:** `$HERMES_HOME/mem0.json`
+**配置：** `$HERMES_HOME/mem0.json`
 
-| Key | Default | Description |
+| 键 | 默认值 | 描述 |
 |-----|---------|-------------|
-| `user_id` | `hermes-user` | User identifier |
-| `agent_id` | `hermes` | Agent identifier |
+| `user_id` | `hermes-user` | 用户标识符 |
+| `agent_id` | `hermes` | 智能体标识符 |
 
 ---
 
 ### Hindsight
 
-Long-term memory with knowledge graph, entity resolution, and multi-strategy retrieval. The `hindsight_reflect` tool provides cross-memory synthesis that no other provider offers. Automatically retains full conversation turns (including tool calls) with session-level document tracking.
+具有知识图谱、实体解析和多策略检索的长期记忆。`hindsight_reflect` 工具提供其他提供者所没有的跨记忆合成。自动保留完整的对话回合（包括工具调用），并进行会话级文档跟踪。
 
 | | |
 |---|---|
-| **Best for** | Knowledge graph-based recall with entity relationships |
-| **Requires** | Cloud: API key from [ui.hindsight.vectorize.io](https://ui.hindsight.vectorize.io). Local: LLM API key (OpenAI, Groq, OpenRouter, etc.) |
-| **Data storage** | Hindsight Cloud or local embedded PostgreSQL |
-| **Cost** | Hindsight pricing (cloud) or free (local) |
+| **最适合** | 基于知识图谱的回忆，具有实体关系 |
+| **要求** | 云：来自 [ui.hindsight.vectorize.io](https://ui.hindsight.vectorize.io) 的 API 密钥。本地：LLM API 密钥（OpenAI、Groq、OpenRouter 等） |
+| **数据存储** | Hindsight Cloud 或本地嵌入式 PostgreSQL |
+| **成本** | Hindsight 定价（云）或免费（本地） |
 
-**Tools:** `hindsight_retain` (store with entity extraction), `hindsight_recall` (multi-strategy search), `hindsight_reflect` (cross-memory synthesis)
+**工具：** `hindsight_retain`（带实体提取的存储）、`hindsight_recall`（多策略搜索）、`hindsight_reflect`（跨记忆合成）
 
-**Setup:**
+**设置：**
 ```bash
-hermes memory setup    # select "hindsight"
-# Or manually:
+hermes memory setup    # 选择 "hindsight"
+# 或手动：
 hermes config set memory.provider hindsight
 echo "HINDSIGHT_API_KEY=your-key" >> ~/.hermes/.env
 ```
 
-The setup wizard installs dependencies automatically and only installs what's needed for the selected mode (`hindsight-client` for cloud, `hindsight-all` for local). Requires `hindsight-client >= 0.4.22` (auto-upgraded on session start if outdated).
+设置向导会自动安装依赖项，并且只安装所选模式所需的依赖项（云模式的 `hindsight-client`，本地模式的 `hindsight-all`）。需要 `hindsight-client >= 0.4.22`（如果过时，会在会话开始时自动升级）。
 
-**Local mode UI:** `hindsight-embed -p hermes ui start`
+**本地模式 UI：** `hindsight-embed -p hermes ui start`
 
-**Config:** `$HERMES_HOME/hindsight/config.json`
+**配置：** `$HERMES_HOME/hindsight/config.json`
 
-| Key | Default | Description |
+| 键 | 默认值 | 描述 |
 |-----|---------|-------------|
-| `mode` | `cloud` | `cloud` or `local` |
-| `bank_id` | `hermes` | Memory bank identifier |
-| `recall_budget` | `mid` | Recall thoroughness: `low` / `mid` / `high` |
-| `memory_mode` | `hybrid` | `hybrid` (context + tools), `context` (auto-inject only), `tools` (tools only) |
-| `auto_retain` | `true` | Automatically retain conversation turns |
-| `auto_recall` | `true` | Automatically recall memories before each turn |
-| `retain_async` | `true` | Process retain asynchronously on the server |
-| `tags` | — | Tags applied when storing memories |
-| `recall_tags` | — | Tags to filter on recall |
+| `mode` | `cloud` | `cloud` 或 `local` |
+| `bank_id` | `hermes` | 记忆库标识符 |
+| `recall_budget` | `mid` | 回忆彻底性：`low` / `mid` / `high` |
+| `memory_mode` | `hybrid` | `hybrid`（上下文 + 工具）、`context`（仅自动注入）、`tools`（仅工具） |
+| `auto_retain` | `true` | 自动保留对话回合 |
+| `auto_recall` | `true` | 在每个回合之前自动回忆记忆 |
+| `retain_async` | `true` | 在服务器上异步处理保留 |
+| `tags` | — | 存储记忆时应用的标签 |
+| `recall_tags` | — | 回忆时过滤的标签 |
 
-See [plugin README](https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/hindsight/README.md) for the full configuration reference.
+参见 [插件 README](https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/hindsight/README.md) 获取完整的配置参考。
 
 ---
 
 ### Holographic
 
-Local SQLite fact store with FTS5 full-text search, trust scoring, and HRR (Holographic Reduced Representations) for compositional algebraic queries.
+本地 SQLite 事实存储，具有 FTS5 全文搜索、信任评分和 HRR（全息约简表示）用于组合代数查询。
 
 | | |
 |---|---|
-| **Best for** | Local-only memory with advanced retrieval, no external dependencies |
-| **Requires** | Nothing (SQLite is always available). NumPy optional for HRR algebra. |
-| **Data storage** | Local SQLite |
-| **Cost** | Free |
+| **最适合** | 具有高级检索的纯本地记忆，无外部依赖 |
+| **要求** | 无（SQLite 始终可用）。NumPy 可选用于 HRR 代数。 |
+| **数据存储** | 本地 SQLite |
+| **成本** | 免费 |
 
-**Tools:** `fact_store` (9 actions: add, search, probe, related, reason, contradict, update, remove, list), `fact_feedback` (helpful/unhelpful rating that trains trust scores)
+**工具：** `fact_store`（9 个操作：添加、搜索、探测、相关、推理、矛盾、更新、删除、列表）、`fact_feedback`（有用/无用评级，用于训练信任评分）
 
-**Setup:**
+**设置：**
 ```bash
-hermes memory setup    # select "holographic"
-# Or manually:
+hermes memory setup    # 选择 "holographic"
+# 或手动：
 hermes config set memory.provider holographic
 ```
 
-**Config:** `config.yaml` under `plugins.hermes-memory-store`
+**配置：** `config.yaml` 中的 `plugins.hermes-memory-store`
 
-| Key | Default | Description |
+| 键 | 默认值 | 描述 |
 |-----|---------|-------------|
-| `db_path` | `$HERMES_HOME/memory_store.db` | SQLite database path |
-| `auto_extract` | `false` | Auto-extract facts at session end |
-| `default_trust` | `0.5` | Default trust score (0.0–1.0) |
+| `db_path` | `$HERMES_HOME/memory_store.db` | SQLite 数据库路径 |
+| `auto_extract` | `false` | 在会话结束时自动提取事实 |
+| `default_trust` | `0.5` | 默认信任评分（0.0–1.0） |
 
-**Unique capabilities:**
-- `probe` — entity-specific algebraic recall (all facts about a person/thing)
-- `reason` — compositional AND queries across multiple entities
-- `contradict` — automated detection of conflicting facts
-- Trust scoring with asymmetric feedback (+0.05 helpful / -0.10 unhelpful)
+**独特功能：**
+- `probe` — 特定实体的代数回忆（关于一个人/事物的所有事实）
+- `reason` — 跨多个实体的组合 AND 查询
+- `contradict` — 自动检测冲突事实
+- 带有非对称反馈的信任评分（+0.05 有用 / -0.10 无用）
 
 ---
 
 ### RetainDB
 
-Cloud memory API with hybrid search (Vector + BM25 + Reranking), 7 memory types, and delta compression.
+具有混合搜索（向量 + BM25 + 重排序）、7 种记忆类型和增量压缩的云记忆 API。
 
 | | |
 |---|---|
-| **Best for** | Teams already using RetainDB's infrastructure |
-| **Requires** | RetainDB account + API key |
-| **Data storage** | RetainDB Cloud |
-| **Cost** | $20/month |
+| **最适合** | 已经使用 RetainDB 基础设施的团队 |
+| **要求** | RetainDB 账户 + API 密钥 |
+| **数据存储** | RetainDB Cloud |
+| **成本** | $20/月 |
 
-**Tools:** `retaindb_profile` (user profile), `retaindb_search` (semantic search), `retaindb_context` (task-relevant context), `retaindb_remember` (store with type + importance), `retaindb_forget` (delete memories)
+**工具：** `retaindb_profile`（用户配置文件）、`retaindb_search`（语义搜索）、`retaindb_context`（任务相关上下文）、`retaindb_remember`（带类型 + 重要性的存储）、`retaindb_forget`（删除记忆）
 
-**Setup:**
+**设置：**
 ```bash
-hermes memory setup    # select "retaindb"
-# Or manually:
+hermes memory setup    # 选择 "retaindb"
+# 或手动：
 hermes config set memory.provider retaindb
 echo "RETAINDB_API_KEY=your-key" >> ~/.hermes/.env
 ```
@@ -367,81 +367,81 @@ echo "RETAINDB_API_KEY=your-key" >> ~/.hermes/.env
 
 ### ByteRover
 
-Persistent memory via the `brv` CLI — hierarchical knowledge tree with tiered retrieval (fuzzy text → LLM-driven search). Local-first with optional cloud sync.
+通过 `brv` CLI 实现的持久记忆 — 具有分层检索（模糊文本 → LLM 驱动搜索）的层次化知识树。本地优先，可选云同步。
 
 | | |
 |---|---|
-| **Best for** | Developers who want portable, local-first memory with a CLI |
-| **Requires** | ByteRover CLI (`npm install -g byterover-cli` or [install script](https://byterover.dev)) |
-| **Data storage** | Local (default) or ByteRover Cloud (optional sync) |
-| **Cost** | Free (local) or ByteRover pricing (cloud) |
+| **最适合** | 想要可移植、本地优先记忆并带有 CLI 的开发者 |
+| **要求** | ByteRover CLI（`npm install -g byterover-cli` 或 [安装脚本](https://byterover.dev)） |
+| **数据存储** | 本地（默认）或 ByteRover Cloud（可选同步） |
+| **成本** | 免费（本地）或 ByteRover 定价（云） |
 
-**Tools:** `brv_query` (search knowledge tree), `brv_curate` (store facts/decisions/patterns), `brv_status` (CLI version + tree stats)
+**工具：** `brv_query`（搜索知识树）、`brv_curate`（存储事实/决策/模式）、`brv_status`（CLI 版本 + 树统计）
 
-**Setup:**
+**设置：**
 ```bash
-# Install the CLI first
+# 首先安装 CLI
 curl -fsSL https://byterover.dev/install.sh | sh
 
-# Then configure Hermes
-hermes memory setup    # select "byterover"
-# Or manually:
+# 然后配置 Hermes
+hermes memory setup    # 选择 "byterover"
+# 或手动：
 hermes config set memory.provider byterover
 ```
 
-**Key features:**
-- Automatic pre-compression extraction (saves insights before context compression discards them)
-- Knowledge tree stored at `$HERMES_HOME/byterover/` (profile-scoped)
-- SOC2 Type II certified cloud sync (optional)
+**关键特性：**
+- 自动预压缩提取（在上下文压缩丢弃信息之前保存见解）
+- 知识树存储在 `$HERMES_HOME/byterover/`（配置文件范围）
+- SOC2 Type II 认证的云同步（可选）
 
 ---
 
 ### Supermemory
 
-Semantic long-term memory with profile recall, semantic search, explicit memory tools, and session-end conversation ingest via the Supermemory graph API.
+具有配置文件回忆、语义搜索、显式记忆工具和通过 Supermemory 图谱 API 进行会话结束对话摄取的语义长期记忆。
 
 | | |
 |---|---|
-| **Best for** | Semantic recall with user profiling and session-level graph building |
-| **Requires** | `pip install supermemory` + [API key](https://supermemory.ai) |
-| **Data storage** | Supermemory Cloud |
-| **Cost** | Supermemory pricing |
+| **最适合** | 具有用户分析和会话级图谱构建的语义回忆 |
+| **要求** | `pip install supermemory` + [API 密钥](https://supermemory.ai) |
+| **数据存储** | Supermemory Cloud |
+| **成本** | Supermemory 定价 |
 
-**Tools:** `supermemory_store` (save explicit memories), `supermemory_search` (semantic similarity search), `supermemory_forget` (forget by ID or best-match query), `supermemory_profile` (persistent profile + recent context)
+**工具：** `supermemory_store`（保存显式记忆）、`supermemory_search`（语义相似性搜索）、`supermemory_forget`（通过 ID 或最佳匹配查询遗忘）、`supermemory_profile`（持久配置文件 + 最近上下文）
 
-**Setup:**
+**设置：**
 ```bash
-hermes memory setup    # select "supermemory"
-# Or manually:
+hermes memory setup    # 选择 "supermemory"
+# 或手动：
 hermes config set memory.provider supermemory
 echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env
 ```
 
-**Config:** `$HERMES_HOME/supermemory.json`
+**配置：** `$HERMES_HOME/supermemory.json`
 
-| Key | Default | Description |
+| 键 | 默认值 | 描述 |
 |-----|---------|-------------|
-| `container_tag` | `hermes` | Container tag used for search and writes. Supports `{identity}` template for profile-scoped tags. |
-| `auto_recall` | `true` | Inject relevant memory context before turns |
-| `auto_capture` | `true` | Store cleaned user-assistant turns after each response |
-| `max_recall_results` | `10` | Max recalled items to format into context |
-| `profile_frequency` | `50` | Include profile facts on first turn and every N turns |
-| `capture_mode` | `all` | Skip tiny or trivial turns by default |
-| `search_mode` | `hybrid` | Search mode: `hybrid`, `memories`, or `documents` |
-| `api_timeout` | `5.0` | Timeout for SDK and ingest requests |
+| `container_tag` | `hermes` | 用于搜索和写入的容器标签。支持 `{identity}` 模板用于配置文件范围的标签。 |
+| `auto_recall` | `true` | 在回合前注入相关记忆上下文 |
+| `auto_capture` | `true` | 在每个响应后存储清理后的用户-助手回合 |
+| `max_recall_results` | `10` | 格式化为上下文的最大回忆项 |
+| `profile_frequency` | `50` | 在第一回合和每 N 个回合包含配置文件事实 |
+| `capture_mode` | `all` | 默认跳过微小或琐碎的回合 |
+| `search_mode` | `hybrid` | 搜索模式：`hybrid`、`memories` 或 `documents` |
+| `api_timeout` | `5.0` | SDK 和摄取请求的超时时间 |
 
-**Environment variables:** `SUPERMEMORY_API_KEY` (required), `SUPERMEMORY_CONTAINER_TAG` (overrides config).
+**环境变量：** `SUPERMEMORY_API_KEY`（必需）、`SUPERMEMORY_CONTAINER_TAG`（覆盖配置）。
 
-**Key features:**
-- Automatic context fencing — strips recalled memories from captured turns to prevent recursive memory pollution
-- Session-end conversation ingest for richer graph-level knowledge building
-- Profile facts injected on first turn and at configurable intervals
-- Trivial message filtering (skips "ok", "thanks", etc.)
-- **Profile-scoped containers** — use `{identity}` in `container_tag` (e.g. `hermes-{identity}` → `hermes-coder`) to isolate memories per Hermes profile
-- **Multi-container mode** — enable `enable_custom_container_tags` with a `custom_containers` list to let the agent read/write across named containers. Automatic operations (sync, prefetch) stay on the primary container.
+**关键特性：**
+- 自动上下文围栏 — 从捕获的回合中剥离回忆的记忆，防止递归记忆污染
+- 会话结束对话摄取，用于更丰富的图谱级知识构建
+- 配置文件事实在第一回合和可配置的间隔注入
+- 琐碎消息过滤（跳过 "ok"、"thanks" 等）
+- **配置文件范围的容器** — 在 `container_tag` 中使用 `{identity}`（例如 `hermes-{identity}` → `hermes-coder`）以隔离每个 Hermes 配置文件的记忆
+- **多容器模式** — 启用 `enable_custom_container_tags` 并使用 `custom_containers` 列表，让智能体跨命名容器读写。自动操作（同步、预取）保持在主容器上。
 
 <details>
-<summary>Multi-container example</summary>
+<summary>多容器示例</summary>
 
 ```json
 {
@@ -454,32 +454,32 @@ echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env
 
 </details>
 
-**Support:** [Discord](https://supermemory.link/discord) · [support@supermemory.com](mailto:support@supermemory.com)
+**支持：** [Discord](https://supermemory.link/discord) · [support@supermemory.com](mailto:support@supermemory.com)
 
 ---
 
-## Provider Comparison
+## 提供者比较
 
-| Provider | Storage | Cost | Tools | Dependencies | Unique Feature |
+| 提供者 | 存储 | 成本 | 工具 | 依赖项 | 独特功能 |
 |----------|---------|------|-------|-------------|----------------|
-| **Honcho** | Cloud | Paid | 4 | `honcho-ai` | Dialectic user modeling |
-| **OpenViking** | Self-hosted | Free | 5 | `openviking` + server | Filesystem hierarchy + tiered loading |
-| **Mem0** | Cloud | Paid | 3 | `mem0ai` | Server-side LLM extraction |
-| **Hindsight** | Cloud/Local | Free/Paid | 3 | `hindsight-client` | Knowledge graph + reflect synthesis |
-| **Holographic** | Local | Free | 2 | None | HRR algebra + trust scoring |
-| **RetainDB** | Cloud | $20/mo | 5 | `requests` | Delta compression |
-| **ByteRover** | Local/Cloud | Free/Paid | 3 | `brv` CLI | Pre-compression extraction |
-| **Supermemory** | Cloud | Paid | 4 | `supermemory` | Context fencing + session graph ingest + multi-container |
+| **Honcho** | 云 | 付费 | 4 | `honcho-ai` | 辩证用户建模 |
+| **OpenViking** | 自托管 | 免费 | 5 | `openviking` + 服务器 | 文件系统层次结构 + 分层加载 |
+| **Mem0** | 云 | 付费 | 3 | `mem0ai` | 服务器端 LLM 提取 |
+| **Hindsight** | 云/本地 | 免费/付费 | 3 | `hindsight-client` | 知识图谱 + 反射合成 |
+| **Holographic** | 本地 | 免费 | 2 | 无 | HRR 代数 + 信任评分 |
+| **RetainDB** | 云 | $20/月 | 5 | `requests` | 增量压缩 |
+| **ByteRover** | 本地/云 | 免费/付费 | 3 | `brv` CLI | 预压缩提取 |
+| **Supermemory** | 云 | 付费 | 4 | `supermemory` | 上下文围栏 + 会话图谱摄取 + 多容器 |
 
-## Profile Isolation
+## 配置文件隔离
 
-Each provider's data is isolated per [profile](/docs/user-guide/profiles):
+每个提供者的数据按 [配置文件](/docs/user-guide/profiles) 隔离：
 
-- **Local storage providers** (Holographic, ByteRover) use `$HERMES_HOME/` paths which differ per profile
-- **Config file providers** (Honcho, Mem0, Hindsight, Supermemory) store config in `$HERMES_HOME/` so each profile has its own credentials
-- **Cloud providers** (RetainDB) auto-derive profile-scoped project names
-- **Env var providers** (OpenViking) are configured via each profile's `.env` file
+- **本地存储提供者**（Holographic、ByteRover）使用 `$HERMES_HOME/` 路径，每个配置文件不同
+- **配置文件提供者**（Honcho、Mem0、Hindsight、Supermemory）将配置存储在 `$HERMES_HOME/` 中，因此每个配置文件都有自己的凭证
+- **云提供者**（RetainDB）自动派生配置文件范围的项目名称
+- **环境变量提供者**（OpenViking）通过每个配置文件的 `.env` 文件配置
 
-## Building a Memory Provider
+## 构建记忆提供者
 
-See the [Developer Guide: Memory Provider Plugins](/docs/developer-guide/memory-provider-plugin) for how to create your own.
+请参阅 [开发者指南：记忆提供者插件](/docs/developer-guide/memory-provider-plugin) 了解如何创建自己的记忆提供者。

@@ -1,127 +1,127 @@
 ---
 sidebar_position: 7
 title: "Email"
-description: "Set up Hermes Agent as an email assistant via IMAP/SMTP"
+description: "通过IMAP/SMTP设置Hermes Agent作为电子邮件助手"
 ---
 
-# Email Setup
+# 电子邮件设置
 
-Hermes can receive and reply to emails using standard IMAP and SMTP protocols. Send an email to the agent's address and it replies in-thread — no special client or bot API needed. Works with Gmail, Outlook, Yahoo, Fastmail, or any provider that supports IMAP/SMTP.
+Hermes可以使用标准的IMAP和SMTP协议接收和回复电子邮件。向代理的地址发送电子邮件，它会在同一线程中回复——不需要特殊客户端或机器人API。适用于Gmail、Outlook、Yahoo、Fastmail或任何支持IMAP/SMTP的提供商。
 
-:::info No External Dependencies
-The Email adapter uses Python's built-in `imaplib`, `smtplib`, and `email` modules. No additional packages or external services are required.
+:::info 无外部依赖
+电子邮件适配器使用Python内置的`imaplib`、`smtplib`和`email`模块。不需要额外的包或外部服务。
 :::
 
 ---
 
-## Prerequisites
+## 先决条件
 
-- **A dedicated email account** for your Hermes agent (don't use your personal email)
-- **IMAP enabled** on the email account
-- **An app password** if using Gmail or another provider with 2FA
+- **专用电子邮件账户** 用于您的Hermes代理（不要使用个人电子邮件）
+- **在电子邮件账户上启用IMAP**
+- **应用密码** 如果使用Gmail或其他启用2FA的提供商
 
-### Gmail Setup
+### Gmail设置
 
-1. Enable 2-Factor Authentication on your Google Account
-2. Go to [App Passwords](https://myaccount.google.com/apppasswords)
-3. Create a new App Password (select "Mail" or "Other")
-4. Copy the 16-character password — you'll use this instead of your regular password
+1. 在您的Google账户上启用双因素认证
+2. 前往 [应用密码](https://myaccount.google.com/apppasswords)
+3. 创建新的应用密码（选择"邮件"或"其他"）
+4. 复制16字符的密码——您将使用此密码代替常规密码
 
 ### Outlook / Microsoft 365
 
-1. Go to [Security Settings](https://account.microsoft.com/security)
-2. Enable 2FA if not already active
-3. Create an App Password under "Additional security options"
-4. IMAP host: `outlook.office365.com`, SMTP host: `smtp.office365.com`
+1. 前往 [安全设置](https://account.microsoft.com/security)
+2. 如果尚未激活，启用2FA
+3. 在"其他安全选项"下创建应用密码
+4. IMAP主机：`outlook.office365.com`，SMTP主机：`smtp.office365.com`
 
-### Other Providers
+### 其他提供商
 
-Most email providers support IMAP/SMTP. Check your provider's documentation for:
-- IMAP host and port (usually port 993 with SSL)
-- SMTP host and port (usually port 587 with STARTTLS)
-- Whether app passwords are required
+大多数电子邮件提供商支持IMAP/SMTP。查看您的提供商文档获取：
+- IMAP主机和端口（通常是带有SSL的993端口）
+- SMTP主机和端口（通常是带有STARTTLS的587端口）
+- 是否需要应用密码
 
 ---
 
-## Step 1: Configure Hermes
+## 步骤1：配置Hermes
 
-The easiest way:
+最简单的方法：
 
 ```bash
 hermes gateway setup
 ```
 
-Select **Email** from the platform menu. The wizard prompts for your email address, password, IMAP/SMTP hosts, and allowed senders.
+从平台菜单中选择 **Email**。向导会提示您输入电子邮件地址、密码、IMAP/SMTP主机和允许的发件人。
 
-### Manual Configuration
+### 手动配置
 
-Add to `~/.hermes/.env`:
+添加到 `~/.hermes/.env`：
 
 ```bash
-# Required
+# 必需
 EMAIL_ADDRESS=hermes@gmail.com
-EMAIL_PASSWORD=abcd efgh ijkl mnop    # App password (not your regular password)
+EMAIL_PASSWORD=abcd efgh ijkl mnop    # 应用密码（不是常规密码）
 EMAIL_IMAP_HOST=imap.gmail.com
 EMAIL_SMTP_HOST=smtp.gmail.com
 
-# Security (recommended)
+# 安全（推荐）
 EMAIL_ALLOWED_USERS=your@email.com,colleague@work.com
 
-# Optional
-EMAIL_IMAP_PORT=993                    # Default: 993 (IMAP SSL)
-EMAIL_SMTP_PORT=587                    # Default: 587 (SMTP STARTTLS)
-EMAIL_POLL_INTERVAL=15                 # Seconds between inbox checks (default: 15)
-EMAIL_HOME_ADDRESS=your@email.com      # Default delivery target for cron jobs
+# 可选
+EMAIL_IMAP_PORT=993                    # 默认：993（IMAP SSL）
+EMAIL_SMTP_PORT=587                    # 默认：587（SMTP STARTTLS）
+EMAIL_POLL_INTERVAL=15                 # 收件箱检查间隔（默认：15秒）
+EMAIL_HOME_ADDRESS=your@email.com      # 定时任务的默认传递目标
 ```
 
 ---
 
-## Step 2: Start the Gateway
+## 步骤2：启动网关
 
 ```bash
-hermes gateway              # Run in foreground
-hermes gateway install      # Install as a user service
-sudo hermes gateway install --system   # Linux only: boot-time system service
+hermes gateway              # 在前台运行
+hermes gateway install      # 安装为用户服务
+sudo hermes gateway install --system   # 仅Linux：启动时系统服务
 ```
 
-On startup, the adapter:
-1. Tests IMAP and SMTP connections
-2. Marks all existing inbox messages as "seen" (only processes new emails)
-3. Starts polling for new messages
+启动时，适配器：
+1. 测试IMAP和SMTP连接
+2. 将所有现有收件箱邮件标记为"已读"（仅处理新邮件）
+3. 开始轮询新消息
 
 ---
 
-## How It Works
+## 工作原理
 
-### Receiving Messages
+### 接收消息
 
-The adapter polls the IMAP inbox for UNSEEN messages at a configurable interval (default: 15 seconds). For each new email:
+适配器以可配置的间隔（默认：15秒）轮询IMAP收件箱中的未读消息。对于每封新邮件：
 
-- **Subject line** is included as context (e.g., `[Subject: Deploy to production]`)
-- **Reply emails** (subject starting with `Re:`) skip the subject prefix — the thread context is already established
-- **Attachments** are cached locally:
-  - Images (JPEG, PNG, GIF, WebP) → available to the vision tool
-  - Documents (PDF, ZIP, etc.) → available for file access
-- **HTML-only emails** have tags stripped for plain text extraction
-- **Self-messages** are filtered out to prevent reply loops
-- **Automated/noreply senders** are silently ignored — `noreply@`, `mailer-daemon@`, `bounce@`, `no-reply@`, and emails with `Auto-Submitted`, `Precedence: bulk`, or `List-Unsubscribe` headers
+- **主题行** 作为上下文包含（例如，`[Subject: Deploy to production]`）
+- **回复邮件**（主题以`Re:`开头）跳过主题前缀——线程上下文已经建立
+- **附件** 本地缓存：
+  - 图像（JPEG、PNG、GIF、WebP）→ 可用于视觉工具
+  - 文档（PDF、ZIP等）→ 可用于文件访问
+- **仅HTML邮件** 剥离标签以提取纯文本
+- **自消息** 被过滤掉以防止回复循环
+- **自动/无回复发件人** 被静默忽略——`noreply@`、`mailer-daemon@`、`bounce@`、`no-reply@`以及带有`Auto-Submitted`、`Precedence: bulk`或`List-Unsubscribe`头的邮件
 
-### Sending Replies
+### 发送回复
 
-Replies are sent via SMTP with proper email threading:
+回复通过SMTP发送，具有正确的电子邮件线程：
 
-- **In-Reply-To** and **References** headers maintain the thread
-- **Subject line** preserved with `Re:` prefix (no double `Re: Re:`)
-- **Message-ID** generated with the agent's domain
-- Responses are sent as plain text (UTF-8)
+- **In-Reply-To** 和 **References** 头维护线程
+- **主题行** 保留`Re:`前缀（无双重`Re: Re:`）
+- **Message-ID** 用代理的域生成
+- 响应以纯文本形式发送（UTF-8）
 
-### File Attachments
+### 文件附件
 
-The agent can send file attachments in replies. Include `MEDIA:/path/to/file` in the response and the file is attached to the outgoing email.
+代理可以在回复中发送文件附件。在响应中包含`MEDIA:/path/to/file`，文件将被附加到 outgoing email。
 
-### Skipping Attachments
+### 跳过附件
 
-To ignore all incoming attachments (for malware protection or bandwidth savings), add to your `config.yaml`:
+要忽略所有传入附件（用于恶意软件保护或带宽节省），请添加到您的`config.yaml`：
 
 ```yaml
 platforms:
@@ -129,62 +129,62 @@ platforms:
     skip_attachments: true
 ```
 
-When enabled, attachment and inline parts are skipped before payload decoding. The email body text is still processed normally.
+启用后，附件和内联部分在有效负载解码前被跳过。邮件正文文本仍正常处理。
 
 ---
 
-## Access Control
+## 访问控制
 
-Email access follows the same pattern as all other Hermes platforms:
+电子邮件访问遵循与所有其他Hermes平台相同的模式：
 
-1. **`EMAIL_ALLOWED_USERS` set** → only emails from those addresses are processed
-2. **No allowlist set** → unknown senders get a pairing code
-3. **`EMAIL_ALLOW_ALL_USERS=true`** → any sender is accepted (use with caution)
+1. **设置`EMAIL_ALLOWED_USERS`** → 仅处理来自这些地址的电子邮件
+2. **未设置允许列表** → 未知发件人获得配对代码
+3. **`EMAIL_ALLOW_ALL_USERS=true`** → 接受任何发件人（谨慎使用）
 
 :::warning
-**Always configure `EMAIL_ALLOWED_USERS`.** Without it, anyone who knows the agent's email address could send commands. The agent has terminal access by default.
+**始终配置`EMAIL_ALLOWED_USERS`。** 没有它，任何知道代理电子邮件地址的人都可以发送命令。代理默认具有终端访问权限。
 :::
 
 ---
 
-## Troubleshooting
+## 故障排除
 
-| Problem | Solution |
+| 问题 | 解决方案 |
 |---------|----------|
-| **"IMAP connection failed"** at startup | Verify `EMAIL_IMAP_HOST` and `EMAIL_IMAP_PORT`. Ensure IMAP is enabled on the account. For Gmail, enable it in Settings → Forwarding and POP/IMAP. |
-| **"SMTP connection failed"** at startup | Verify `EMAIL_SMTP_HOST` and `EMAIL_SMTP_PORT`. Check that your password is correct (use App Password for Gmail). |
-| **Messages not received** | Check `EMAIL_ALLOWED_USERS` includes the sender's email. Check spam folder — some providers flag automated replies. |
-| **"Authentication failed"** | For Gmail, you must use an App Password, not your regular password. Ensure 2FA is enabled first. |
-| **Duplicate replies** | Ensure only one gateway instance is running. Check `hermes gateway status`. |
-| **Slow response** | The default poll interval is 15 seconds. Reduce with `EMAIL_POLL_INTERVAL=5` for faster response (but more IMAP connections). |
-| **Replies not threading** | The adapter uses In-Reply-To headers. Some email clients (especially web-based) may not thread correctly with automated messages. |
+| **启动时"IMAP连接失败"** | 验证`EMAIL_IMAP_HOST`和`EMAIL_IMAP_PORT`。确保在账户上启用了IMAP。对于Gmail，在设置→转发和POP/IMAP中启用它。 |
+| **启动时"SMTP连接失败"** | 验证`EMAIL_SMTP_HOST`和`EMAIL_SMTP_PORT`。检查您的密码是否正确（对Gmail使用应用密码）。 |
+| **未收到消息** | 检查`EMAIL_ALLOWED_USERS`是否包含发件人的电子邮件。检查垃圾邮件文件夹——某些提供商会标记自动回复。 |
+| **"认证失败"** | 对于Gmail，您必须使用应用密码，而不是常规密码。确保首先启用2FA。 |
+| **重复回复** | 确保只运行一个网关实例。检查`hermes gateway status`。 |
+| **响应缓慢** | 默认轮询间隔为15秒。使用`EMAIL_POLL_INTERVAL=5`减少以获得更快的响应（但更多IMAP连接）。 |
+| **回复未线程化** | 适配器使用In-Reply-To头。一些电子邮件客户端（尤其是基于Web的）可能无法正确线程化自动消息。 |
 
 ---
 
-## Security
+## 安全
 
 :::warning
-**Use a dedicated email account.** Don't use your personal email — the agent stores the password in `.env` and has full inbox access via IMAP.
+**使用专用电子邮件账户。** 不要使用个人电子邮件——代理在`.env`中存储密码，并通过IMAP拥有完整的收件箱访问权限。
 :::
 
-- Use **App Passwords** instead of your main password (required for Gmail with 2FA)
-- Set `EMAIL_ALLOWED_USERS` to restrict who can interact with the agent
-- The password is stored in `~/.hermes/.env` — protect this file (`chmod 600`)
-- IMAP uses SSL (port 993) and SMTP uses STARTTLS (port 587) by default — connections are encrypted
+- 使用**应用密码**代替主密码（对启用2FA的Gmail是必需的）
+- 设置`EMAIL_ALLOWED_USERS`以限制谁可以与代理交互
+- 密码存储在`~/.hermes/.env`中——保护此文件（`chmod 600`）
+- IMAP默认使用SSL（端口993），SMTP默认使用STARTTLS（端口587）——连接已加密
 
 ---
 
-## Environment Variables Reference
+## 环境变量参考
 
-| Variable | Required | Default | Description |
+| 变量 | 必需 | 默认值 | 描述 |
 |----------|----------|---------|-------------|
-| `EMAIL_ADDRESS` | Yes | — | Agent's email address |
-| `EMAIL_PASSWORD` | Yes | — | Email password or app password |
-| `EMAIL_IMAP_HOST` | Yes | — | IMAP server host (e.g., `imap.gmail.com`) |
-| `EMAIL_SMTP_HOST` | Yes | — | SMTP server host (e.g., `smtp.gmail.com`) |
-| `EMAIL_IMAP_PORT` | No | `993` | IMAP server port |
-| `EMAIL_SMTP_PORT` | No | `587` | SMTP server port |
-| `EMAIL_POLL_INTERVAL` | No | `15` | Seconds between inbox checks |
-| `EMAIL_ALLOWED_USERS` | No | — | Comma-separated allowed sender addresses |
-| `EMAIL_HOME_ADDRESS` | No | — | Default delivery target for cron jobs |
-| `EMAIL_ALLOW_ALL_USERS` | No | `false` | Allow all senders (not recommended) |
+| `EMAIL_ADDRESS` | 是 | — | 代理的电子邮件地址 |
+| `EMAIL_PASSWORD` | 是 | — | 电子邮件密码或应用密码 |
+| `EMAIL_IMAP_HOST` | 是 | — | IMAP服务器主机（例如，`imap.gmail.com`） |
+| `EMAIL_SMTP_HOST` | 是 | — | SMTP服务器主机（例如，`smtp.gmail.com`） |
+| `EMAIL_IMAP_PORT` | 否 | `993` | IMAP服务器端口 |
+| `EMAIL_SMTP_PORT` | 否 | `587` | SMTP服务器端口 |
+| `EMAIL_POLL_INTERVAL` | 否 | `15` | 收件箱检查间隔（秒） |
+| `EMAIL_ALLOWED_USERS` | 否 | — | 逗号分隔的允许发件人地址 |
+| `EMAIL_HOME_ADDRESS` | 否 | — | 定时任务的默认传递目标 |
+| `EMAIL_ALLOW_ALL_USERS` | 否 | `false` | 允许所有发件人（不推荐） |

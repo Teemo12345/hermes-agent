@@ -116,82 +116,82 @@ You optimize for truth, clarity, and usefulness over politeness theater.
 - Treat edge cases as part of the design, not cleanup
 ```
 
-## What Hermes injects into the prompt
+## Hermes 如何将内容注入到提示中
 
-`SOUL.md` content goes directly into slot #1 of the system prompt — the agent identity position. No wrapper language is added around it.
+`SOUL.md` 内容直接进入系统提示的槽位 #1 — 智能体身份位置。它周围不会添加任何包装语言。
 
-The content goes through:
-- prompt-injection scanning
-- truncation if it is too large
+内容会经过：
+- 提示注入扫描
+- 如果内容太大则截断
 
-If the file is empty, whitespace-only, or cannot be read, Hermes falls back to a built-in default identity ("You are Hermes Agent, an intelligent AI assistant created by Nous Research..."). This fallback also applies when `skip_context_files` is set (e.g., in subagent/delegation contexts).
+如果文件为空、仅包含空白或无法读取，Hermes 会回退到内置的默认身份（"You are Hermes Agent, an intelligent AI assistant created by Nous Research..."）。当设置了 `skip_context_files` 时（例如在子智能体/委托上下文中），此回退也适用。
 
-## Security scanning
+## 安全扫描
 
-`SOUL.md` is scanned like other context-bearing files for prompt injection patterns before inclusion.
+`SOUL.md` 像其他承载上下文的文件一样，在包含之前会扫描提示注入模式。
 
-That means you should still keep it focused on persona/voice rather than trying to sneak in strange meta-instructions.
+这意味着您仍然应该将其重点放在角色/声音上，而不是尝试偷偷加入奇怪的元指令。
 
-## SOUL.md vs AGENTS.md
+## SOUL.md 与 AGENTS.md 的区别
 
-This is the most important distinction.
+这是最重要的区别。
 
 ### SOUL.md
-Use for:
-- identity
-- tone
-- style
-- communication defaults
-- personality-level behavior
+用于：
+- 身份
+- 语气
+- 风格
+- 沟通默认值
+- 个性级行为
 
 ### AGENTS.md
-Use for:
-- project architecture
-- coding conventions
-- tool preferences
-- repo-specific workflows
-- commands, ports, paths, deployment notes
+用于：
+- 项目架构
+- 编码约定
+- 工具偏好
+- 仓库特定工作流
+- 命令、端口、路径、部署说明
 
-A useful rule:
-- if it should follow you everywhere, it belongs in `SOUL.md`
-- if it belongs to a project, it belongs in `AGENTS.md`
+一个有用的规则：
+- 如果它应该跟随您到任何地方，它属于 `SOUL.md`
+- 如果它属于项目，它属于 `AGENTS.md`
 
-## SOUL.md vs `/personality`
+## SOUL.md 与 `/personality` 的区别
 
-`SOUL.md` is your durable default personality.
+`SOUL.md` 是您持久的默认个性。
 
-`/personality` is a session-level overlay that changes or supplements the current system prompt.
+`/personality` 是会话级覆盖，用于更改或补充当前系统提示。
 
-So:
-- `SOUL.md` = baseline voice
-- `/personality` = temporary mode switch
+因此：
+- `SOUL.md` = 基线声音
+- `/personality` = 临时模式切换
 
-Examples:
-- keep a pragmatic default SOUL, then use `/personality teacher` for a tutoring conversation
-- keep a concise SOUL, then use `/personality creative` for brainstorming
+示例：
+- 保持实用的默认 SOUL，然后使用 `/personality teacher` 进行辅导对话
+- 保持简洁的 SOUL，然后使用 `/personality creative` 进行头脑风暴
 
-## Built-in personalities
+## 内置个性
 
-Hermes ships with built-in personalities you can switch to with `/personality`.
+Hermes 附带内置个性，您可以使用 `/personality` 切换到这些个性。
 
-| Name | Description |
+| 名称 | 描述 |
 |------|-------------|
-| **helpful** | Friendly, general-purpose assistant |
-| **concise** | Brief, to-the-point responses |
-| **technical** | Detailed, accurate technical expert |
-| **creative** | Innovative, outside-the-box thinking |
-| **teacher** | Patient educator with clear examples |
-| **kawaii** | Cute expressions, sparkles, and enthusiasm ★ |
-| **catgirl** | Neko-chan with cat-like expressions, nya~ |
-| **pirate** | Captain Hermes, tech-savvy buccaneer |
-| **shakespeare** | Bardic prose with dramatic flair |
-| **surfer** | Totally chill bro vibes |
-| **noir** | Hard-boiled detective narration |
-| **uwu** | Maximum cute with uwu-speak |
-| **philosopher** | Deep contemplation on every query |
-| **hype** | MAXIMUM ENERGY AND ENTHUSIASM!!! |
+| **helpful** | 友好的通用助手 |
+| **concise** | 简洁、直接的回应 |
+| **technical** | 详细、准确的技术专家 |
+| **creative** | 创新、跳出框框的思维 |
+| **teacher** | 耐心的教育者，有清晰的例子 |
+| **kawaii** | 可爱的表达、闪光和热情 ★ |
+| **catgirl** | 猫耳女孩，带有猫一样的表达，nya~ |
+| **pirate** | Hermes 船长，精通技术的海盗 |
+| **shakespeare** | 具有戏剧性 flair 的吟游诗人散文 |
+| **surfer** | 完全放松的兄弟氛围 |
+| **noir** | 硬汉侦探叙事 |
+| **uwu** |  maximum 可爱的 uwu 语言 |
+| **philosopher** | 对每个查询进行深度思考 |
+| **hype** | 最大能量和热情!!! |
 
-## Switching personalities with commands
+## 使用命令切换个性
 
 ### CLI
 
@@ -201,17 +201,17 @@ Hermes ships with built-in personalities you can switch to with `/personality`.
 /personality technical
 ```
 
-### Messaging platforms
+### 消息平台
 
 ```text
 /personality teacher
 ```
 
-These are convenient overlays, but your global `SOUL.md` still gives Hermes its persistent default personality unless the overlay meaningfully changes it.
+这些是方便的覆盖，但您的全局 `SOUL.md` 仍然为 Hermes 提供持久的默认个性，除非覆盖有意义地改变了它。
 
-## Custom personalities in config
+## 配置中的自定义个性
 
-You can also define named custom personalities in `~/.hermes/config.yaml` under `agent.personalities`.
+您还可以在 `~/.hermes/config.yaml` 的 `agent.personalities` 下定义命名的自定义个性。
 
 ```yaml
 agent:
@@ -221,51 +221,51 @@ agent:
       performance concerns, and unclear design choices. Be precise and constructive.
 ```
 
-Then switch to it with:
+然后使用以下命令切换到它：
 
 ```text
 /personality codereviewer
 ```
 
-## Recommended workflow
+## 推荐工作流
 
-A strong default setup is:
+一个强大的默认设置是：
 
-1. Keep a thoughtful global `SOUL.md` in `~/.hermes/SOUL.md`
-2. Put project instructions in `AGENTS.md`
-3. Use `/personality` only when you want a temporary mode shift
+1. 在 `~/.hermes/SOUL.md` 中保持深思熟虑的全局 `SOUL.md`
+2. 将项目说明放在 `AGENTS.md` 中
+3. 仅在需要临时模式转变时使用 `/personality`
 
-That gives you:
-- a stable voice
-- project-specific behavior where it belongs
-- temporary control when needed
+这给您：
+- 稳定的声音
+- 项目特定行为在其所属的地方
+- 需要时的临时控制
 
-## How personality interacts with the full prompt
+## 个性如何与完整提示交互
 
-At a high level, the prompt stack includes:
-1. **SOUL.md** (agent identity — or built-in fallback if SOUL.md is unavailable)
-2. tool-aware behavior guidance
-3. memory/user context
-4. skills guidance
-5. context files (`AGENTS.md`, `.cursorrules`)
-6. timestamp
-7. platform-specific formatting hints
-8. optional system-prompt overlays such as `/personality`
+在高层次上，提示堆栈包括：
+1. **SOUL.md**（智能体身份 — 如果 SOUL.md 不可用，则为内置回退）
+2. 工具感知行为指导
+3. 记忆/用户上下文
+4. 技能指导
+5. 上下文文件（`AGENTS.md`、`.cursorrules`）
+6. 时间戳
+7. 平台特定格式提示
+8. 可选的系统提示覆盖，如 `/personality`
 
-`SOUL.md` is the foundation — everything else builds on top of it.
+`SOUL.md` 是基础 — 其他一切都建立在它之上。
 
-## Related docs
+## 相关文档
 
-- [Context Files](/docs/user-guide/features/context-files)
-- [Configuration](/docs/user-guide/configuration)
-- [Tips & Best Practices](/docs/guides/tips)
-- [SOUL.md Guide](/docs/guides/use-soul-with-hermes)
+- [上下文文件](/docs/user-guide/features/context-files)
+- [配置](/docs/user-guide/configuration)
+- [提示与最佳实践](/docs/guides/tips)
+- [SOUL.md 指南](/docs/guides/use-soul-with-hermes)
 
-## CLI appearance vs conversational personality
+## CLI 外观与对话个性
 
-Conversational personality and CLI appearance are separate:
+对话个性和 CLI 外观是分开的：
 
-- `SOUL.md`, `agent.system_prompt`, and `/personality` affect how Hermes speaks
-- `display.skin` and `/skin` affect how Hermes looks in the terminal
+- `SOUL.md`、`agent.system_prompt` 和 `/personality` 影响 Hermes 的说话方式
+- `display.skin` 和 `/skin` 影响 Hermes 在终端中的外观
 
-For terminal appearance, see [Skins & Themes](./skins.md).
+有关终端外观，请参阅 [皮肤与主题](./skins.md)。

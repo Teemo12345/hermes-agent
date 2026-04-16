@@ -127,39 +127,39 @@ Portrait of a wise old owl perched on ancient tree branch
 Futuristic cityscape with flying cars and neon lights
 ```
 
-## Debugging
+## 调试
 
-Enable debug logging for image generation:
+为图像生成启用调试日志：
 
 ```bash
 export IMAGE_TOOLS_DEBUG=true
 ```
 
-Debug logs are saved to `./logs/image_tools_debug_<session_id>.json` with details about each generation request, parameters, timing, and any errors.
+调试日志保存到 `./logs/image_tools_debug_<session_id>.json`，包含每个生成请求的详细信息、参数、时间和任何错误。
 
-## Safety Settings
+## 安全设置
 
-The image generation tool runs with safety checks disabled by default (`safety_tolerance: 5`, the most permissive setting). This is configured at the code level and is not user-adjustable.
+图像生成工具默认禁用安全检查（`safety_tolerance: 5`，最宽松的设置）。这在代码级别配置，用户无法调整。
 
-## Platform Delivery
+## 平台交付
 
-Generated images are delivered differently depending on the platform:
+生成的图像根据平台以不同方式交付：
 
-| Platform | Delivery method |
+| 平台 | 交付方式 |
 |----------|----------------|
-| **CLI** | Image URL printed as markdown `![description](url)` — click to open in browser |
-| **Telegram** | Image sent as a photo message with the prompt as caption |
-| **Discord** | Image embedded in a message |
-| **Slack** | Image URL in message (Slack unfurls it) |
-| **WhatsApp** | Image sent as a media message |
-| **Other platforms** | Image URL in plain text |
+| **CLI** | 图像 URL 以 Markdown 格式 `![description](url)` 打印 — 点击在浏览器中打开 |
+| **Telegram** | 图像作为照片消息发送，提示作为标题 |
+| **Discord** | 图像嵌入到消息中 |
+| **Slack** | 消息中的图像 URL（Slack 会展开它） |
+| **WhatsApp** | 图像作为媒体消息发送 |
+| **其他平台** | 纯文本中的图像 URL |
 
-The agent uses `MEDIA:<url>` syntax in its response, which the platform adapter converts to the appropriate format.
+智能体在其响应中使用 `MEDIA:<url>` 语法，平台适配器会将其转换为适当的格式。
 
-## Limitations
+## 限制
 
-- **Requires FAL API key** — image generation incurs API costs on your FAL.ai account
-- **No image editing** — this is text-to-image only, no inpainting or img2img
-- **URL-based delivery** — images are returned as temporary FAL.ai URLs, not saved locally. URLs expire after a period (typically hours)
-- **Upscaling adds latency** — the automatic 2x upscale step adds processing time
-- **Max 4 images per request** — `num_images` is capped at 4
+- **需要 FAL API 密钥** — 图像生成会在您的 FAL.ai 账户上产生 API 成本
+- **无图像编辑** — 这仅支持文本到图像，无修复或图像到图像功能
+- **基于 URL 的交付** — 图像作为临时 FAL.ai URL 返回，不本地保存。URL 会在一段时间后过期（通常为几小时）
+- **放大增加延迟** — 自动 2 倍放大步骤增加处理时间
+- **每个请求最多 4 张图像** — `num_images` 上限为 4

@@ -217,43 +217,43 @@ auxiliary:
     model: ""
 ```
 
-Every task above follows the same **provider / model / base_url** pattern. Context compression is configured under `auxiliary.compression`:
+上述每个任务都遵循相同的 **provider / model / base_url** 模式。上下文压缩在 `auxiliary.compression` 下配置：
 
 ```yaml
 auxiliary:
   compression:
-    provider: main                                    # Same provider options as other auxiliary tasks
+    provider: main                                    # 与其他辅助任务相同的提供商选项
     model: google/gemini-3-flash-preview
-    base_url: null                                    # Custom OpenAI-compatible endpoint
+    base_url: null                                    # 自定义 OpenAI 兼容端点
 ```
 
-And the fallback model uses:
+备用模型使用：
 
 ```yaml
 fallback_model:
   provider: openrouter
   model: anthropic/claude-sonnet-4
-  # base_url: http://localhost:8000/v1               # Optional custom endpoint
+  # base_url: http://localhost:8000/v1               # 可选的自定义端点
 ```
 
-All three — auxiliary, compression, fallback — work the same way: set `provider` to pick who handles the request, `model` to pick which model, and `base_url` to point at a custom endpoint (overrides provider).
+这三者 — 辅助任务、压缩、备用 — 工作方式相同：设置 `provider` 选择谁处理请求，设置 `model` 选择哪个模型，设置 `base_url` 指向自定义端点（覆盖提供商）。
 
-### Provider Options for Auxiliary Tasks
+### 辅助任务的提供商选项
 
-These options apply to `auxiliary:`, `compression:`, and `fallback_model:` configs only — `"main"` is **not** a valid value for your top-level `model.provider`. For custom endpoints, use `provider: custom` in your `model:` section (see [AI Providers](/docs/integrations/providers)).
+这些选项仅适用于 `auxiliary:`、`compression:` 和 `fallback_model:` 配置 — `"main"` 不是顶级 `model.provider` 的有效值。对于自定义端点，在 `model:` 部分使用 `provider: custom`（请参阅 [AI 提供商](/docs/integrations/providers)）。
 
-| Provider | Description | Requirements |
+| 提供商 | 描述 | 要求 |
 |----------|-------------|-------------|
-| `"auto"` | Try providers in order until one works (default) | At least one provider configured |
-| `"openrouter"` | Force OpenRouter | `OPENROUTER_API_KEY` |
-| `"nous"` | Force Nous Portal | `hermes auth` |
-| `"codex"` | Force Codex OAuth | `hermes model` → Codex |
-| `"main"` | Use whatever provider the main agent uses (auxiliary tasks only) | Active main provider configured |
-| `"anthropic"` | Force Anthropic native | `ANTHROPIC_API_KEY` or Claude Code credentials |
+| `"auto"` | 按顺序尝试提供商，直到找到一个可用的（默认） | 至少配置了一个提供商 |
+| `"openrouter"` | 强制使用 OpenRouter | `OPENROUTER_API_KEY` |
+| `"nous"` | 强制使用 Nous Portal | `hermes auth` |
+| `"codex"` | 强制使用 Codex OAuth | `hermes model` → Codex |
+| `"main"` | 使用主智能体使用的任何提供商（仅辅助任务） | 配置了活跃的主提供商 |
+| `"anthropic"` | 强制使用 Anthropic 原生 | `ANTHROPIC_API_KEY` 或 Claude Code 凭证 |
 
-### Direct Endpoint Override
+### 直接端点覆盖
 
-For any auxiliary task, setting `base_url` bypasses provider resolution entirely and sends requests directly to that endpoint:
+对于任何辅助任务，设置 `base_url` 会完全绕过提供商解析，直接将请求发送到该端点：
 
 ```yaml
 auxiliary:
@@ -263,13 +263,13 @@ auxiliary:
     model: "qwen2.5-vl"
 ```
 
-`base_url` takes precedence over `provider`. Hermes uses the configured `api_key` for authentication, falling back to `OPENAI_API_KEY` if not set. It does **not** reuse `OPENROUTER_API_KEY` for custom endpoints.
+`base_url` 优先于 `provider`。Hermes 使用配置的 `api_key` 进行身份验证，如果未设置则回退到 `OPENAI_API_KEY`。它**不会**为自定义端点重用 `OPENROUTER_API_KEY`。
 
 ---
 
-## Context Compression Fallback
+## 上下文压缩备用
 
-Context compression uses the `auxiliary.compression` config block to control which model and provider handles summarization:
+上下文压缩使用 `auxiliary.compression` 配置块来控制哪个模型和提供商处理摘要：
 
 ```yaml
 auxiliary:
@@ -278,33 +278,33 @@ auxiliary:
     model: "google/gemini-3-flash-preview"
 ```
 
-:::info Legacy migration
-Older configs with `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` are automatically migrated to `auxiliary.compression.*` on first load (config version 17).
+:::info 旧版本迁移
+带有 `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` 的旧配置在首次加载时会自动迁移到 `auxiliary.compression.*`（配置版本 17）。
 :::
 
-If no provider is available for compression, Hermes drops middle conversation turns without generating a summary rather than failing the session.
+如果没有可用的压缩提供商，Hermes 会丢弃中间对话轮次而不生成摘要，而不是使会话失败。
 
 ---
 
-## Delegation Provider Override
+## 委托提供商覆盖
 
-Subagents spawned by `delegate_task` do **not** use the primary fallback model. However, they can be routed to a different provider:model pair for cost optimization:
+由 `delegate_task` 生成的子智能体**不**使用主要备用模型。但是，它们可以被路由到不同的提供商:模型对以优化成本：
 
 ```yaml
 delegation:
-  provider: "openrouter"                      # override provider for all subagents
-  model: "google/gemini-3-flash-preview"      # override model
-  # base_url: "http://localhost:1234/v1"      # or use a direct endpoint
+  provider: "openrouter"                      # 为所有子智能体覆盖提供商
+  model: "google/gemini-3-flash-preview"      # 覆盖模型
+  # base_url: "http://localhost:1234/v1"      # 或使用直接端点
   # api_key: "local-key"
 ```
 
-See [Subagent Delegation](/docs/user-guide/features/delegation) for full configuration details.
+有关完整配置详细信息，请参阅 [子智能体委托](/docs/user-guide/features/delegation)。
 
 ---
 
-## Cron Job Providers
+## Cron 作业提供商
 
-Cron jobs run with whatever provider is configured at execution time. They do not support a fallback model. To use a different provider for cron jobs, configure `provider` and `model` overrides on the cron job itself:
+Cron 作业使用执行时配置的任何提供商运行。它们不支持备用模型。要为 cron 作业使用不同的提供商，请在 cron 作业本身配置 `provider` 和 `model` 覆盖：
 
 ```python
 cronjob(
@@ -316,21 +316,21 @@ cronjob(
 )
 ```
 
-See [Scheduled Tasks (Cron)](/docs/user-guide/features/cron) for full configuration details.
+有关完整配置详细信息，请参阅 [计划任务（Cron）](/docs/user-guide/features/cron)。
 
 ---
 
-## Summary
+## 摘要
 
-| Feature | Fallback Mechanism | Config Location |
+| 功能 | 备用机制 | 配置位置 |
 |---------|-------------------|----------------|
-| Main agent model | `fallback_model` in config.yaml — one-shot failover on errors | `fallback_model:` (top-level) |
-| Vision | Auto-detection chain + internal OpenRouter retry | `auxiliary.vision` |
-| Web extraction | Auto-detection chain + internal OpenRouter retry | `auxiliary.web_extract` |
-| Context compression | Auto-detection chain, degrades to no-summary if unavailable | `auxiliary.compression` |
-| Session search | Auto-detection chain | `auxiliary.session_search` |
-| Skills hub | Auto-detection chain | `auxiliary.skills_hub` |
-| MCP helpers | Auto-detection chain | `auxiliary.mcp` |
-| Memory flush | Auto-detection chain | `auxiliary.flush_memories` |
-| Delegation | Provider override only (no automatic fallback) | `delegation.provider` / `delegation.model` |
-| Cron jobs | Per-job provider override only (no automatic fallback) | Per-job `provider` / `model` |
+| 主智能体模型 | `fallback_model` 在 config.yaml 中 — 错误时一次性故障转移 | `fallback_model:`（顶级） |
+| 视觉 | 自动检测链 + 内部 OpenRouter 重试 | `auxiliary.vision` |
+| 网页提取 | 自动检测链 + 内部 OpenRouter 重试 | `auxiliary.web_extract` |
+| 上下文压缩 | 自动检测链，不可用时降级为无摘要 | `auxiliary.compression` |
+| 会话搜索 | 自动检测链 | `auxiliary.session_search` |
+| 技能中心 | 自动检测链 | `auxiliary.skills_hub` |
+| MCP 助手 | 自动检测链 | `auxiliary.mcp` |
+| 记忆刷新 | 自动检测链 | `auxiliary.flush_memories` |
+| 委托 | 仅提供商覆盖（无自动备用） | `delegation.provider` / `delegation.model` |
+| Cron 作业 | 仅每个作业的提供商覆盖（无自动备用） | 每个作业的 `provider` / `model` |

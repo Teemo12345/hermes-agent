@@ -203,14 +203,14 @@ delegate_task(
 ## 配置
 
 ```yaml
-# In ~/.hermes/config.yaml
+# 在 ~/.hermes/config.yaml 中
 delegation:
-  max_iterations: 50                        # Max turns per child (default: 50)
-  default_toolsets: ["terminal", "file", "web"]  # Default toolsets
-  model: "google/gemini-3-flash-preview"             # Optional provider/model override
-  provider: "openrouter"                             # Optional built-in provider
+  max_iterations: 50                        # 每个子智能体的最大轮次（默认：50）
+  default_toolsets: ["terminal", "file", "web"]  # 默认工具集
+  model: "google/gemini-3-flash-preview"             # 可选的提供商/模型覆盖
+  provider: "openrouter"                             # 可选的内置提供商
 
-# Or use a direct custom endpoint instead of provider:
+# 或者使用直接的自定义端点而不是提供商：
 delegation:
   model: "qwen2.5-coder"
   base_url: "http://localhost:1234/v1"
@@ -218,5 +218,5 @@ delegation:
 ```
 
 :::tip
-The agent handles delegation automatically based on the task complexity. You don't need to explicitly ask it to delegate — it will do so when it makes sense.
+智能体会根据任务复杂度自动处理委托。您不需要明确要求它委托 — 当有意义时它会自动这样做。
 :::

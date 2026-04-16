@@ -49,105 +49,105 @@ hermes skills uninstall <skill-name>
 |-------|-------------|
 | **one-three-one-rule** | 用于提案和决策的结构化通信框架。 |
 
-## Creative
+## 创意
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **blender-mcp** | Control Blender directly from Hermes via socket connection to the blender-mcp addon. Create 3D objects, materials, animations, and run arbitrary Blender Python (bpy) code. |
-| **meme-generation** | Generate real meme images by picking a template and overlaying text with Pillow. Produces actual `.png` meme files. |
+| **blender-mcp** | 通过与 blender-mcp 插件的套接字连接直接从 Hermes 控制 Blender。创建 3D 对象、材质、动画，并运行任意 Blender Python (bpy) 代码。 |
+| **meme-generation** | 通过选择模板并使用 Pillow 覆盖文本生成真实的 meme 图像。生成实际的 `.png` meme 文件。 |
 
 ## DevOps
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **cli** | Run 150+ AI apps via inference.sh CLI (infsh) — image generation, video creation, LLMs, search, 3D, and social automation. |
-| **docker-management** | Manage Docker containers, images, volumes, networks, and Compose stacks — lifecycle ops, debugging, cleanup, and Dockerfile optimization. |
+| **cli** | 通过 inference.sh CLI (infsh) 运行 150+ AI 应用 — 图像生成、视频创建、LLM、搜索、3D 和社交自动化。 |
+| **docker-management** | 管理 Docker 容器、镜像、卷、网络和 Compose 堆栈 — 生命周期操作、调试、清理和 Dockerfile 优化。 |
 
-## Email
+## 电子邮件
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **agentmail** | Give the agent its own dedicated email inbox via AgentMail. Send, receive, and manage email autonomously using agent-owned email addresses. |
+| **agentmail** | 通过 AgentMail 给智能体提供自己的专用电子邮件收件箱。使用智能体拥有的电子邮件地址自主发送、接收和管理电子邮件。 |
 
-## Health
+## 健康
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **neuroskill-bci** | Brain-Computer Interface (BCI) integration for neuroscience research workflows. |
+| **neuroskill-bci** | 用于神经科学研究工作流程的脑机接口 (BCI) 集成。 |
 
 ## MCP
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **fastmcp** | Build, test, inspect, install, and deploy MCP servers with FastMCP in Python. Covers wrapping APIs or databases as MCP tools, exposing resources or prompts, and deployment. |
+| **fastmcp** | 使用 FastMCP 在 Python 中构建、测试、检查、安装和部署 MCP 服务器。涵盖将 API 或数据库包装为 MCP 工具、公开资源或提示，以及部署。 |
 
-## Migration
+## 迁移
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **openclaw-migration** | Migrate a user's OpenClaw customization footprint into Hermes Agent. Imports memories, SOUL.md, command allowlists, user skills, and selected workspace assets. |
+| **openclaw-migration** | 将用户的 OpenClaw 自定义足迹迁移到 Hermes Agent。导入记忆、SOUL.md、命令允许列表、用户技能和选定的工作区资产。 |
 
 ## MLOps
 
-The largest optional category — covers the full ML pipeline from data curation to production inference.
+最大的可选类别 — 涵盖从数据整理到生产推理的完整 ML 管道。
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **accelerate** | Simplest distributed training API. 4 lines to add distributed support to any PyTorch script. Unified API for DeepSpeed/FSDP/Megatron/DDP. |
-| **chroma** | Open-source embedding database. Store embeddings and metadata, perform vector and full-text search. Simple 4-function API for RAG and semantic search. |
-| **faiss** | Facebook's library for efficient similarity search and clustering of dense vectors. Supports billions of vectors, GPU acceleration, and various index types (Flat, IVF, HNSW). |
-| **flash-attention** | Optimize transformer attention with Flash Attention for 2-4x speedup and 10-20x memory reduction. Supports PyTorch SDPA, flash-attn library, H100 FP8, and sliding window. |
-| **hermes-atropos-environments** | Build, test, and debug Hermes Agent RL environments for Atropos training. Covers the HermesAgentBaseEnv interface, reward functions, agent loop integration, and evaluation. |
-| **huggingface-tokenizers** | Fast Rust-based tokenizers for research and production. Tokenizes 1GB in under 20 seconds. Supports BPE, WordPiece, and Unigram algorithms. |
-| **instructor** | Extract structured data from LLM responses with Pydantic validation, retry failed extractions automatically, and stream partial results. |
-| **lambda-labs** | Reserved and on-demand GPU cloud instances for ML training and inference. SSH access, persistent filesystems, and multi-node clusters. |
-| **llava** | Large Language and Vision Assistant — visual instruction tuning and image-based conversations combining CLIP vision with LLaMA language models. |
-| **nemo-curator** | GPU-accelerated data curation for LLM training. Fuzzy deduplication (16x faster), quality filtering (30+ heuristics), semantic dedup, PII redaction. Scales with RAPIDS. |
-| **pinecone** | Managed vector database for production AI. Auto-scaling, hybrid search (dense + sparse), metadata filtering, and low latency (under 100ms p95). |
-| **pytorch-lightning** | High-level PyTorch framework with Trainer class, automatic distributed training (DDP/FSDP/DeepSpeed), callbacks, and minimal boilerplate. |
-| **qdrant** | High-performance vector similarity search engine. Rust-powered with fast nearest neighbor search, hybrid search with filtering, and scalable vector storage. |
-| **saelens** | Train and analyze Sparse Autoencoders (SAEs) using SAELens to decompose neural network activations into interpretable features. |
-| **simpo** | Simple Preference Optimization — reference-free alternative to DPO with better performance (+6.4 pts on AlpacaEval 2.0). No reference model needed. |
-| **slime** | LLM post-training with RL using Megatron+SGLang framework. Custom data generation workflows and tight Megatron-LM integration for RL scaling. |
-| **tensorrt-llm** | Optimize LLM inference with NVIDIA TensorRT for maximum throughput. 10-100x faster than PyTorch on A100/H100 with quantization (FP8/INT4) and in-flight batching. |
-| **torchtitan** | PyTorch-native distributed LLM pretraining with 4D parallelism (FSDP2, TP, PP, CP). Scale from 8 to 512+ GPUs with Float8 and torch.compile. |
+| **accelerate** | 最简单的分布式训练 API。4 行代码即可为任何 PyTorch 脚本添加分布式支持。DeepSpeed/FSDP/Megatron/DDP 的统一 API。 |
+| **chroma** | 开源嵌入数据库。存储嵌入和元数据，执行向量和全文搜索。用于 RAG 和语义搜索的简单 4 函数 API。 |
+| **faiss** | Facebook 的高效相似性搜索和密集向量聚类库。支持数十亿向量、GPU 加速和各种索引类型（Flat、IVF、HNSW）。 |
+| **flash-attention** | 使用 Flash Attention 优化 Transformer 注意力，实现 2-4 倍速度提升和 10-20 倍内存减少。支持 PyTorch SDPA、flash-attn 库、H100 FP8 和滑动窗口。 |
+| **hermes-atropos-environments** | 为 Atropos 训练构建、测试和调试 Hermes Agent RL 环境。涵盖 HermesAgentBaseEnv 接口、奖励函数、智能体循环集成和评估。 |
+| **huggingface-tokenizers** | 用于研究和生产的快速 Rust 基础分词器。在 20 秒内分词 1GB。支持 BPE、WordPiece 和 Unigram 算法。 |
+| **instructor** | 使用 Pydantic 验证从 LLM 响应中提取结构化数据，自动重试失败的提取，并流式传输部分结果。 |
+| **lambda-labs** | 用于 ML 训练和推理的预留和按需 GPU 云实例。SSH 访问、持久文件系统和多节点集群。 |
+| **llava** | 大型语言和视觉助手 — 视觉指令调整和基于图像的对话，结合 CLIP 视觉和 LLaMA 语言模型。 |
+| **nemo-curator** | 用于 LLM 训练的 GPU 加速数据整理。模糊去重（快 16 倍）、质量过滤（30+ 启发式）、语义去重、PII 编辑。通过 RAPIDS 扩展。 |
+| **pinecone** | 用于生产 AI 的托管向量数据库。自动扩展、混合搜索（密集 + 稀疏）、元数据过滤和低延迟（p95 低于 100ms）。 |
+| **pytorch-lightning** | 高级 PyTorch 框架，具有 Trainer 类、自动分布式训练（DDP/FSDP/DeepSpeed）、回调和最小样板代码。 |
+| **qdrant** | 高性能向量相似性搜索引擎。由 Rust 驱动，具有快速最近邻搜索、带过滤的混合搜索和可扩展向量存储。 |
+| **saelens** | 使用 SAELens 训练和分析稀疏自编码器 (SAE)，将神经网络激活分解为可解释特征。 |
+| **simpo** | 简单偏好优化 — DPO 的无参考替代方案，性能更好（AlpacaEval 2.0 上 +6.4 分）。无需参考模型。 |
+| **slime** | 使用 Megatron+SGLang 框架通过 RL 进行 LLM 后训练。自定义数据生成工作流程和与 Megatron-LM 的紧密集成用于 RL 扩展。 |
+| **tensorrt-llm** | 使用 NVIDIA TensorRT 优化 LLM 推理以获得最大吞吐量。在 A100/H100 上通过量化（FP8/INT4）和飞行中批处理比 PyTorch 快 10-100 倍。 |
+| **torchtitan** | PyTorch 原生分布式 LLM 预训练，具有 4D 并行性（FSDP2、TP、PP、CP）。使用 Float8 和 torch.compile 从 8 扩展到 512+ GPU。 |
 
-## Productivity
+## 生产力
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **canvas** | Canvas LMS integration — fetch enrolled courses and assignments using API token authentication. |
-| **memento-flashcards** | Spaced repetition flashcard system for learning and knowledge retention. |
-| **siyuan** | SiYuan Note API for searching, reading, creating, and managing blocks and documents in a self-hosted knowledge base. |
-| **telephony** | Give Hermes phone capabilities — provision a Twilio number, send/receive SMS/MMS, make calls, and place AI-driven outbound calls through Bland.ai or Vapi. |
+| **canvas** | Canvas LMS 集成 — 使用 API 令牌认证获取已注册课程和作业。 |
+| **memento-flashcards** | 用于学习和知识保留的间隔重复闪卡系统。 |
+| **siyuan** | SiYuan 笔记 API，用于在自托管知识库中搜索、阅读、创建和管理块和文档。 |
+| **telephony** | 为 Hermes 提供电话功能 — 配置 Twilio 号码、发送/接收 SMS/MMS、拨打电话，以及通过 Bland.ai 或 Vapi 进行 AI 驱动的外呼。 |
 
-## Research
+## 研究
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **bioinformatics** | Gateway to 400+ bioinformatics skills from bioSkills and ClawBio. Covers genomics, transcriptomics, single-cell, variant calling, pharmacogenomics, metagenomics, and structural biology. |
-| **domain-intel** | Passive domain reconnaissance using Python stdlib. Subdomain discovery, SSL certificate inspection, WHOIS lookups, DNS records, and bulk multi-domain analysis. No API keys required. |
-| **duckduckgo-search** | Free web search via DuckDuckGo — text, news, images, videos. No API key needed. |
-| **gitnexus-explorer** | Index a codebase with GitNexus and serve an interactive knowledge graph via web UI and Cloudflare tunnel. |
-| **parallel-cli** | Vendor skill for Parallel CLI — agent-native web search, extraction, deep research, enrichment, and monitoring. |
-| **qmd** | Search personal knowledge bases, notes, docs, and meeting transcripts locally using qmd — a hybrid retrieval engine with BM25, vector search, and LLM reranking. |
-| **scrapling** | Web scraping with Scrapling — HTTP fetching, stealth browser automation, Cloudflare bypass, and spider crawling via CLI and Python. |
+| **bioinformatics** | 来自 bioSkills 和 ClawBio 的 400+ 生物信息学技能的网关。涵盖基因组学、转录组学、单细胞、变异 calling、药物基因组学、宏基因组学和结构生物学。 |
+| **domain-intel** | 使用 Python 标准库进行被动域名侦察。子域名发现、SSL 证书检查、WHOIS 查找、DNS 记录和批量多域名分析。无需 API 密钥。 |
+| **duckduckgo-search** | 通过 DuckDuckGo 进行免费网络搜索 — 文本、新闻、图像、视频。无需 API 密钥。 |
+| **gitnexus-explorer** | 使用 GitNexus 索引代码库并通过 Web UI 和 Cloudflare 隧道提供交互式知识图谱。 |
+| **parallel-cli** | Parallel CLI 的供应商技能 — 智能体原生网络搜索、提取、深度研究、丰富和监控。 |
+| **qmd** | 使用 qmd 在本地搜索个人知识库、笔记、文档和会议记录 — 具有 BM25、向量搜索和 LLM 重排序的混合检索引擎。 |
+| **scrapling** | 使用 Scrapling 进行网络抓取 — HTTP 获取、隐身浏览器自动化、Cloudflare 绕过和通过 CLI 和 Python 进行蜘蛛爬行。 |
 
-## Security
+## 安全
 
-| Skill | Description |
+| 技能 | 描述 |
 |-------|-------------|
-| **1password** | Set up and use 1Password CLI (op). Install the CLI, enable desktop app integration, sign in, and read/inject secrets for commands. |
-| **oss-forensics** | Open-source software forensics — analyze packages, dependencies, and supply chain risks. |
-| **sherlock** | OSINT username search across 400+ social networks. Hunt down social media accounts by username. |
+| **1password** | 设置和使用 1Password CLI (op)。安装 CLI，启用桌面应用集成，登录，并为命令读取/注入密钥。 |
+| **oss-forensics** | 开源软件取证 — 分析包、依赖项和供应链风险。 |
+| **sherlock** | 跨 400+ 社交网络的 OSINT 用户名搜索。通过用户名查找社交媒体账户。 |
 
 ---
 
-## Contributing Optional Skills
+## 贡献可选技能
 
-To add a new optional skill to the repository:
+要向仓库添加新的可选技能：
 
-1. Create a directory under `optional-skills/<category>/<skill-name>/`
-2. Add a `SKILL.md` with standard frontmatter (name, description, version, author)
-3. Include any supporting files in `references/`, `templates/`, or `scripts/` subdirectories
-4. Submit a pull request — the skill will appear in this catalog once merged
+1. 在 `optional-skills/<category>/<skill-name>/` 下创建目录
+2. 添加带有标准前置内容（名称、描述、版本、作者）的 `SKILL.md`
+3. 在 `references/`、`templates/` 或 `scripts/` 子目录中包含任何支持文件
+4. 提交拉取请求 — 技能在合并后会出现在此目录中

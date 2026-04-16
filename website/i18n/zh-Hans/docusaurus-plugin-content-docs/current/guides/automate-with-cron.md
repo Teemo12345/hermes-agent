@@ -49,7 +49,7 @@ if os.path.exists(STATE_FILE):
 with open(STATE_FILE, "w") as f:
     json.dump({"hash": current_hash, "url": URL}, f)
 
-# Output for the agent
+# Output for agent
 if prev_hash and prev_hash != current_hash:
     print(f"CHANGE DETECTED on {URL}")
     print(f"Previous hash: {prev_hash}")
@@ -62,11 +62,11 @@ else:
 设置 cron 作业：
 
 ```bash
-/cron add "every 1h" "If the script output says CHANGE DETECTED, summarize what changed on the page and why it might matter. If it says NO_CHANGE, respond with just ." --script ~/.hermes/scripts/watch-site.py --name "Pricing monitor" --deliver telegram
+/cron add "every 1h" "如果脚本输出说 CHANGE DETECTED，总结页面上更改了什么以及为什么这可能很重要。如果它说 NO_CHANGE，仅用 [SILENT] 响应。" --script ~/.hermes/scripts/watch-site.py --name "定价监控" --deliver telegram
 ```
 
-:::tip  技巧
-当智能体的最终响应包含 `` 时，传递会被抑制。这意味着您只有在实际发生事情时才会收到通知 — 安静时段不会收到垃圾信息。
+:::tip 技巧
+当智能体的最终响应包含 `[SILENT]` 时，传递会被抑制。这意味着您只有在实际发生事情时才会收到通知 — 安静时段不会收到垃圾信息。
 :::
 
 ---
@@ -76,22 +76,22 @@ else:
 从多个来源编译信息，形成格式化摘要。这每周运行一次并传递到您的主频道。
 
 ```bash
-/cron add "0 9 * * 1" "Generate a weekly report covering:
+/cron add "0 9 * * 1" "生成涵盖以下内容的每周报告：
 
-1. Search the web for the top 5 AI news stories from the past week
-2. Search GitHub for trending repositories in the 'machine-learning' topic
-3. Check Hacker News for the most discussed AI/ML posts
+1. 搜索网络以查找过去一周的前 5 个 AI 新闻故事
+2. 搜索 GitHub 以查找'machine-learning'主题中的趋势仓库
+3. 检查 Hacker News 以查找讨论最多的 AI/ML 帖子
 
-Format as a clean summary with sections for each source. Include links.
-Keep it under 500 words — highlight only what matters." --name "Weekly AI digest" --deliver telegram
+格式为每个来源都有章节的干净摘要。包含链接。
+保持在 500 字以下 — 仅突出重要内容。" --name "每周 AI 摘要" --deliver telegram
 ```
 
 从 CLI：
 
 ```bash
 hermes cron create "0 9 * * 1" \
-  "Generate a weekly report covering the top AI news, trending ML GitHub repos, and most-discussed HN posts. Format with sections, include links, keep under 500 words." \
-  --name "Weekly AI digest" \
+  "生成涵盖顶级 AI 新闻、趋势 ML GitHub 仓库和讨论最多的 HN 帖子的每周报告。格式包含章节，包含链接，保持在 500 字以下。" \
+  --name "每周 AI 摘要" \
   --deliver telegram
 ```
 
@@ -104,17 +104,17 @@ hermes cron create "0 9 * * 1" \
 监控仓库的新问题、PR 或发布。
 
 ```bash
-/cron add "every 6h" "Check the GitHub repository NousResearch/hermes-agent for:
-- New issues opened in the last 6 hours
-- New PRs opened or merged in the last 6 hours
-- Any new releases
+/cron add "every 6h" "检查 GitHub 仓库 NousResearch/hermes-agent 以查找：
+- 过去 6 小时内打开的新问题
+- 过去 6 小时内打开或合并的新 PR
+- 任何新发布
 
-Use the terminal to run gh commands:
+使用终端运行 gh 命令：
   gh issue list --repo NousResearch/hermes-agent --state open --json number,title,author,createdAt --limit 10
   gh pr list --repo NousResearch/hermes-agent --state all --json number,title,author,createdAt,mergedAt --limit 10
 
-Filter to only items from the last 6 hours. If nothing new, respond with .
-Otherwise, provide a concise summary of the activity." --name "Repo watcher" --deliver discord
+仅筛选过去 6 小时内的项目。如果没有新内容，用 [SILENT] 响应。
+否则，提供活动的简洁摘要。" --name "仓库观察者" --deliver discord
 ```
 
 :::warning 自包含提示
@@ -157,15 +157,15 @@ for r in recent[-6:]:
 ```
 
 ```bash
-/cron add "every 1h" "Analyze the price data from the script output. Report:
-1. Current prices
-2. Trend direction over the last 6 data points (up/down/flat)
-3. Any notable movements (>5% change)
+/cron add "every 1h" "分析脚本输出的价格数据。报告：
+1. 当前价格
+2. 过去 6 个数据点的趋势方向（上升/下降/持平）
+3. 任何显著移动（>5% 变化）
 
-If prices are flat and nothing notable, respond with .
-If there's a significant move, explain what happened." \
+如果价格持平且没有显著内容，用 [SILENT] 响应。
+如果有重大移动，解释发生了什么。" \
   --script ~/.hermes/scripts/collect-prices.py \
-  --name "Price tracker" \
+  --name "价格跟踪器" \
   --deliver telegram
 ```
 
@@ -179,10 +179,10 @@ If there's a significant move, explain what happened." \
 
 ```bash
 # 使用 arxiv 技能查找论文，然后使用 obsidian 技能保存笔记
-/cron add "0 8 * * *" "Search arXiv for the 3 most interesting papers on 'language model reasoning' from the past day. For each paper, create an Obsidian note with the title, authors, abstract summary, and key contribution." \
+/cron add "0 8 * * *" "搜索 arXiv 以查找过去一天中关于'语言模型推理'的 3 篇最有趣的论文。对于每篇论文，创建一个 Obsidian 笔记，包含标题、作者、摘要摘要和关键贡献。" \
   --skill arxiv \
   --skill obsidian \
-  --name "Paper digest"
+  --name "论文摘要"
 ```
 
 直接从工具：
@@ -191,9 +191,9 @@ If there's a significant move, explain what happened." \
 cronjob(
     action="create",
     skills=["arxiv", "obsidian"],
-    prompt="Search arXiv for papers on 'language model reasoning' from the past day. Save the top 3 as Obsidian notes.",
+    prompt="搜索 arXiv 以查找过去一天中关于'语言模型推理'的论文。将前 3 篇保存为 Obsidian 笔记。",
     schedule="0 8 * * *",
-    name="Paper digest",
+    name="论文摘要",
     deliver="local"
 )
 ```
@@ -216,7 +216,7 @@ cronjob(
 
 # 编辑运行中作业的计划或提示
 /cron edit <job_id> --schedule "every 4h"
-/cron edit <job_id> --prompt "Updated task description"
+/cron edit <job_id> --prompt "更新的任务描述"
 
 # 向现有作业添加或删除技能
 /cron edit <job_id> --skill arxiv --skill obsidian
@@ -248,7 +248,7 @@ cronjob(
 
 **使提示自包含。** cron 作业中的智能体没有您对话的记忆。在提示中直接包含 URL、仓库名称、格式偏好和传递指令。
 
-**自由使用 ``。** 对于监控作业，始终包含诸如 "if nothing changed, respond with ``。" 这样的指令。这可以防止通知噪音。
+**自由使用 [SILENT]。** 对于监控作业，始终包含诸如"如果没有变更，用 [SILENT] 响应。"这样的指令。这可以防止通知噪音。
 
 **使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。智能体只看到脚本的 stdout 并对其应用推理。这比让智能体自己进行获取更便宜、更可靠。
 
@@ -258,4 +258,4 @@ cronjob(
 
 ---
 
-*For the complete cron reference — all parameters, edge cases, and internals — see [Scheduled Tasks (Cron)](/docs/user-guide/features/cron).*
+*有关完整的 cron 参考 — 所有参数、边缘情况和内部机制 — 请参阅[计划任务（Cron）](/docs/user-guide/features/cron)。*

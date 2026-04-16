@@ -52,13 +52,13 @@ $ hermes profile list
 hermes profile use <name>
 ```
 
-Sets `<name>` as the active profile. All subsequent `hermes` commands (without `-p`) will use this profile.
+将 `<name>` 设置为活动配置文件。所有后续的 `hermes` 命令（不带 `-p`）将使用此配置文件。
 
-| Argument | Description |
+| 参数 | 描述 |
 |----------|-------------|
-| `<name>` | Profile name to activate. Use `default` to return to the base profile. |
+| `<name>` | 要激活的配置文件名称。使用 `default` 返回基础配置文件。 |
 
-**Example:**
+**示例：**
 
 ```bash
 hermes profile use work
@@ -71,29 +71,29 @@ hermes profile use default
 hermes profile create <name> [options]
 ```
 
-Creates a new profile.
+创建新配置文件。
 
-| Argument / Option | Description |
+| 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<name>` | Name for the new profile. Must be a valid directory name (alphanumeric, hyphens, underscores). |
-| `--clone` | Copy `config.yaml`, `.env`, and `SOUL.md` from the current profile. |
-| `--clone-all` | Copy everything (config, memories, skills, sessions, state) from the current profile. |
-| `--clone-from <profile>` | Clone from a specific profile instead of the current one. Used with `--clone` or `--clone-all`. |
-| `--no-alias` | Skip wrapper script creation. |
+| `<name>` | 新配置文件的名称。必须是有效的目录名称（字母数字、连字符、下划线）。 |
+| `--clone` | 从当前配置文件复制 `config.yaml`、`.env` 和 `SOUL.md`。 |
+| `--clone-all` | 从当前配置文件复制所有内容（配置、记忆、技能、会话、状态）。 |
+| `--clone-from <profile>` | 从特定配置文件克隆，而不是当前配置文件。与 `--clone` 或 `--clone-all` 一起使用。 |
+| `--no-alias` | 跳过包装脚本创建。 |
 
-**Examples:**
+**示例：**
 
 ```bash
-# Blank profile — needs full setup
+# 空白配置文件 — 需要完整设置
 hermes profile create mybot
 
-# Clone config only from current profile
+# 仅从当前配置文件克隆配置
 hermes profile create work --clone
 
-# Clone everything from current profile
+# 从当前配置文件克隆所有内容
 hermes profile create backup --clone-all
 
-# Clone config from a specific profile
+# 从特定配置文件克隆配置
 hermes profile create work2 --clone --clone-from work
 ```
 
@@ -103,14 +103,14 @@ hermes profile create work2 --clone --clone-from work
 hermes profile delete <name> [options]
 ```
 
-Deletes a profile and removes its shell alias.
+删除配置文件并删除其 shell 别名。
 
-| Argument / Option | Description |
+| 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<name>` | Profile to delete. |
-| `--yes`, `-y` | Skip confirmation prompt. |
+| `<name>` | 要删除的配置文件。 |
+| `--yes`, `-y` | 跳过确认提示。 |
 
-**Example:**
+**示例：**
 
 ```bash
 hermes profile delete mybot
@@ -118,7 +118,7 @@ hermes profile delete mybot --yes
 ```
 
 :::warning
-This permanently deletes the profile's entire directory including all config, memories, sessions, and skills. Cannot delete the currently active profile.
+这会永久删除配置文件的整个目录，包括所有配置、记忆、会话和技能。无法删除当前活动的配置文件。
 :::
 
 ## `hermes profile show`
@@ -127,13 +127,13 @@ This permanently deletes the profile's entire directory including all config, me
 hermes profile show <name>
 ```
 
-Displays details about a profile including its home directory, configured model, gateway status, skills count, and configuration file status.
+显示配置文件的详细信息，包括其主目录、配置的模型、网关状态、技能计数和配置文件状态。
 
-| Argument | Description |
+| 参数 | 描述 |
 |----------|-------------|
-| `<name>` | Profile to inspect. |
+| `<name>` | 要检查的配置文件。 |
 
-**Example:**
+**示例：**
 
 ```bash
 $ hermes profile show work
@@ -153,25 +153,25 @@ Alias:   ~/.local/bin/work
 hermes profile alias <name> [options]
 ```
 
-Regenerates the shell alias script at `~/.local/bin/<name>`. Useful if the alias was accidentally deleted or if you need to update it after moving your Hermes installation.
+重新生成 `~/.local/bin/<name>` 处的 shell 别名脚本。如果别名被意外删除或在移动 Hermes 安装后需要更新，这很有用。
 
-| Argument / Option | Description |
+| 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<name>` | Profile to create/update the alias for. |
-| `--remove` | Remove the wrapper script instead of creating it. |
-| `--name <alias>` | Custom alias name (default: profile name). |
+| `<name>` | 要创建/更新别名的配置文件。 |
+| `--remove` | 删除包装脚本而不是创建它。 |
+| `--name <alias>` | 自定义别名名称（默认：配置文件名称）。 |
 
-**Example:**
+**示例：**
 
 ```bash
 hermes profile alias work
-# Creates/updates ~/.local/bin/work
+# 创建/更新 ~/.local/bin/work
 
 hermes profile alias work --name mywork
-# Creates ~/.local/bin/mywork
+# 创建 ~/.local/bin/mywork
 
 hermes profile alias work --remove
-# Removes the wrapper script
+# 删除包装脚本
 ```
 
 ## `hermes profile rename`
@@ -180,14 +180,14 @@ hermes profile alias work --remove
 hermes profile rename <old-name> <new-name>
 ```
 
-Renames a profile. Updates the directory and shell alias.
+重命名配置文件。更新目录和 shell 别名。
 
-| Argument | Description |
+| 参数 | 描述 |
 |----------|-------------|
-| `<old-name>` | Current profile name. |
-| `<new-name>` | New profile name. |
+| `<old-name>` | 当前配置文件名称。 |
+| `<new-name>` | 新配置文件名称。 |
 
-**Example:**
+**示例：**
 
 ```bash
 hermes profile rename mybot assistant
@@ -201,18 +201,18 @@ hermes profile rename mybot assistant
 hermes profile export <name> [options]
 ```
 
-Exports a profile as a compressed tar.gz archive.
+将配置文件导出为压缩的 tar.gz 存档。
 
-| Argument / Option | Description |
+| 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<name>` | Profile to export. |
-| `-o`, `--output <path>` | Output file path (default: `<name>.tar.gz`). |
+| `<name>` | 要导出的配置文件。 |
+| `-o`, `--output <path>` | 输出文件路径（默认：`<name>.tar.gz`）。 |
 
-**Example:**
+**示例：**
 
 ```bash
 hermes profile export work
-# Creates work.tar.gz in the current directory
+# 在当前目录创建 work.tar.gz
 
 hermes profile export work -o ./work-2026-03-29.tar.gz
 ```
@@ -223,18 +223,18 @@ hermes profile export work -o ./work-2026-03-29.tar.gz
 hermes profile import <archive> [options]
 ```
 
-Imports a profile from a tar.gz archive.
+从 tar.gz 存档导入配置文件。
 
-| Argument / Option | Description |
+| 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<archive>` | Path to the tar.gz archive to import. |
-| `--name <name>` | Name for the imported profile (default: inferred from archive). |
+| `<archive>` | 要导入的 tar.gz 存档的路径。 |
+| `--name <name>` | 导入的配置文件的名称（默认：从存档推断）。 |
 
-**Example:**
+**示例：**
 
 ```bash
 hermes profile import ./work-2026-03-29.tar.gz
-# Infers profile name from the archive
+# 从存档推断配置文件名称
 
 hermes profile import ./work-2026-03-29.tar.gz --name work-restored
 ```
@@ -246,13 +246,13 @@ hermes -p <name> <command> [options]
 hermes --profile <name> <command> [options]
 ```
 
-Global flag to run any Hermes command under a specific profile without changing the sticky default. This overrides the active profile for the duration of the command.
+全局标志，用于在特定配置文件下运行任何 Hermes 命令，而不更改粘性默认值。这会在命令执行期间覆盖活动配置文件。
 
-| Option | Description |
+| 选项 | 描述 |
 |--------|-------------|
-| `-p <name>`, `--profile <name>` | Profile to use for this command. |
+| `-p <name>`, `--profile <name>` | 用于此命令的配置文件。 |
 
-**Examples:**
+**示例：**
 
 ```bash
 hermes -p work chat -q "Check the server status"
@@ -267,30 +267,30 @@ hermes -p work config edit
 hermes completion <shell>
 ```
 
-Generates shell completion scripts. Includes completions for profile names and profile subcommands.
+生成 shell 补全脚本。包括配置文件名称和配置文件子命令的补全。
 
-| Argument | Description |
+| 参数 | 描述 |
 |----------|-------------|
-| `<shell>` | Shell to generate completions for: `bash` or `zsh`. |
+| `<shell>` | 要生成补全的 shell：`bash` 或 `zsh`。 |
 
-**Examples:**
+**示例：**
 
 ```bash
-# Install completions
+# 安装补全
 hermes completion bash >> ~/.bashrc
 hermes completion zsh >> ~/.zshrc
 
-# Reload shell
+# 重新加载 shell
 source ~/.bashrc
 ```
 
-After installation, tab completion works for:
-- `hermes profile <TAB>` — subcommands (list, use, create, etc.)
-- `hermes profile use <TAB>` — profile names
-- `hermes -p <TAB>` — profile names
+安装后，Tab 补全适用于：
+- `hermes profile <TAB>` — 子命令（list, use, create 等）
+- `hermes profile use <TAB>` — 配置文件名称
+- `hermes -p <TAB>` — 配置文件名称
 
-## See also
+## 另请参阅
 
-- [Profiles User Guide](../user-guide/profiles.md)
-- [CLI Commands Reference](./cli-commands.md)
-- [FAQ — Profiles section](./faq.md#profiles)
+- [配置文件用户指南](../user-guide/profiles.md)
+- [CLI 命令参考](./cli-commands.md)
+- [FAQ — 配置文件部分](./faq.md#profiles)

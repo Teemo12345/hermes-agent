@@ -2,96 +2,96 @@
 sidebar_position: 8
 sidebar_label: "SMS (Twilio)"
 title: "SMS (Twilio)"
-description: "Set up Hermes Agent as an SMS chatbot via Twilio"
+description: "通过Twilio设置Hermes Agent作为SMS聊天机器人"
 ---
 
-# SMS Setup (Twilio)
+# SMS设置 (Twilio)
 
-Hermes connects to SMS through the [Twilio](https://www.twilio.com/) API. People text your Twilio phone number and get AI responses back — same conversational experience as Telegram or Discord, but over standard text messages.
+Hermes通过[Twilio](https://www.twilio.com/) API连接到SMS。人们向您的Twilio电话号码发送文本消息，然后收到AI回复 — 与Telegram或Discord相同的对话体验，但通过标准文本消息。
 
-:::info Shared Credentials
-The SMS gateway shares credentials with the optional [telephony skill](/docs/reference/skills-catalog). If you've already set up Twilio for voice calls or one-off SMS, the gateway works with the same `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`.
+:::info 共享凭据
+SMS网关与可选的[电话技能](/docs/reference/skills-catalog)共享凭据。如果您已经为语音通话或一次性SMS设置了Twilio，网关将使用相同的`TWILIO_ACCOUNT_SID`、`TWILIO_AUTH_TOKEN`和`TWILIO_PHONE_NUMBER`。
 :::
 
 ---
 
-## Prerequisites
+## 先决条件
 
-- **Twilio account** — [Sign up at twilio.com](https://www.twilio.com/try-twilio) (free trial available)
-- **A Twilio phone number** with SMS capability
-- **A publicly accessible server** — Twilio sends webhooks to your server when SMS arrives
+- **Twilio账户** — [在twilio.com注册](https://www.twilio.com/try-twilio)（提供免费试用）
+- **具有SMS功能的Twilio电话号码**
+- **可公开访问的服务器** — 当SMS到达时，Twilio会向您的服务器发送webhook
 - **aiohttp** — `pip install 'hermes-agent[sms]'`
 
 ---
 
-## Step 1: Get Your Twilio Credentials
+## 步骤1：获取您的Twilio凭据
 
-1. Go to the [Twilio Console](https://console.twilio.com/)
-2. Copy your **Account SID** and **Auth Token** from the dashboard
-3. Go to **Phone Numbers → Manage → Active Numbers** — note your phone number in E.164 format (e.g., `+15551234567`)
+1. 前往[Twilio控制台](https://console.twilio.com/)
+2. 从仪表板复制您的**Account SID**和**Auth Token**
+3. 前往**Phone Numbers → Manage → Active Numbers** — 以E.164格式记下您的电话号码（例如，`+15551234567`）
 
 ---
 
-## Step 2: Configure Hermes
+## 步骤2：配置Hermes
 
-### Interactive setup (recommended)
+### 交互式设置（推荐）
 
 ```bash
 hermes gateway setup
 ```
 
-Select **SMS (Twilio)** from the platform list. The wizard will prompt for your credentials.
+从平台列表中选择**SMS (Twilio)**。向导会提示您输入凭据。
 
-### Manual setup
+### 手动设置
 
-Add to `~/.hermes/.env`:
+添加到 `~/.hermes/.env`：
 
 ```bash
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your_auth_token_here
 TWILIO_PHONE_NUMBER=+15551234567
 
-# Security: restrict to specific phone numbers (recommended)
+# 安全：限制特定电话号码（推荐）
 SMS_ALLOWED_USERS=+15559876543,+15551112222
 
-# Optional: set a home channel for cron job delivery
+# 可选：设置定时任务传递的主频道
 SMS_HOME_CHANNEL=+15559876543
 ```
 
 ---
 
-## Step 3: Configure Twilio Webhook
+## 步骤3：配置Twilio Webhook
 
-Twilio needs to know where to send incoming messages. In the [Twilio Console](https://console.twilio.com/):
+Twilio需要知道在哪里发送传入的消息。在[Twilio控制台](https://console.twilio.com/)中：
 
-1. Go to **Phone Numbers → Manage → Active Numbers**
-2. Click your phone number
-3. Under **Messaging → A MESSAGE COMES IN**, set:
-   - **Webhook**: `https://your-server:8080/webhooks/twilio`
-   - **HTTP Method**: `POST`
+1. 前往**Phone Numbers → Manage → Active Numbers**
+2. 点击您的电话号码
+3. 在**Messaging → A MESSAGE COMES IN**下，设置：
+   - **Webhook**：`https://your-server:8080/webhooks/twilio`
+   - **HTTP Method**：`POST`
 
-:::tip Exposing Your Webhook
-If you're running Hermes locally, use a tunnel to expose the webhook:
+:::tip 暴露您的Webhook
+如果您在本地运行Hermes，请使用隧道来暴露webhook：
 
 ```bash
-# Using cloudflared
+# 使用cloudflared
 cloudflared tunnel --url http://localhost:8080
 
-# Using ngrok
+# 使用ngrok
 ngrok http 8080
 ```
 
-Set the resulting public URL as your Twilio webhook.
+将生成的公共URL设置为您的Twilio webhook。
 :::
 
-**Set `SMS_WEBHOOK_URL` to the same URL you configured in Twilio.** This is required for Twilio signature validation — the adapter will refuse to start without it:
+**将`SMS_WEBHOOK_URL`设置为您在Twilio中配置的相同URL。** 这对于Twilio签名验证是必需的 — 适配器会拒绝在没有它的情况下启动：
 
 ```bash
-# Must match the webhook URL in your Twilio Console
+# 必须与Twilio控制台中的webhook URL匹配
 SMS_WEBHOOK_URL=https://your-server:8080/webhooks/twilio
 ```
 
-The webhook port defaults to `8080`. Override with:
+Webhook端口默认为`8080`。可以通过以下方式覆盖：
 
 ```bash
 SMS_WEBHOOK_PORT=3000
@@ -99,105 +99,105 @@ SMS_WEBHOOK_PORT=3000
 
 ---
 
-## Step 4: Start the Gateway
+## 步骤4：启动网关
 
 ```bash
 hermes gateway
 ```
 
-You should see:
+您应该看到：
 
 ```
 [sms] Twilio webhook server listening on 0.0.0.0:8080, from: +1555***4567
 ```
 
-If you see `Refusing to start: SMS_WEBHOOK_URL is required`, set `SMS_WEBHOOK_URL` to the public URL configured in your Twilio Console (see Step 3).
+如果您看到`Refusing to start: SMS_WEBHOOK_URL is required`，请将`SMS_WEBHOOK_URL`设置为您在Twilio控制台中配置的公共URL（见步骤3）。
 
-Text your Twilio number — Hermes will respond via SMS.
+向您的Twilio号码发送文本 — Hermes将通过SMS响应。
 
 ---
 
-## Environment Variables
+## 环境变量
 
-| Variable | Required | Description |
+| 变量 | 必需 | 描述 |
 |----------|----------|-------------|
-| `TWILIO_ACCOUNT_SID` | Yes | Twilio Account SID (starts with `AC`) |
-| `TWILIO_AUTH_TOKEN` | Yes | Twilio Auth Token (also used for webhook signature validation) |
-| `TWILIO_PHONE_NUMBER` | Yes | Your Twilio phone number (E.164 format) |
-| `SMS_WEBHOOK_URL` | Yes | Public URL for Twilio signature validation — must match the webhook URL in your Twilio Console |
-| `SMS_WEBHOOK_PORT` | No | Webhook listener port (default: `8080`) |
-| `SMS_WEBHOOK_HOST` | No | Webhook bind address (default: `0.0.0.0`) |
-| `SMS_INSECURE_NO_SIGNATURE` | No | Set to `true` to disable signature validation (local dev only — **not for production**) |
-| `SMS_ALLOWED_USERS` | No | Comma-separated E.164 phone numbers allowed to chat |
-| `SMS_ALLOW_ALL_USERS` | No | Set to `true` to allow anyone (not recommended) |
-| `SMS_HOME_CHANNEL` | No | Phone number for cron job / notification delivery |
-| `SMS_HOME_CHANNEL_NAME` | No | Display name for the home channel (default: `Home`) |
+| `TWILIO_ACCOUNT_SID` | 是 | Twilio Account SID（以`AC`开头） |
+| `TWILIO_AUTH_TOKEN` | 是 | Twilio Auth Token（也用于webhook签名验证） |
+| `TWILIO_PHONE_NUMBER` | 是 | 您的Twilio电话号码（E.164格式） |
+| `SMS_WEBHOOK_URL` | 是 | 用于Twilio签名验证的公共URL — 必须与Twilio控制台中的webhook URL匹配 |
+| `SMS_WEBHOOK_PORT` | 否 | Webhook监听器端口（默认：`8080`） |
+| `SMS_WEBHOOK_HOST` | 否 | Webhook绑定地址（默认：`0.0.0.0`） |
+| `SMS_INSECURE_NO_SIGNATURE` | 否 | 设置为`true`以禁用签名验证（仅本地开发 — **不用于生产**） |
+| `SMS_ALLOWED_USERS` | 否 | 允许聊天的逗号分隔E.164电话号码 |
+| `SMS_ALLOW_ALL_USERS` | 否 | 设置为`true`以允许任何人（不推荐） |
+| `SMS_HOME_CHANNEL` | 否 | 用于定时任务/通知传递的电话号码 |
+| `SMS_HOME_CHANNEL_NAME` | 否 | 主频道的显示名称（默认：`Home`） |
 
 ---
 
-## SMS-Specific Behavior
+## SMS特定行为
 
-- **Plain text only** — Markdown is automatically stripped since SMS renders it as literal characters
-- **1600 character limit** — Longer responses are split across multiple messages at natural boundaries (newlines, then spaces)
-- **Echo prevention** — Messages from your own Twilio number are ignored to prevent loops
-- **Phone number redaction** — Phone numbers are redacted in logs for privacy
+- **仅纯文本** — Markdown会自动剥离，因为SMS将其呈现为文字字符
+- **1600字符限制** — 更长的响应会在自然边界（换行符，然后是空格）处分割成多条消息
+- **回显预防** — 来自您自己的Twilio号码的消息被忽略，以防止循环
+- **电话号码编辑** — 电话号码在日志中被编辑以保护隐私
 
 ---
 
-## Security
+## 安全
 
-### Webhook signature validation
+### Webhook签名验证
 
-Hermes validates that inbound webhooks genuinely originate from Twilio by verifying the `X-Twilio-Signature` header (HMAC-SHA1). This prevents attackers from injecting forged messages.
+Hermes通过验证`X-Twilio-Signature`头（HMAC-SHA1）来验证入站webhook确实来自Twilio。这可以防止攻击者注入伪造消息。
 
-**`SMS_WEBHOOK_URL` is required.** Set it to the public URL configured in your Twilio Console. The adapter will refuse to start without it.
+**`SMS_WEBHOOK_URL`是必需的。** 将其设置为您在Twilio控制台中配置的公共URL。适配器会拒绝在没有它的情况下启动。
 
-For local development without a public URL, you can disable validation:
+对于没有公共URL的本地开发，您可以禁用验证：
 
 ```bash
-# Local dev only — NOT for production
+# 仅本地开发 — 不用于生产
 SMS_INSECURE_NO_SIGNATURE=true
 ```
 
-### User allowlists
+### 用户允许列表
 
-**The gateway denies all users by default.** Configure an allowlist:
+**网关默认拒绝所有用户。** 配置允许列表：
 
 ```bash
-# Recommended: restrict to specific phone numbers
+# 推荐：限制特定电话号码
 SMS_ALLOWED_USERS=+15559876543,+15551112222
 
-# Or allow all (NOT recommended for bots with terminal access)
+# 或允许所有人（不推荐用于具有终端访问权限的机器人）
 SMS_ALLOW_ALL_USERS=true
 ```
 
 :::warning
-SMS has no built-in encryption. Don't use SMS for sensitive operations unless you understand the security implications. For sensitive use cases, prefer Signal or Telegram.
+SMS没有内置加密。除非您了解安全影响，否则不要将SMS用于敏感操作。对于敏感用例，首选Signal或Telegram。
 :::
 
 ---
 
-## Troubleshooting
+## 故障排除
 
-### Messages not arriving
+### 消息未到达
 
-1. Check your Twilio webhook URL is correct and publicly accessible
-2. Verify `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` are correct
-3. Check the Twilio Console → **Monitor → Logs → Messaging** for delivery errors
-4. Ensure your phone number is in `SMS_ALLOWED_USERS` (or `SMS_ALLOW_ALL_USERS=true`)
+1. 检查您的Twilio webhook URL是否正确且可公开访问
+2. 验证`TWILIO_ACCOUNT_SID`和`TWILIO_AUTH_TOKEN`是否正确
+3. 检查Twilio控制台 → **Monitor → Logs → Messaging** 中的传递错误
+4. 确保您的电话号码在`SMS_ALLOWED_USERS`中（或`SMS_ALLOW_ALL_USERS=true`）
 
-### Replies not sending
+### 回复未发送
 
-1. Check `TWILIO_PHONE_NUMBER` is set correctly (E.164 format with `+`)
-2. Verify your Twilio account has SMS-capable numbers
-3. Check Hermes gateway logs for Twilio API errors
+1. 检查`TWILIO_PHONE_NUMBER`是否正确设置（带有`+`的E.164格式）
+2. 验证您的Twilio账户是否有支持SMS的号码
+3. 检查Hermes网关日志中的Twilio API错误
 
-### Webhook port conflicts
+### Webhook端口冲突
 
-If port 8080 is already in use, change it:
+如果端口8080已被使用，请更改它：
 
 ```bash
 SMS_WEBHOOK_PORT=3001
 ```
 
-Update the webhook URL in Twilio Console to match.
+更新Twilio控制台中的webhook URL以匹配。

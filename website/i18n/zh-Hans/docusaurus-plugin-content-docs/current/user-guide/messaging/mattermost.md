@@ -1,117 +1,117 @@
 ---
 sidebar_position: 8
 title: "Mattermost"
-description: "Set up Hermes Agent as a Mattermost bot"
+description: "将 Hermes Agent 设置为 Mattermost 机器人"
 ---
 
-# Mattermost Setup
+# Mattermost 设置
 
-Hermes Agent integrates with Mattermost as a bot, letting you chat with your AI assistant through direct messages or team channels. Mattermost is a self-hosted, open-source Slack alternative — you run it on your own infrastructure, keeping full control of your data. The bot connects via Mattermost's REST API (v4) and WebSocket for real-time events, processes messages through the Hermes Agent pipeline (including tool use, memory, and reasoning), and responds in real time. It supports text, file attachments, images, and slash commands.
+Hermes Agent 作为机器人集成到 Mattermost 中，让您通过直接消息或团队频道与您的 AI 助手聊天。Mattermost 是一个自托管的开源 Slack 替代品 — 您在自己的基础设施上运行它，完全控制您的数据。机器人通过 Mattermost 的 REST API (v4) 和 WebSocket 连接以获取实时事件，通过 Hermes Agent 管道处理消息（包括工具使用、内存和推理），并实时响应。它支持文本、文件附件、图像和斜杠命令。
 
-No external Mattermost library is required — the adapter uses `aiohttp`, which is already a Hermes dependency.
+不需要外部 Mattermost 库 — 适配器使用 `aiohttp`，这已经是 Hermes 的依赖项。
 
-Before setup, here's the part most people want to know: how Hermes behaves once it's in your Mattermost instance.
+在设置之前，这里是大多数人想知道的：Hermes 在您的 Mattermost 实例中的行为。
 
-## How Hermes Behaves
+## Hermes 的行为
 
-| Context | Behavior |
+| 上下文 | 行为 |
 |---------|----------|
-| **DMs** | Hermes responds to every message. No `@mention` needed. Each DM has its own session. |
-| **Public/private channels** | Hermes responds when you `@mention` it. Without a mention, Hermes ignores the message. |
-| **Threads** | If `MATTERMOST_REPLY_MODE=thread`, Hermes replies in a thread under your message. Thread context stays isolated from the parent channel. |
-| **Shared channels with multiple users** | By default, Hermes isolates session history per user inside the channel. Two people talking in the same channel do not share one transcript unless you explicitly disable that. |
+| **私聊** | Hermes 响应每条消息。不需要 `@提及`。每个私聊都有自己的会话。 |
+| **公共/私有频道** | 当您 `@提及` 它时，Hermes 会响应。没有提及，Hermes 会忽略消息。 |
+| **线程** | 如果 `MATTERMOST_REPLY_MODE=thread`，Hermes 会在您的消息下的线程中回复。线程上下文与父频道隔离。 |
+| **与多个用户共享频道** | 默认情况下，Hermes 在频道内为每个用户隔离会话历史记录。两个人在同一个频道交谈不会共享一个转录本，除非您明确禁用它。 |
 
 :::tip
-If you want Hermes to reply as threaded conversations (nested under your original message), set `MATTERMOST_REPLY_MODE=thread`. The default is `off`, which sends flat messages in the channel.
+如果您希望 Hermes 以线程对话的形式回复（嵌套在您的原始消息下），请设置 `MATTERMOST_REPLY_MODE=thread`。默认值为 `off`，它会在频道中发送扁平消息。
 :::
 
-### Session Model in Mattermost
+### Mattermost 中的会话模型
 
-By default:
+默认情况下：
 
-- each DM gets its own session
-- each thread gets its own session namespace
-- each user in a shared channel gets their own session inside that channel
+- 每个私聊获得自己的会话
+- 每个线程获得自己的会话命名空间
+- 共享频道中的每个用户在该频道内获得自己的会话
 
-This is controlled by `config.yaml`:
+这由 `config.yaml` 控制：
 
 ```yaml
 group_sessions_per_user: true
 ```
 
-Set it to `false` only if you explicitly want one shared conversation for the entire channel:
+只有当您明确希望整个频道有一个共享对话时，才将其设置为 `false`：
 
 ```yaml
 group_sessions_per_user: false
 ```
 
-Shared sessions can be useful for a collaborative channel, but they also mean:
+共享会话对于协作频道很有用，但它们也意味着：
 
-- users share context growth and token costs
-- one person's long tool-heavy task can bloat everyone else's context
-- one person's in-flight run can interrupt another person's follow-up in the same channel
+- 用户共享上下文增长和令牌成本
+- 一个人繁重的工具任务可能会使其他人的上下文膨胀
+- 一个人正在进行的运行可能会中断同一频道中另一个人的后续操作
 
-This guide walks you through the full setup process — from creating your bot on Mattermost to sending your first message.
+本指南引导您完成完整的设置过程 — 从在 Mattermost 上创建机器人到发送第一条消息。
 
-## Step 1: Enable Bot Accounts
+## 步骤 1：启用机器人账户
 
-Bot accounts must be enabled on your Mattermost server before you can create one.
+在创建机器人之前，必须在 Mattermost 服务器上启用机器人账户。
 
-1. Log in to Mattermost as a **System Admin**.
-2. Go to **System Console** → **Integrations** → **Bot Accounts**.
-3. Set **Enable Bot Account Creation** to **true**.
-4. Click **Save**.
+1. 以 **系统管理员** 身份登录 Mattermost。
+2. 转到 **系统控制台** → **集成** → **机器人账户**。
+3. 将 **启用机器人账户创建** 设置为 **true**。
+4. 点击 **保存**。
 
 :::info
-If you don't have System Admin access, ask your Mattermost administrator to enable bot accounts and create one for you.
+如果您没有系统管理员访问权限，请要求您的 Mattermost 管理员启用机器人账户并为您创建一个。
 :::
 
-## Step 2: Create a Bot Account
+## 步骤 2：创建机器人账户
 
-1. In Mattermost, click the **☰** menu (top-left) → **Integrations** → **Bot Accounts**.
-2. Click **Add Bot Account**.
-3. Fill in the details:
-   - **Username**: e.g., `hermes`
-   - **Display Name**: e.g., `Hermes Agent`
-   - **Description**: optional
-   - **Role**: `Member` is sufficient
-4. Click **Create Bot Account**.
-5. Mattermost will display the **bot token**. **Copy it immediately.**
+1. 在 Mattermost 中，点击 **☰** 菜单（左上角）→ **集成** → **机器人账户**。
+2. 点击 **添加机器人账户**。
+3. 填写详细信息：
+   - **用户名**：例如，`hermes`
+   - **显示名称**：例如，`Hermes Agent`
+   - **描述**：可选
+   - **角色**：`Member` 就足够了
+4. 点击 **创建机器人账户**。
+5. Mattermost 将显示 **机器人令牌**。**立即复制它**。
 
-:::warning[Token shown only once]
-The bot token is only displayed once when you create the bot account. If you lose it, you'll need to regenerate it from the bot account settings. Never share your token publicly or commit it to Git — anyone with this token has full control of the bot.
+:::warning[令牌只显示一次]
+机器人令牌仅在创建机器人账户时显示一次。如果您丢失了它，需要从机器人账户设置中重新生成。永远不要公开分享您的令牌或将其提交到 Git — 任何拥有此令牌的人都可以完全控制机器人。
 :::
 
-Store the token somewhere safe (a password manager, for example). You'll need it in Step 5.
+将令牌存储在安全的地方（例如密码管理器）。您将在步骤 5 中需要它。
 
 :::tip
-You can also use a **personal access token** instead of a bot account. Go to **Profile** → **Security** → **Personal Access Tokens** → **Create Token**. This is useful if you want Hermes to post as your own user rather than a separate bot user.
+您也可以使用 **个人访问令牌** 而不是机器人账户。转到 **个人资料** → **安全** → **个人访问令牌** → **创建令牌**。如果您希望 Hermes 以您自己的用户身份而不是单独的机器人用户身份发布，这很有用。
 :::
 
-## Step 3: Add the Bot to Channels
+## 步骤 3：将机器人添加到频道
 
-The bot needs to be a member of any channel where you want it to respond:
+机器人需要成为您希望它响应的任何频道的成员：
 
-1. Open the channel where you want the bot.
-2. Click the channel name → **Add Members**.
-3. Search for your bot username (e.g., `hermes`) and add it.
+1. 打开您希望机器人加入的频道。
+2. 点击频道名称 → **添加成员**。
+3. 搜索您的机器人用户名（例如，`hermes`）并添加它。
 
-For DMs, simply open a direct message with the bot — it will be able to respond immediately.
+对于私聊，只需与机器人打开直接消息 — 它将能够立即响应。
 
-## Step 4: Find Your Mattermost User ID
+## 步骤 4：查找您的 Mattermost 用户 ID
 
-Hermes Agent uses your Mattermost User ID to control who can interact with the bot. To find it:
+Hermes Agent 使用您的 Mattermost 用户 ID 来控制谁可以与机器人交互。要找到它：
 
-1. Click your **avatar** (top-left corner) → **Profile**.
-2. Your User ID is displayed in the profile dialog — click it to copy.
+1. 点击您的 **头像**（左上角）→ **个人资料**。
+2. 您的用户 ID 显示在个人资料对话框中 — 点击它进行复制。
 
-Your User ID is a 26-character alphanumeric string like `3uo8dkh1p7g1mfk49ear5fzs5c`.
+您的用户 ID 是一个 26 字符的字母数字字符串，如 `3uo8dkh1p7g1mfk49ear5fzs5c`。
 
 :::warning
-Your User ID is **not** your username. The username is what appears after `@` (e.g., `@alice`). The User ID is a long alphanumeric identifier that Mattermost uses internally.
+您的用户 ID **不是** 您的用户名。用户名是 `@` 后面的内容（例如，`@alice`）。用户 ID 是 Mattermost 在内部使用的长字母数字标识符。
 :::
 
-**Alternative**: You can also get your User ID via the API:
+**替代方法**：您也可以通过 API 获取您的用户 ID：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
@@ -119,133 +119,133 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 ```
 
 :::tip
-To get a **Channel ID**: click the channel name → **View Info**. The Channel ID is shown in the info panel. You'll need this if you want to set a home channel manually.
+要获取 **频道 ID**：点击频道名称 → **查看信息**。频道 ID 显示在信息面板中。如果您想手动设置主频道，您将需要这个。
 :::
 
-## Step 5: Configure Hermes Agent
+## 步骤 5：配置 Hermes Agent
 
-### Option A: Interactive Setup (Recommended)
+### 选项 A：交互式设置（推荐）
 
-Run the guided setup command:
+运行引导设置命令：
 
 ```bash
 hermes gateway setup
 ```
 
-Select **Mattermost** when prompted, then paste your server URL, bot token, and user ID when asked.
+当提示时选择 **Mattermost**，然后在询问时粘贴您的服务器 URL、机器人令牌和用户 ID。
 
-### Option B: Manual Configuration
+### 选项 B：手动配置
 
-Add the following to your `~/.hermes/.env` file:
+将以下内容添加到您的 `~/.hermes/.env` 文件：
 
 ```bash
-# Required
+# 必需
 MATTERMOST_URL=https://mm.example.com
 MATTERMOST_TOKEN=***
 MATTERMOST_ALLOWED_USERS=3uo8dkh1p7g1mfk49ear5fzs5c
 
-# Multiple allowed users (comma-separated)
+# 多个允许的用户（逗号分隔）
 # MATTERMOST_ALLOWED_USERS=3uo8dkh1p7g1mfk49ear5fzs5c,8fk2jd9s0a7bncm1xqw4tp6r3e
 
-# Optional: reply mode (thread or off, default: off)
+# 可选：回复模式（thread 或 off，默认：off）
 # MATTERMOST_REPLY_MODE=thread
 
-# Optional: respond without @mention (default: true = require mention)
+# 可选：无需 @提及即可响应（默认：true = 需要提及）
 # MATTERMOST_REQUIRE_MENTION=false
 
-# Optional: channels where bot responds without @mention (comma-separated channel IDs)
+# 可选：机器人无需 @提及即可响应的频道（逗号分隔的频道 ID）
 # MATTERMOST_FREE_RESPONSE_CHANNELS=channel_id_1,channel_id_2
 ```
 
-Optional behavior settings in `~/.hermes/config.yaml`:
+`~/.hermes/config.yaml` 中的可选行为设置：
 
 ```yaml
 group_sessions_per_user: true
 ```
 
-- `group_sessions_per_user: true` keeps each participant's context isolated inside shared channels and threads
+- `group_sessions_per_user: true` 在共享频道和线程中保持每个参与者的上下文隔离
 
-### Start the Gateway
+### 启动网关
 
-Once configured, start the Mattermost gateway:
+配置完成后，启动 Mattermost 网关：
 
 ```bash
 hermes gateway
 ```
 
-The bot should connect to your Mattermost server within a few seconds. Send it a message — either a DM or in a channel where it's been added — to test.
+机器人应该在几秒钟内连接到您的 Mattermost 服务器。向它发送消息 — 无论是私聊还是在已添加它的频道中 — 进行测试。
 
 :::tip
-You can run `hermes gateway` in the background or as a systemd service for persistent operation. See the deployment docs for details.
+您可以在后台或作为 systemd 服务运行 `hermes gateway` 以实现持久操作。有关详细信息，请参阅部署文档。
 :::
 
-## Home Channel
+## 主频道
 
-You can designate a "home channel" where the bot sends proactive messages (such as cron job output, reminders, and notifications). There are two ways to set it:
+您可以指定一个"主频道"，机器人在其中发送主动消息（例如 cron 作业输出、提醒和通知）。有两种设置方法：
 
-### Using the Slash Command
+### 使用斜杠命令
 
-Type `/sethome` in any Mattermost channel where the bot is present. That channel becomes the home channel.
+在机器人所在的任何 Mattermost 频道中输入 `/sethome`。该频道成为主频道。
 
-### Manual Configuration
+### 手动配置
 
-Add this to your `~/.hermes/.env`:
+将此添加到您的 `~/.hermes/.env`：
 
 ```bash
 MATTERMOST_HOME_CHANNEL=abc123def456ghi789jkl012mn
 ```
 
-Replace the ID with the actual channel ID (click the channel name → View Info → copy the ID).
+用实际的频道 ID 替换该 ID（点击频道名称 → 查看信息 → 复制 ID）。
 
-## Reply Mode
+## 回复模式
 
-The `MATTERMOST_REPLY_MODE` setting controls how Hermes posts responses:
+`MATTERMOST_REPLY_MODE` 设置控制 Hermes 如何发布响应：
 
-| Mode | Behavior |
+| 模式 | 行为 |
 |------|----------|
-| `off` (default) | Hermes posts flat messages in the channel, like a normal user. |
-| `thread` | Hermes replies in a thread under your original message. Keeps channels clean when there's lots of back-and-forth. |
+| `off`（默认） | Hermes 在频道中发布扁平消息，就像普通用户一样。 |
+| `thread` | Hermes 在您原始消息下的线程中回复。当有很多来回对话时，保持频道整洁。 |
 
-Set it in your `~/.hermes/.env`:
+在您的 `~/.hermes/.env` 中设置：
 
 ```bash
 MATTERMOST_REPLY_MODE=thread
 ```
 
-## Mention Behavior
+## 提及行为
 
-By default, the bot only responds in channels when `@mentioned`. You can change this:
+默认情况下，机器人只在 `@提及` 时在频道中响应。您可以更改此设置：
 
-| Variable | Default | Description |
+| 变量 | 默认值 | 描述 |
 |----------|---------|-------------|
-| `MATTERMOST_REQUIRE_MENTION` | `true` | Set to `false` to respond to all messages in channels (DMs always work). |
-| `MATTERMOST_FREE_RESPONSE_CHANNELS` | _(none)_ | Comma-separated channel IDs where the bot responds without `@mention`, even when require_mention is true. |
+| `MATTERMOST_REQUIRE_MENTION` | `true` | 设置为 `false` 以响应频道中的所有消息（私聊始终有效）。 |
+| `MATTERMOST_FREE_RESPONSE_CHANNELS` | _(无)_ | 逗号分隔的频道 ID，机器人无需 `@提及` 即可响应，即使 require_mention 为 true。 |
 
-To find a channel ID in Mattermost: open the channel, click the channel name header, and look for the ID in the URL or channel details.
+要在 Mattermost 中查找频道 ID：打开频道，点击频道名称标题，然后在 URL 或频道详细信息中查找 ID。
 
-When the bot is `@mentioned`, the mention is automatically stripped from the message before processing.
+当机器人被 `@提及` 时，提及会在处理前自动从消息中删除。
 
-## Troubleshooting
+## 故障排除
 
-### Bot is not responding to messages
+### 机器人不响应消息
 
-**Cause**: The bot is not a member of the channel, or `MATTERMOST_ALLOWED_USERS` doesn't include your User ID.
+**原因**：机器人不是频道的成员，或者 `MATTERMOST_ALLOWED_USERS` 不包含您的用户 ID。
 
-**Fix**: Add the bot to the channel (channel name → Add Members → search for the bot). Verify your User ID is in `MATTERMOST_ALLOWED_USERS`. Restart the gateway.
+**解决方法**：将机器人添加到频道（频道名称 → 添加成员 → 搜索机器人）。验证您的用户 ID 是否在 `MATTERMOST_ALLOWED_USERS` 中。重启网关。
 
-### 403 Forbidden errors
+### 403 Forbidden 错误
 
-**Cause**: The bot token is invalid, or the bot doesn't have permission to post in the channel.
+**原因**：机器人令牌无效，或者机器人没有在频道中发布的权限。
 
-**Fix**: Check that `MATTERMOST_TOKEN` in your `.env` file is correct. Make sure the bot account hasn't been deactivated. Verify the bot has been added to the channel. If using a personal access token, ensure your account has the required permissions.
+**解决方法**：检查 `.env` 文件中的 `MATTERMOST_TOKEN` 是否正确。确保机器人账户未被停用。验证机器人已添加到频道。如果使用个人访问令牌，确保您的账户具有所需的权限。
 
-### WebSocket disconnects / reconnection loops
+### WebSocket 断开连接 / 重连循环
 
-**Cause**: Network instability, Mattermost server restarts, or firewall/proxy issues with WebSocket connections.
+**原因**：网络不稳定、Mattermost 服务器重启或 WebSocket 连接的防火墙/代理问题。
 
-**Fix**: The adapter automatically reconnects with exponential backoff (2s → 60s). Check your server's WebSocket configuration — reverse proxies (nginx, Apache) need WebSocket upgrade headers configured. Verify no firewall is blocking WebSocket connections on your Mattermost server.
+**解决方法**：适配器使用指数退避自动重连（2s → 60s）。检查您服务器的 WebSocket 配置 — 反向代理（nginx、Apache）需要配置 WebSocket 升级头。验证没有防火墙阻止您的 Mattermost 服务器上的 WebSocket 连接。
 
-For nginx, ensure your config includes:
+对于 nginx，确保您的配置包含：
 
 ```nginx
 location /api/v4/websocket {
@@ -256,41 +256,41 @@ location /api/v4/websocket {
 }
 ```
 
-### "Failed to authenticate" on startup
+### 启动时"Failed to authenticate"
 
-**Cause**: The token or server URL is incorrect.
+**原因**：令牌或服务器 URL 不正确。
 
-**Fix**: Verify `MATTERMOST_URL` points to your Mattermost server (include `https://`, no trailing slash). Check that `MATTERMOST_TOKEN` is valid — try it with curl:
+**解决方法**：验证 `MATTERMOST_URL` 指向您的 Mattermost 服务器（包含 `https://`，无尾部斜杠）。检查 `MATTERMOST_TOKEN` 是否有效 — 尝试使用 curl：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
   https://your-server/api/v4/users/me
 ```
 
-If this returns your bot's user info, the token is valid. If it returns an error, regenerate the token.
+如果这返回您的机器人的用户信息，则令牌有效。如果返回错误，请重新生成令牌。
 
-### Bot is offline
+### 机器人离线
 
-**Cause**: The Hermes gateway isn't running, or it failed to connect.
+**原因**：Hermes 网关未运行，或连接失败。
 
-**Fix**: Check that `hermes gateway` is running. Look at the terminal output for error messages. Common issues: wrong URL, expired token, Mattermost server unreachable.
+**解决方法**：检查 `hermes gateway` 是否在运行。查看终端输出以获取错误消息。常见问题：错误的 URL、过期的令牌、Mattermost 服务器无法访问。
 
-### "User not allowed" / Bot ignores you
+### "User not allowed" / 机器人忽略您
 
-**Cause**: Your User ID isn't in `MATTERMOST_ALLOWED_USERS`.
+**原因**：您的用户 ID 不在 `MATTERMOST_ALLOWED_USERS` 中。
 
-**Fix**: Add your User ID to `MATTERMOST_ALLOWED_USERS` in `~/.hermes/.env` and restart the gateway. Remember: the User ID is a 26-character alphanumeric string, not your `@username`.
+**解决方法**：将您的用户 ID 添加到 `~/.hermes/.env` 中的 `MATTERMOST_ALLOWED_USERS` 并重启网关。记住：用户 ID 是一个 26 字符的字母数字字符串，不是您的 `@username`。
 
-## Security
+## 安全性
 
 :::warning
-Always set `MATTERMOST_ALLOWED_USERS` to restrict who can interact with the bot. Without it, the gateway denies all users by default as a safety measure. Only add User IDs of people you trust — authorized users have full access to the agent's capabilities, including tool use and system access.
+始终设置 `MATTERMOST_ALLOWED_USERS` 以限制谁可以与机器人交互。没有它，网关默认拒绝所有用户作为安全措施。只添加您信任的人的用户 ID — 授权用户可以完全访问智能体的功能，包括工具使用和系统访问。
 :::
 
-For more information on securing your Hermes Agent deployment, see the [Security Guide](../security.md).
+有关保护您的 Hermes Agent 部署的更多信息，请参阅 [安全指南](../security.md)。
 
-## Notes
+## 注意事项
 
-- **Self-hosted friendly**: Works with any self-hosted Mattermost instance. No Mattermost Cloud account or subscription required.
-- **No extra dependencies**: The adapter uses `aiohttp` for HTTP and WebSocket, which is already included with Hermes Agent.
-- **Team Edition compatible**: Works with both Mattermost Team Edition (free) and Enterprise Edition.
+- **自托管友好**：适用于任何自托管的 Mattermost 实例。不需要 Mattermost Cloud 账户或订阅。
+- **无额外依赖**：适配器使用 `aiohttp` 进行 HTTP 和 WebSocket，这已经包含在 Hermes Agent 中。
+- **团队版兼容**：适用于 Mattermost 团队版（免费）和企业版。

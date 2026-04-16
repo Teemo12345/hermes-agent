@@ -49,36 +49,36 @@ hermes cron create "0 2 * * *" \
 
 ### 自动 PR 代码审查
 
-Review every pull request automatically when it's opened. Posts a review comment directly on the PR.
+在打开时自动审查每个拉取请求。直接在 PR 上发布审查评论。
 
-**Trigger:** GitHub webhook
+**触发器：** GitHub webhook
 
-**Option A — Dynamic subscription (CLI):**
+**选项 A — 动态订阅 (CLI):**
 
 ```bash
 hermes webhook subscribe github-pr-review \
   --events "pull_request" \
-  --prompt "Review this pull request:
-Repository: {repository.full_name}
-PR #{pull_request.number}: {pull_request.title}
-Author: {pull_request.user.login}
-Action: {action}
-Diff URL: {pull_request.diff_url}
+  --prompt "审查此拉取请求：
+仓库：{repository.full_name}
+PR #{pull_request.number}：{pull_request.title}
+作者：{pull_request.user.login}
+操作：{action}
+差异 URL：{pull_request.diff_url}
 
-Fetch the diff with: curl -sL {pull_request.diff_url}
+使用以下命令获取差异：curl -sL {pull_request.diff_url}
 
-Review for:
-- Security issues (injection, auth bypass, secrets in code)
-- Performance concerns (N+1 queries, unbounded loops, memory leaks)
-- Code quality (naming, duplication, error handling)
-- Missing tests for new behavior
+审查以下内容：
+- 安全问题（注入、身份验证绕过、代码中的密钥）
+- 性能问题（N+1 查询、无限循环、内存泄漏）
+- 代码质量（命名、重复、错误处理）
+- 新行为缺少测试
 
-Post a concise review. If the PR is a trivial docs/typo change, say so briefly." \
+发布简洁的审查。如果 PR 是微不足道的文档/拼写错误更改，请简要说明。" \
   --skills "github-code-review" \
   --deliver github_comment
 ```
 
-**Option B — Static route (config.yaml):**
+**选项 B — 静态路由 (config.yaml):**
 
 ```yaml
 platforms:
@@ -92,11 +92,11 @@ platforms:
           events: ["pull_request"]
           secret: "github-webhook-secret"
           prompt: |
-            Review PR #{pull_request.number}: {pull_request.title}
-            Repository: {repository.full_name}
-            Author: {pull_request.user.login}
-            Diff URL: {pull_request.diff_url}
-            Review for security, performance, and code quality.
+            审查 PR #{pull_request.number}：{pull_request.title}
+            仓库：{repository.full_name}
+            作者：{pull_request.user.login}
+            差异 URL：{pull_request.diff_url}
+            审查安全性、性能和代码质量。
           skills: ["github-code-review"]
           deliver: "github_comment"
           deliver_extra:
@@ -104,87 +104,87 @@ platforms:
             pr_number: "{pull_request.number}"
 ```
 
-Then in GitHub: **Settings → Webhooks → Add webhook** → Payload URL: `http://your-server:8644/webhooks/github-pr-review`, Content type: `application/json`, Secret: `github-webhook-secret`, Events: **Pull requests**.
+然后在 GitHub 中：**设置 → Webhooks → 添加 webhook** → Payload URL：`http://your-server:8644/webhooks/github-pr-review`，内容类型：`application/json`，密钥：`github-webhook-secret`，事件：**Pull requests**。
 
-### Docs Drift Detection
+### 文档漂移检测
 
-Weekly scan of merged PRs to find API changes that need documentation updates.
+每周扫描已合并的 PR，以查找需要文档更新的 API 更改。
 
-**Trigger:** Schedule (weekly)
+**触发器：** 定时（每周）
 
 ```bash
 hermes cron create "0 9 * * 1" \
-  "Scan the NousResearch/hermes-agent repo for documentation drift.
+  "扫描 NousResearch/hermes-agent 仓库以查找文档漂移。
 
-1. Run: gh pr list --repo NousResearch/hermes-agent --state merged --json number,title,files,mergedAt --limit 30
-2. Filter to PRs merged in the last 7 days
-3. For each merged PR, check if it modified:
-   - Tool schemas (tools/*.py) — may need docs/reference/tools-reference.md update
-   - CLI commands (hermes_cli/commands.py, hermes_cli/main.py) — may need docs/reference/cli-commands.md update
-   - Config options (hermes_cli/config.py) — may need docs/user-guide/configuration.md update
-   - Environment variables — may need docs/reference/environment-variables.md update
-4. Cross-reference: for each code change, check if the corresponding docs page was also updated in the same PR
+1. 运行：gh pr list --repo NousResearch/hermes-agent --state merged --json number,title,files,mergedAt --limit 30
+2. 筛选过去 7 天内合并的 PR
+3. 对于每个合并的 PR，检查它是否修改了：
+   - 工具架构（tools/*.py）— 可能需要 docs/reference/tools-reference.md 更新
+   - CLI 命令（hermes_cli/commands.py、hermes_cli/main.py）— 可能需要 docs/reference/cli-commands.md 更新
+   - 配置选项（hermes_cli/config.py）— 可能需要 docs/user-guide/configuration.md 更新
+   - 环境变量 — 可能需要 docs/reference/environment-variables.md 更新
+4. 交叉引用：对于每个代码更改，检查相应的文档页面是否也在同一 PR 中更新
 
-Report any gaps where code changed but docs didn't. If everything is in sync, respond with [SILENT]." \
-  --name "Docs drift detection" \
+报告代码更改但文档未更新的任何差距。如果一切同步，用 [SILENT] 响应。" \
+  --name "文档漂移检测" \
   --deliver telegram
 ```
 
-### Dependency Security Audit
+### 依赖安全审计
 
-Daily scan for known vulnerabilities in project dependencies.
+每日扫描项目依赖项中的已知漏洞。
 
-**Trigger:** Schedule (daily)
+**触发器：** 定时（每日）
 
 ```bash
 hermes cron create "0 6 * * *" \
-  "Run a dependency security audit on the hermes-agent project.
+  "对 hermes-agent 项目运行依赖安全审计。
 
 1. cd ~/.hermes/hermes-agent && source .venv/bin/activate
-2. Run: pip audit --format json 2>/dev/null || pip audit 2>&1
-3. Run: npm audit --json 2>/dev/null (in website/ directory if it exists)
-4. Check for any CVEs with CVSS score >= 7.0
+2. 运行：pip audit --format json 2>/dev/null || pip audit 2>&1
+3. 运行：npm audit --json 2>/dev/null（如果 website/ 目录存在）
+4. 检查任何 CVSS 分数 >= 7.0 的 CVE
 
-If vulnerabilities found:
-- List each one with package name, version, CVE ID, severity
-- Check if an upgrade is available
-- Note if it's a direct dependency or transitive
+如果发现漏洞：
+- 列出每个漏洞的包名称、版本、CVE ID、严重性
+- 检查是否有可用升级
+- 注意它是直接依赖还是传递依赖
 
-If no vulnerabilities, respond with [SILENT]." \
-  --name "Dependency audit" \
+如果没有漏洞，用 [SILENT] 响应。" \
+  --name "依赖审计" \
   --deliver telegram
 ```
 
 ---
 
-## DevOps & Monitoring
+## DevOps & 监控
 
-### Deploy Verification
+### 部署验证
 
-Trigger smoke tests after every deployment. Your CI/CD pipeline POSTs to the webhook when a deploy completes.
+在每次部署后触发冒烟测试。您的 CI/CD 管道在部署完成时向 webhook POST。
 
-**Trigger:** API call (webhook)
+**触发器：** API 调用 (webhook)
 
 ```bash
 hermes webhook subscribe deploy-verify \
   --events "deployment" \
-  --prompt "A deployment just completed:
-Service: {service}
-Environment: {environment}
-Version: {version}
-Deployed by: {deployer}
+  --prompt "部署刚刚完成：
+服务：{service}
+环境：{environment}
+版本：{version}
+部署者：{deployer}
 
-Run these verification steps:
-1. Check if the service is responding: curl -s -o /dev/null -w '%{http_code}' {health_url}
-2. Search recent logs for errors: check the deployment payload for any error indicators
-3. Verify the version matches: curl -s {health_url}/version
+运行这些验证步骤：
+1. 检查服务是否响应：curl -s -o /dev/null -w '%{http_code}' {health_url}
+2. 搜索最近的日志以查找错误：检查部署负载中是否有任何错误指示符
+3. 验证版本匹配：curl -s {health_url}/version
 
-Report: deployment status (healthy/degraded/failed), response time, any errors found.
-If healthy, keep it brief. If degraded or failed, provide detailed diagnostics." \
+报告：部署状态（健康/降级/失败）、响应时间、发现的任何错误。
+如果健康，请保持简短。如果降级或失败，请提供详细诊断。" \
   --deliver telegram
 ```
 
-Your CI/CD pipeline triggers it:
+您的 CI/CD 管道触发它：
 
 ```bash
 curl -X POST http://your-server:8644/webhooks/deploy-verify \
@@ -193,38 +193,38 @@ curl -X POST http://your-server:8644/webhooks/deploy-verify \
   -d '{"service":"api","environment":"prod","version":"2.1.0","deployer":"ci","health_url":"https://api.example.com/health"}'
 ```
 
-### Alert Triage
+### 警报分类
 
-Correlate monitoring alerts with recent changes to draft a response. Works with Datadog, PagerDuty, Grafana, or any alerting system that can POST JSON.
+将监控警报与最近的更改相关联，以起草响应。适用于 Datadog、PagerDuty、Grafana 或任何可以 POST JSON 的警报系统。
 
-**Trigger:** API call (webhook)
+**触发器：** API 调用 (webhook)
 
 ```bash
 hermes webhook subscribe alert-triage \
-  --prompt "Monitoring alert received:
-Alert: {alert.name}
-Severity: {alert.severity}
-Service: {alert.service}
-Message: {alert.message}
-Timestamp: {alert.timestamp}
+  --prompt "收到监控警报：
+警报：{alert.name}
+严重性：{alert.severity}
+服务：{alert.service}
+消息：{alert.message}
+时间戳：{alert.timestamp}
 
-Investigate:
-1. Search the web for known issues with this error pattern
-2. Check if this correlates with any recent deployments or config changes
-3. Draft a triage summary with:
-   - Likely root cause
-   - Suggested first response steps
-   - Escalation recommendation (P1-P4)
+调查：
+1. 搜索网络以查找此错误模式的已知问题
+2. 检查这是否与最近的部署或配置更改相关
+3. 起草分类摘要，包括：
+   - 可能的根本原因
+   - 建议的第一响应步骤
+   - 升级建议（P1-P4）
 
-Be concise. This goes to the on-call channel." \
+保持简洁。这将发送到值班频道。" \
   --deliver slack
 ```
 
-### Uptime Monitor
+### 正常运行时间监控
 
-Check endpoints every 30 minutes. Only notify when something is down.
+每 30 分钟检查端点。仅在出现问题时通知。
 
-**Trigger:** Schedule (every 30 min)
+**触发器：** 定时（每 30 分钟）
 
 ```python title="~/.hermes/scripts/check-uptime.py"
 import urllib.request, json, time
@@ -258,127 +258,127 @@ else:
 
 ```bash
 hermes cron create "every 30m" \
-  "If the script reports OUTAGE DETECTED, summarize which services are down and suggest likely causes. If NO_ISSUES, respond with [SILENT]." \
+  "如果脚本报告 OUTAGE DETECTED，总结哪些服务已关闭并建议可能的原因。如果 NO_ISSUES，用 [SILENT] 响应。" \
   --script ~/.hermes/scripts/check-uptime.py \
-  --name "Uptime monitor" \
+  --name "正常运行时间监控" \
   --deliver telegram
 ```
 
 ---
 
-## Research & Intelligence
+## 研究与智能
 
-### Competitive Repository Scout
+### 竞争对手仓库侦察
 
-Monitor competitor repos for interesting PRs, features, and architectural decisions.
+监控竞争对手仓库以查找有趣的 PR、功能和架构决策。
 
-**Trigger:** Schedule (daily)
+**触发器：** 定时（每日）
 
 ```bash
 hermes cron create "0 8 * * *" \
-  "Scout these AI agent repositories for notable activity in the last 24 hours:
+  "侦察这些 AI 智能体仓库在过去 24 小时内的显著活动：
 
-Repos to check:
+要检查的仓库：
 - anthropics/claude-code
 - openai/codex
 - All-Hands-AI/OpenHands
 - Aider-AI/aider
 
-For each repo:
+对于每个仓库：
 1. gh pr list --repo <repo> --state all --json number,title,author,createdAt,mergedAt --limit 15
 2. gh issue list --repo <repo> --state open --json number,title,labels,createdAt --limit 10
 
-Focus on:
-- New features being developed
-- Architectural changes
-- Integration patterns we could learn from
-- Security fixes that might affect us too
+重点关注：
+- 正在开发的新功能
+- 架构更改
+- 我们可以学习的集成模式
+- 可能影响我们的安全修复
 
-Skip routine dependency bumps and CI fixes. If nothing notable, respond with [SILENT].
-If there are findings, organize by repo with brief analysis of each item." \
+跳过常规依赖升级和 CI 修复。如果没有显著内容，用 [SILENT] 响应。
+如果有发现，请按仓库组织，并对每个项目进行简要分析。" \
   --skills "competitive-pr-scout" \
-  --name "Competitor scout" \
+  --name "竞争对手侦察" \
   --deliver telegram
 ```
 
-### AI News Digest
+### AI 新闻摘要
 
-Weekly roundup of AI/ML developments.
+每周 AI/ML 发展的汇总。
 
-**Trigger:** Schedule (weekly)
+**触发器：** 定时（每周）
 
 ```bash
 hermes cron create "0 9 * * 1" \
-  "Generate a weekly AI news digest covering the past 7 days:
+  "生成涵盖过去 7 天的每周 AI 新闻摘要：
 
-1. Search the web for major AI announcements, model releases, and research breakthroughs
-2. Search for trending ML repositories on GitHub
-3. Check arXiv for highly-cited papers on language models and agents
+1. 搜索网络以查找主要的 AI 公告、模型发布和研究突破
+2. 搜索 GitHub 上趋势中的 ML 仓库
+3. 检查 arXiv 上关于语言模型和智能体的高引用论文
 
-Structure:
-## Headlines (3-5 major stories)
-## Notable Papers (2-3 papers with one-sentence summaries)
-## Open Source (interesting new repos or major releases)
-## Industry Moves (funding, acquisitions, launches)
+结构：
+## 标题（3-5 个主要故事）
+## 值得注意的论文（2-3 篇论文，附带一句话摘要）
+## 开源（有趣的新仓库或主要发布）
+## 行业动态（资金、收购、发布）
 
-Keep each item to 1-2 sentences. Include links. Total under 600 words." \
-  --name "Weekly AI digest" \
+将每个项目保持在 1-2 句话。包含链接。总共不超过 600 字。" \
+  --name "每周 AI 摘要" \
   --deliver telegram
 ```
 
-### Paper Digest with Notes
+### 带笔记的论文摘要
 
-Daily arXiv scan that saves summaries to your note-taking system.
+每日 arXiv 扫描，将摘要保存到您的笔记系统。
 
-**Trigger:** Schedule (daily)
+**触发器：** 定时（每日）
 
 ```bash
 hermes cron create "0 8 * * *" \
-  "Search arXiv for the 3 most interesting papers on 'language model reasoning' OR 'tool-use agents' from the past day. For each paper, create an Obsidian note with the title, authors, abstract summary, key contribution, and potential relevance to Hermes Agent development." \
+  "搜索 arXiv 以查找过去一天中关于'语言模型推理'或'工具使用智能体'的 3 篇最有趣的论文。对于每篇论文，创建一个 Obsidian 笔记，包含标题、作者、摘要摘要、关键贡献以及对 Hermes Agent 开发的潜在相关性。" \
   --skills "arxiv,obsidian" \
-  --name "Paper digest" \
+  --name "论文摘要" \
   --deliver local
 ```
 
 ---
 
-## GitHub Event Automations
+## GitHub 事件自动化
 
-### Issue Auto-Labeling
+### 问题自动标记
 
-Automatically label and respond to new issues.
+自动标记并响应新问题。
 
-**Trigger:** GitHub webhook
+**触发器：** GitHub webhook
 
 ```bash
 hermes webhook subscribe github-issues \
   --events "issues" \
-  --prompt "New GitHub issue received:
-Repository: {repository.full_name}
-Issue #{issue.number}: {issue.title}
-Author: {issue.user.login}
-Action: {action}
-Body: {issue.body}
-Labels: {issue.labels}
+  --prompt "收到新的 GitHub 问题：
+仓库：{repository.full_name}
+问题 #{issue.number}：{issue.title}
+作者：{issue.user.login}
+操作：{action}
+正文：{issue.body}
+标签：{issue.labels}
 
-If this is a new issue (action=opened):
-1. Read the issue title and body carefully
-2. Suggest appropriate labels (bug, feature, docs, security, question)
-3. If it's a bug report, check if you can identify the affected component from the description
-4. Post a helpful initial response acknowledging the issue
+如果这是一个新问题（action=opened）：
+1. 仔细阅读问题标题和正文
+2. 建议适当的标签（bug、feature、docs、security、question）
+3. 如果是错误报告，检查您是否可以从描述中识别受影响的组件
+4. 发布有帮助的初始响应以确认问题
 
-If this is a label or assignment change, respond with [SILENT]." \
+如果这是标签或分配更改，用 [SILENT] 响应。" \
   --deliver github_comment
 ```
 
-### CI Failure Analysis
+### CI 失败分析
 
-Analyze CI failures and post diagnostics on the PR.
+分析 CI 失败并在 PR 上发布诊断。
 
-**Trigger:** GitHub webhook
+**触发器：** GitHub webhook
 
 ```yaml
-# config.yaml route
+# config.yaml 路由
 platforms:
   webhook:
     enabled: true
@@ -388,206 +388,206 @@ platforms:
           events: ["check_run"]
           secret: "ci-secret"
           prompt: |
-            CI check failed:
-            Repository: {repository.full_name}
-            Check: {check_run.name}
-            Status: {check_run.conclusion}
-            PR: #{check_run.pull_requests.0.number}
-            Details URL: {check_run.details_url}
+            CI 检查失败：
+            仓库：{repository.full_name}
+            检查：{check_run.name}
+            状态：{check_run.conclusion}
+            PR：#{check_run.pull_requests.0.number}
+            详细信息 URL：{check_run.details_url}
 
-            If conclusion is "failure":
-            1. Fetch the log from the details URL if accessible
-            2. Identify the likely cause of failure
-            3. Suggest a fix
-            If conclusion is "success", respond with [SILENT].
+            如果结论是"failure"：
+            1. 如果可访问，从详细信息 URL 获取日志
+            2. 识别可能的失败原因
+            3. 建议修复方法
+            如果结论是"success"，用 [SILENT] 响应。
           deliver: "github_comment"
           deliver_extra:
             repo: "{repository.full_name}"
             pr_number: "{check_run.pull_requests.0.number}"
 ```
 
-### Auto-Port Changes Across Repos
+### 跨仓库自动移植更改
 
-When a PR merges in one repo, automatically port the equivalent change to another.
+当一个 PR 在一个仓库中合并时，自动将等效更改移植到另一个仓库。
 
-**Trigger:** GitHub webhook
+**触发器：** GitHub webhook
 
 ```bash
 hermes webhook subscribe auto-port \
   --events "pull_request" \
-  --prompt "PR merged in the source repository:
-Repository: {repository.full_name}
-PR #{pull_request.number}: {pull_request.title}
-Author: {pull_request.user.login}
-Action: {action}
-Merge commit: {pull_request.merge_commit_sha}
+  --prompt "PR 在源仓库中合并：
+仓库：{repository.full_name}
+PR #{pull_request.number}：{pull_request.title}
+作者：{pull_request.user.login}
+操作：{action}
+合并提交：{pull_request.merge_commit_sha}
 
-If action is 'closed' and pull_request.merged is true:
-1. Fetch the diff: curl -sL {pull_request.diff_url}
-2. Analyze what changed
-3. Determine if this change needs to be ported to the Go SDK equivalent
-4. If yes, create a branch, apply the equivalent changes, and open a PR on the target repo
-5. Reference the original PR in the new PR description
+如果操作是 'closed' 且 pull_request.merged 为 true：
+1. 获取差异：curl -sL {pull_request.diff_url}
+2. 分析更改了什么
+3. 确定此更改是否需要移植到 Go SDK 等效项
+4. 如果是，创建分支，应用等效更改，并在目标仓库上打开 PR
+5. 在新 PR 描述中引用原始 PR
 
-If action is not 'closed' or not merged, respond with [SILENT]." \
+如果操作不是 'closed' 或未合并，用 [SILENT] 响应。" \
   --skills "github-pr-workflow" \
   --deliver log
 ```
 
 ---
 
-## Business Operations
+## 业务运营
 
-### Stripe Payment Monitoring
+### Stripe 支付监控
 
-Track payment events and get summaries of failures.
+跟踪支付事件并获取失败摘要。
 
-**Trigger:** API call (webhook)
+**触发器：** API 调用 (webhook)
 
 ```bash
 hermes webhook subscribe stripe-payments \
   --events "payment_intent.succeeded,payment_intent.payment_failed,charge.dispute.created" \
-  --prompt "Stripe event received:
-Event type: {type}
-Amount: {data.object.amount} cents ({data.object.currency})
-Customer: {data.object.customer}
-Status: {data.object.status}
+  --prompt "收到 Stripe 事件：
+事件类型：{type}
+金额：{data.object.amount} 分（{data.object.currency}）
+客户：{data.object.customer}
+状态：{data.object.status}
 
-For payment_intent.payment_failed:
-- Identify the failure reason from {data.object.last_payment_error}
-- Suggest whether this is a transient issue (retry) or permanent (contact customer)
+对于 payment_intent.payment_failed：
+- 从 {data.object.last_payment_error} 识别失败原因
+- 建议这是临时问题（重试）还是永久问题（联系客户）
 
-For charge.dispute.created:
-- Flag as urgent
-- Summarize the dispute details
+对于 charge.dispute.created：
+- 标记为紧急
+- 总结争议详情
 
-For payment_intent.succeeded:
-- Brief confirmation only
+对于 payment_intent.succeeded：
+- 仅简要确认
 
-Keep responses concise for the ops channel." \
+为运营频道保持响应简洁。" \
   --deliver slack
 ```
 
-### Daily Revenue Summary
+### 每日收入摘要
 
-Compile key business metrics every morning.
+每天早上编译关键业务指标。
 
-**Trigger:** Schedule (daily)
+**触发器：** 定时（每日）
 
 ```bash
 hermes cron create "0 8 * * *" \
-  "Generate a morning business metrics summary.
+  "生成早间业务指标摘要。
 
-Search the web for:
-1. Current Bitcoin and Ethereum prices
-2. S&P 500 status (pre-market or previous close)
-3. Any major tech/AI industry news from the last 12 hours
+搜索网络以查找：
+1. 当前比特币和以太坊价格
+2. 标准普尔 500 指数状态（盘前或前收盘）
+3. 过去 12 小时内任何主要科技/AI 行业新闻
 
-Format as a brief morning briefing, 3-4 bullet points max.
-Deliver as a clean, scannable message." \
-  --name "Morning briefing" \
+格式为简短的早间简报，最多 3-4 个要点。
+作为干净、可扫描的消息交付。" \
+  --name "早间简报" \
   --deliver telegram
 ```
 
 ---
 
-## Multi-Skill Workflows
+## 多技能工作流
 
-### Security Audit Pipeline
+### 安全审计管道
 
-Combine multiple skills for a comprehensive weekly security review.
+结合多个技能进行全面的每周安全审查。
 
-**Trigger:** Schedule (weekly)
+**触发器：** 定时（每周）
 
 ```bash
 hermes cron create "0 3 * * 0" \
-  "Run a comprehensive security audit of the hermes-agent codebase.
+  "对 hermes-agent 代码库进行全面安全审计。
 
-1. Check for dependency vulnerabilities (pip audit, npm audit)
-2. Search the codebase for common security anti-patterns:
-   - Hardcoded secrets or API keys
-   - SQL injection vectors (string formatting in queries)
-   - Path traversal risks (user input in file paths without validation)
-   - Unsafe deserialization (pickle.loads, yaml.load without SafeLoader)
-3. Review recent commits (last 7 days) for security-relevant changes
-4. Check if any new environment variables were added without being documented
+1. 检查依赖漏洞（pip audit、npm audit）
+2. 搜索代码库以查找常见安全反模式：
+   - 硬编码的密钥或 API 密钥
+   - SQL 注入向量（查询中的字符串格式化）
+   - 路径遍历风险（文件路径中的用户输入未经验证）
+   - 不安全的反序列化（pickle.loads、不带 SafeLoader 的 yaml.load）
+3. 审查最近的提交（过去 7 天）以查找安全相关更改
+4. 检查是否添加了任何新的环境变量而未记录
 
-Write a security report with findings categorized by severity (Critical, High, Medium, Low).
-If nothing found, report a clean bill of health." \
+编写安全报告，按严重性（关键、高、中、低）分类发现。
+如果未发现任何内容，报告健康状况良好。" \
   --skills "codebase-security-audit" \
-  --name "Weekly security audit" \
+  --name "每周安全审计" \
   --deliver telegram
 ```
 
-### Content Pipeline
+### 内容管道
 
-Research, draft, and prepare content on a schedule.
+按计划研究、起草和准备内容。
 
-**Trigger:** Schedule (weekly)
+**触发器：** 定时（每周）
 
 ```bash
 hermes cron create "0 10 * * 3" \
-  "Research and draft a technical blog post outline about a trending topic in AI agents.
+  "研究并起草关于 AI 智能体中热门主题的技术博客文章大纲。
 
-1. Search the web for the most discussed AI agent topics this week
-2. Pick the most interesting one that's relevant to open-source AI agents
-3. Create an outline with:
-   - Hook/intro angle
-   - 3-4 key sections
-   - Technical depth appropriate for developers
-   - Conclusion with actionable takeaway
-4. Save the outline to ~/drafts/blog-$(date +%Y%m%d).md
+1. 搜索网络以查找本周讨论最多的 AI 智能体主题
+2. 选择与开源 AI 智能体相关的最有趣的一个
+3. 创建大纲，包括：
+   - 钩子/介绍角度
+   - 3-4 个关键部分
+   - 适合开发人员的技术深度
+   - 带有可操作要点的结论
+4. 将大纲保存到 ~/drafts/blog-$(date +%Y%m%d).md
 
-Keep the outline to ~300 words. This is a starting point, not a finished post." \
-  --name "Blog outline" \
+将大纲保持在约 300 字。这是一个起点，而不是完成的帖子。" \
+  --name "博客大纲" \
   --deliver local
 ```
 
 ---
 
-## Quick Reference
+## 快速参考
 
-### Cron Schedule Syntax
+### Cron 计划语法
 
-| Expression | Meaning |
+| 表达式 | 含义 |
 |-----------|---------|
-| `every 30m` | Every 30 minutes |
-| `every 2h` | Every 2 hours |
-| `0 2 * * *` | Daily at 2:00 AM |
-| `0 9 * * 1` | Every Monday at 9:00 AM |
-| `0 9 * * 1-5` | Weekdays at 9:00 AM |
-| `0 3 * * 0` | Every Sunday at 3:00 AM |
-| `0 */6 * * *` | Every 6 hours |
+| `every 30m` | 每 30 分钟 |
+| `every 2h` | 每 2 小时 |
+| `0 2 * * *` | 每天凌晨 2:00 |
+| `0 9 * * 1` | 每周一上午 9:00 |
+| `0 9 * * 1-5` | 工作日上午 9:00 |
+| `0 3 * * 0` | 每周日凌晨 3:00 |
+| `0 */6 * * *` | 每 6 小时 |
 
-### Delivery Targets
+### 交付目标
 
-| Target | Flag | Notes |
+| 目标 | 标志 | 说明 |
 |--------|------|-------|
-| Same chat | `--deliver origin` | Default — delivers to where the job was created |
-| Local file | `--deliver local` | Saves output, no notification |
-| Telegram | `--deliver telegram` | Home channel, or `telegram:CHAT_ID` for specific |
-| Discord | `--deliver discord` | Home channel, or `discord:CHANNEL_ID` |
-| Slack | `--deliver slack` | Home channel |
-| SMS | `--deliver sms:+15551234567` | Direct to phone number |
-| Specific thread | `--deliver telegram:-100123:456` | Telegram forum topic |
+| 同一聊天 | `--deliver origin` | 默认 — 交付到创建作业的位置 |
+| 本地文件 | `--deliver local` | 保存输出，无通知 |
+| Telegram | `--deliver telegram` | 家庭频道，或 `telegram:CHAT_ID` 用于特定频道 |
+| Discord | `--deliver discord` | 家庭频道，或 `discord:CHANNEL_ID` |
+| Slack | `--deliver slack` | 家庭频道 |
+| SMS | `--deliver sms:+15551234567` | 直接到电话号码 |
+| 特定线程 | `--deliver telegram:-100123:456` | Telegram 论坛主题 |
 
-### Webhook Template Variables
+### Webhook 模板变量
 
-| Variable | Description |
+| 变量 | 说明 |
 |----------|-------------|
-| `{pull_request.title}` | PR title |
-| `{issue.number}` | Issue number |
+| `{pull_request.title}` | PR 标题 |
+| `{issue.number}` | 问题编号 |
 | `{repository.full_name}` | `owner/repo` |
-| `{action}` | Event action (opened, closed, etc.) |
-| `{__raw__}` | Full JSON payload (truncated at 4000 chars) |
-| `{sender.login}` | GitHub user who triggered the event |
+| `{action}` | 事件操作（opened、closed 等） |
+| `{__raw__}` | 完整 JSON 负载（在 4000 字符处截断） |
+| `{sender.login}` | 触发事件的 GitHub 用户 |
 
-### The [SILENT] Pattern
+### [SILENT] 模式
 
-When a cron job's response contains `[SILENT]`, delivery is suppressed. Use this to avoid notification spam on quiet runs:
+当 cron 作业的响应包含 `[SILENT]` 时，交付被抑制。使用此模式可以在安静运行时避免通知垃圾邮件：
 
 ```
-If nothing noteworthy happened, respond with [SILENT].
+如果没有发生值得注意的事情，用 [SILENT] 响应。
 ```
 
-This means you only get notified when the agent has something to report.
+这意味着您仅在智能体有内容要报告时才会收到通知。

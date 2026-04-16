@@ -147,32 +147,32 @@ hermes config set WANDB_API_KEY your-wandb-key
 - 测试 3 个不同规模的模型以确保鲁棒性：
   - `qwen/qwen3-8b`（小型）
   - `z-ai/glm-4.7-flash`（中型）
-  - `minimax/minimax-m2.7` (large)
-- Total: ~144 rollouts
+  - `minimax/minimax-m2.7` (大型)
+- 总计: ~144 次展开
 
-This validates:
-- Environment loads correctly
-- Prompt construction works
-- Inference response parsing is robust across model scales
-- Verifier/scoring logic produces valid rewards
+这会验证：
+- 环境加载正确
+- 提示构建工作正常
+- 推理响应解析在不同模型规模下都很健壮
+- 验证器/评分逻辑产生有效的奖励
 
-## Tinker API Integration
+## Tinker API 集成
 
-The trainer uses the [Tinker](https://tinker.computer) API for model training operations:
+训练器使用 [Tinker](https://tinker.computer) API 进行模型训练操作：
 
-- **ServiceClient** — Creates training and sampling clients
-- **Training client** — Handles forward-backward passes with importance sampling loss, optimizer steps (Adam), and weight checkpointing
-- **Sampling client** — Provides inference using the latest trained weights
+- **ServiceClient** — 创建训练和采样客户端
+- **训练客户端** — 处理带有重要性采样损失的前向-后向传递、优化器步骤（Adam）和权重检查点
+- **采样客户端** — 使用最新训练的权重提供推理
 
-The training loop:
-1. Fetches a batch of rollouts from Atropos (prompt + completions + scores)
-2. Converts to Tinker Datum objects with padded logprobs and advantages
-3. Runs forward-backward pass with importance sampling loss
-4. Takes an optimizer step (Adam: lr=4e-5, β1=0.9, β2=0.95)
-5. Saves weights and creates a new sampling client for next-step inference
-6. Logs metrics to WandB
+训练循环：
+1. 从 Atropos 获取一批展开（提示 + 完成 + 分数）
+2. 转换为带有填充对数概率和优势的 Tinker Datum 对象
+3. 使用重要性采样损失运行前向-后向传递
+4. 执行优化器步骤（Adam: lr=4e-5, β1=0.9, β2=0.95）
+5. 保存权重并为下一步推理创建新的采样客户端
+6. 将指标记录到 WandB
 
-## Architecture Diagram
+## 架构图
 
 ```mermaid
 flowchart LR
@@ -187,48 +187,48 @@ flowchart LR
     trainer -->|"serves inference"| infer
 ```
 
-## Creating Custom Environments
+## 创建自定义环境
 
-To create a new RL environment:
+要创建新的 RL 环境：
 
-1. Create a Python file in `tinker-atropos/tinker_atropos/environments/`
-2. Define a class that inherits from `BaseEnv`
-3. Implement the required methods:
-   - `load_dataset()` — Load your training data
-   - `get_next_item()` — Provide the next item to the model
-   - `score_answer()` — Score model outputs and assign rewards
-   - `collect_trajectories()` — Collect and return trajectories
-4. Optionally define a custom config class inheriting from `BaseEnvConfig`
+1. 在 `tinker-atropos/tinker_atropos/environments/` 中创建一个 Python 文件
+2. 定义一个继承自 `BaseEnv` 的类
+3. 实现所需的方法：
+   - `load_dataset()` — 加载训练数据
+   - `get_next_item()` — 向模型提供下一个项目
+   - `score_answer()` — 评分模型输出并分配奖励
+   - `collect_trajectories()` — 收集并返回轨迹
+4. 可选地定义一个继承自 `BaseEnvConfig` 的自定义配置类
 
-Study the existing `gsm8k_tinker.py` as a template. The agent can help you create new environments — it can read existing environment files, inspect HuggingFace datasets, and write new environment code.
+以现有的 `gsm8k_tinker.py` 为模板进行研究。智能体可以帮助您创建新环境 — 它可以读取现有的环境文件、检查 HuggingFace 数据集并编写新的环境代码。
 
-## WandB Metrics
+## WandB 指标
 
-Training runs log to Weights & Biases with these key metrics:
+训练运行会记录到 Weights & Biases，包含以下关键指标：
 
-| Metric | Description |
+| 指标 | 描述 |
 |--------|-------------|
-| `train/loss` | Training loss (importance sampling) |
-| `train/learning_rate` | Current learning rate |
-| `reward/mean` | Mean reward across groups |
-| `logprobs/mean` | Mean reference logprobs |
-| `logprobs/mean_training` | Mean training logprobs |
-| `logprobs/diff` | Logprob drift (reference - training) |
-| `advantages/mean` | Mean advantage values |
-| `advantages/std` | Advantage standard deviation |
+| `train/loss` | 训练损失（重要性采样） |
+| `train/learning_rate` | 当前学习率 |
+| `reward/mean` | 组间奖励均值 |
+| `logprobs/mean` | 参考对数概率均值 |
+| `logprobs/mean_training` | 训练对数概率均值 |
+| `logprobs/diff` | 对数概率漂移（参考 - 训练） |
+| `advantages/mean` | 优势值均值 |
+| `advantages/std` | 优势标准差 |
 
-## Log Files
+## 日志文件
 
-Each training run generates log files in `~/.hermes/logs/rl_training/`:
+每个训练运行在 `~/.hermes/logs/rl_training/` 中生成日志文件：
 
 ```
 logs/
-├── api_{run_id}.log        # Atropos API server logs
-├── trainer_{run_id}.log    # Tinker trainer logs
-├── env_{run_id}.log        # Environment process logs
-└── inference_tests/        # Inference test results
+├── api_{run_id}.log        # Atropos API 服务器日志
+├── trainer_{run_id}.log    # Tinker 训练器日志
+├── env_{run_id}.log        # 环境进程日志
+└── inference_tests/        # 推理测试结果
     ├── test_{env}_{model}.jsonl
     └── test_{env}_{model}.log
 ```
 
-These are invaluable for debugging when training fails or produces unexpected results.
+这些对于训练失败或产生意外结果时的调试非常宝贵。

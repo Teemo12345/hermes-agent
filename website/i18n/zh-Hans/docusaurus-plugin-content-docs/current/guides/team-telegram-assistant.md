@@ -49,22 +49,22 @@ description: "设置整个团队可以用于代码帮助、研究、系统管理
    Use this token to access the HTTP API:
    7123456789:AAH1bGciOiJSUzI1NiIsInR5cCI6Ikp...
    ```
-   Save this token — you'll need it in the next step.
+   保存此令牌 — 您将在下一步中需要它。
 
-4. **Set a description** (optional but recommended):
+4. **设置描述**（可选但推荐）：
    ```
    /setdescription
    ```
-   Choose your bot, then enter something like:
+   选择您的机器人，然后输入类似以下内容：
    ```
    Team AI assistant powered by Hermes Agent. DM me for help with code, research, debugging, and more.
    ```
 
-5. **Set bot commands** (optional — gives users a command menu):
+5. **设置机器人命令**（可选 — 为用户提供命令菜单）：
    ```
    /setcommands
    ```
-   Choose your bot, then paste:
+   选择您的机器人，然后粘贴：
    ```
    new - Start a fresh conversation
    model - Show or change the AI model
@@ -74,26 +74,26 @@ description: "设置整个团队可以用于代码帮助、研究、系统管理
    ```
 
 :::warning
-Keep your bot token secret. Anyone with the token can control the bot. If it leaks, use `/revoke` in BotFather to generate a new one.
+保持您的机器人令牌秘密。任何拥有令牌的人都可以控制机器人。如果泄露，请在 BotFather 中使用 `/revoke` 生成新令牌。
 :::
 
 ---
 
-## Step 2: Configure the Gateway
+## 步骤 2：配置网关
 
-You have two options: the interactive setup wizard (recommended) or manual configuration.
+您有两个选项：交互式设置向导（推荐）或手动配置。
 
-### Option A: Interactive Setup (Recommended)
+### 选项 A：交互式设置（推荐）
 
 ```bash
 hermes gateway setup
 ```
 
-This walks you through everything with arrow-key selection. Pick **Telegram**, paste your bot token, and enter your user ID when prompted.
+这将引导您完成所有操作，使用箭头键选择。选择 **Telegram**，粘贴您的机器人令牌，并在提示时输入您的用户 ID。
 
-### Option B: Manual Configuration
+### 选项 B：手动配置
 
-Add these lines to `~/.hermes/.env`:
+将这些行添加到 `~/.hermes/.env`：
 
 ```bash
 # Telegram bot token from BotFather
@@ -103,31 +103,31 @@ TELEGRAM_BOT_TOKEN=7123456789:AAH1bGciOiJSUzI1NiIsInR5cCI6Ikp...
 TELEGRAM_ALLOWED_USERS=123456789
 ```
 
-### Finding Your User ID
+### 查找您的用户 ID
 
-Your Telegram user ID is a numeric value (not your username). To find it:
+您的 Telegram 用户 ID 是一个数字值（不是您的用户名）。要找到它：
 
-1. Message [@userinfobot](https://t.me/userinfobot) on Telegram
-2. It instantly replies with your numeric user ID
-3. Copy that number into `TELEGRAM_ALLOWED_USERS`
+1. 在 Telegram 上向 [@userinfobot](https://t.me/userinfobot) 发送消息
+2. 它会立即回复您的数字用户 ID
+3. 将该数字复制到 `TELEGRAM_ALLOWED_USERS`
 
 :::info
-Telegram user IDs are permanent numbers like `123456789`. They're different from your `@username`, which can change. Always use the numeric ID for allowlists.
+Telegram 用户 ID 是永久数字，如 `123456789`。它们与您的 `@username` 不同，后者可以更改。始终使用数字 ID 作为允许列表。
 :::
 
 ---
 
-## Step 3: Start the Gateway
+## 步骤 3：启动网关
 
-### Quick Test
+### 快速测试
 
-Run the gateway in the foreground first to make sure everything works:
+首先在前台运行网关以确保一切正常工作：
 
 ```bash
 hermes gateway
 ```
 
-You should see output like:
+您应该看到类似以下的输出：
 
 ```
 [Gateway] Starting Hermes Gateway...
@@ -135,163 +135,163 @@ You should see output like:
 [Gateway] Cron scheduler started (tick every 60s)
 ```
 
-Open Telegram, find your bot, and send it a message. If it replies, you're in business. Press `Ctrl+C` to stop.
+打开 Telegram，找到您的机器人，向它发送消息。如果它回复，您就成功了。按 `Ctrl+C` 停止。
 
-### Production: Install as a Service
+### 生产环境：安装为服务
 
-For a persistent deployment that survives reboots:
+对于可在重启后继续运行的持久部署：
 
 ```bash
 hermes gateway install
-sudo hermes gateway install --system   # Linux only: boot-time system service
+sudo hermes gateway install --system   # Linux 仅：启动时系统服务
 ```
 
-This creates a background service: a user-level **systemd** service on Linux by default, a **launchd** service on macOS, or a boot-time Linux system service if you pass `--system`.
+这会创建一个后台服务：默认情况下，Linux 上是用户级 **systemd** 服务，macOS 上是 **launchd** 服务，如果您传递 `--system`，则是启动时 Linux 系统服务。
 
 ```bash
-# Linux — manage the default user service
+# Linux — 管理默认用户服务
 hermes gateway start
 hermes gateway stop
 hermes gateway status
 
-# View live logs
+# 查看实时日志
 journalctl --user -u hermes-gateway -f
 
-# Keep running after SSH logout
+# SSH 登出后保持运行
 sudo loginctl enable-linger $USER
 
-# Linux servers — explicit system-service commands
+# Linux 服务器 — 明确的系统服务命令
 sudo hermes gateway start --system
 sudo hermes gateway status --system
 journalctl -u hermes-gateway -f
 ```
 
 ```bash
-# macOS — manage the service
+# macOS — 管理服务
 hermes gateway start
 hermes gateway stop
 tail -f ~/.hermes/logs/gateway.log
 ```
 
 :::tip macOS PATH
-The launchd plist captures your shell PATH at install time so gateway subprocesses can find tools like Node.js and ffmpeg. If you install new tools later, re-run `hermes gateway install` to update the plist.
+launchd plist 在安装时捕获您的 shell PATH，以便网关子进程可以找到 Node.js 和 ffmpeg 等工具。如果您后来安装了新工具，请重新运行 `hermes gateway install` 以更新 plist。
 :::
 
-### Verify It's Running
+### 验证它正在运行
 
 ```bash
 hermes gateway status
 ```
 
-Then send a test message to your bot on Telegram. You should get a response within a few seconds.
+然后向 Telegram 上的机器人发送测试消息。您应该在几秒钟内收到回复。
 
 ---
 
-## Step 4: Set Up Team Access
+## 步骤 4：设置团队访问
 
-Now let's give your teammates access. There are two approaches.
+现在让我们为您的团队成员提供访问权限。有两种方法。
 
-### Approach A: Static Allowlist
+### 方法 A：静态允许列表
 
-Collect each team member's Telegram user ID (have them message [@userinfobot](https://t.me/userinfobot)) and add them as a comma-separated list:
+收集每个团队成员的 Telegram 用户 ID（让他们向 [@userinfobot](https://t.me/userinfobot) 发送消息），并将它们添加为逗号分隔的列表：
 
 ```bash
 # In ~/.hermes/.env
 TELEGRAM_ALLOWED_USERS=123456789,987654321,555555555
 ```
 
-Restart the gateway after changes:
+更改后重启网关：
 
 ```bash
 hermes gateway stop && hermes gateway start
 ```
 
-### Approach B: DM Pairing (Recommended for Teams)
+### 方法 B：私信配对（团队推荐）
 
-DM pairing is more flexible — you don't need to collect user IDs upfront. Here's how it works:
+私信配对更加灵活 — 您不需要预先收集用户 ID。工作原理如下：
 
-1. **Teammate DMs the bot** — since they're not on the allowlist, the bot replies with a one-time pairing code:
+1. **团队成员向机器人发送私信** — 由于他们不在允许列表中，机器人会回复一次性配对代码：
    ```
    🔐 Pairing code: XKGH5N7P
    Send this code to the bot owner for approval.
    ```
 
-2. **Teammate sends you the code** (via any channel — Slack, email, in person)
+2. **团队成员向您发送代码**（通过任何渠道 — Slack、电子邮件、面对面）
 
-3. **You approve it** on the server:
+3. **您在服务器上批准它**：
    ```bash
    hermes pairing approve telegram XKGH5N7P
    ```
 
-4. **They're in** — the bot immediately starts responding to their messages
+4. **他们就可以使用了** — 机器人立即开始回复他们的消息
 
-**Managing paired users:**
+**管理配对用户：**
 
 ```bash
-# See all pending and approved users
+# 查看所有待处理和已批准的用户
 hermes pairing list
 
-# Revoke someone's access
+# 撤销某人的访问权限
 hermes pairing revoke telegram 987654321
 
-# Clear expired pending codes
+# 清除过期的待处理代码
 hermes pairing clear-pending
 ```
 
 :::tip
-DM pairing is ideal for teams because you don't need to restart the gateway when adding new users. Approvals take effect immediately.
+私信配对对于团队来说是理想的，因为添加新用户时不需要重启网关。批准立即生效。
 :::
 
-### Security Considerations
+### 安全考虑
 
-- **Never set `GATEWAY_ALLOW_ALL_USERS=true`** on a bot with terminal access — anyone who finds your bot could run commands on your server
-- Pairing codes expire after **1 hour** and use cryptographic randomness
-- Rate limiting prevents brute-force attacks: 1 request per user per 10 minutes, max 3 pending codes per platform
-- After 5 failed approval attempts, the platform enters a 1-hour lockout
-- All pairing data is stored with `chmod 0600` permissions
+- **永远不要在具有终端访问权限的机器人上设置 `GATEWAY_ALLOW_ALL_USERS=true`** — 任何找到您的机器人的人都可以在您的服务器上运行命令
+- 配对代码在 **1 小时**后过期，并使用加密随机性
+- 速率限制防止暴力攻击：每用户每 10 分钟 1 个请求，每个平台最多 3 个待处理代码
+- 5 次失败的批准尝试后，平台进入 1 小时锁定
+- 所有配对数据都以 `chmod 0600` 权限存储
 
 ---
 
-## Step 5: Configure the Bot
+## 步骤 5：配置机器人
 
-### Set a Home Channel
+### 设置家庭频道
 
-A **home channel** is where the bot delivers cron job results and proactive messages. Without one, scheduled tasks have nowhere to send output.
+**家庭频道**是机器人传递定时任务结果和主动消息的地方。没有它，计划任务就没有地方发送输出。
 
-**Option 1:** Use the `/sethome` command in any Telegram group or chat where the bot is a member.
+**选项 1：** 在机器人作为成员的任何 Telegram 群组或聊天中使用 `/sethome` 命令。
 
-**Option 2:** Set it manually in `~/.hermes/.env`:
+**选项 2：** 在 `~/.hermes/.env` 中手动设置：
 
 ```bash
 TELEGRAM_HOME_CHANNEL=-1001234567890
 TELEGRAM_HOME_CHANNEL_NAME="Team Updates"
 ```
 
-To find a channel ID, add [@userinfobot](https://t.me/userinfobot) to the group — it will report the group's chat ID.
+要查找频道 ID，请将 [@userinfobot](https://t.me/userinfobot) 添加到群组 — 它会报告群组的聊天 ID。
 
-### Configure Tool Progress Display
+### 配置工具进度显示
 
-Control how much detail the bot shows when using tools. In `~/.hermes/config.yaml`:
+控制机器人使用工具时显示的详细程度。在 `~/.hermes/config.yaml` 中：
 
 ```yaml
 display:
   tool_progress: new    # off | new | all | verbose
 ```
 
-| Mode | What You See |
+| 模式 | 您看到的内容 |
 |------|-------------|
-| `off` | Clean responses only — no tool activity |
-| `new` | Brief status for each new tool call (recommended for messaging) |
-| `all` | Every tool call with details |
-| `verbose` | Full tool output including command results |
+| `off` | 仅干净的响应 — 无工具活动 |
+| `new` | 每个新工具调用的简短状态（推荐用于消息传递） |
+| `all` | 每个工具调用的详细信息 |
+| `verbose` | 完整的工具输出，包括命令结果 |
 
-Users can also change this per-session with the `/verbose` command in chat.
+用户还可以在聊天中使用 `/verbose` 命令按会话更改此设置。
 
-### Set Up a Personality with SOUL.md
+### 使用 SOUL.md 设置个性
 
-Customize how the bot communicates by editing `~/.hermes/SOUL.md`:
+通过编辑 `~/.hermes/SOUL.md` 自定义机器人的沟通方式：
 
-For a full guide, see [Use SOUL.md with Hermes](/docs/guides/use-soul-with-hermes).
+有关完整指南，请参阅 [使用 SOUL.md 与 Hermes](/docs/guides/use-soul-with-hermes)。
 
 ```markdown
 # Soul
@@ -301,9 +301,9 @@ values directness. When debugging, always ask for error logs
 before guessing at solutions.
 ```
 
-### Add Project Context
+### 添加项目上下文
 
-If your team works on specific projects, create context files so the bot knows your stack:
+如果您的团队从事特定项目，请创建上下文文件，以便机器人了解您的技术栈：
 
 ```markdown
 <!-- ~/.hermes/AGENTS.md -->
@@ -316,18 +316,18 @@ If your team works on specific projects, create context files so the bot knows y
 ```
 
 :::info
-Context files are injected into every session's system prompt. Keep them concise — every character counts against your token budget.
+上下文文件被注入到每个会话的系统提示中。保持简洁 — 每个字符都会计入您的令牌预算。
 :::
 
 ---
 
-## Step 6: Set Up Scheduled Tasks
+## 步骤 6：设置定时任务
 
-With the gateway running, you can schedule recurring tasks that deliver results to your team channel.
+随着网关运行，您可以安排定期任务，将结果传递到团队频道。
 
-### Daily Standup Summary
+### 每日站会摘要
 
-Message the bot on Telegram:
+在 Telegram 上向机器人发送消息：
 
 ```
 Every weekday at 9am, check the GitHub repository at
@@ -338,9 +338,9 @@ github.com/myorg/myproject for:
 Format as a brief standup-style summary.
 ```
 
-The agent creates a cron job automatically and delivers results to the chat where you asked (or the home channel).
+智能体会自动创建一个 cron 作业，并将结果传递到您提问的聊天（或家庭频道）。
 
-### Server Health Check
+### 服务器健康检查
 
 ```
 Every 6 hours, check disk usage with 'df -h', memory with 'free -h',
@@ -348,7 +348,7 @@ and Docker container status with 'docker ps'. Report anything unusual —
 partitions above 80%, containers that have restarted, or high memory usage.
 ```
 
-### Managing Scheduled Tasks
+### 管理定时任务
 
 ```bash
 # From the CLI
@@ -361,16 +361,16 @@ hermes cron status        # Check if scheduler is running
 ```
 
 :::warning
-Cron job prompts run in completely fresh sessions with no memory of prior conversations. Make sure each prompt contains **all** the context the agent needs — file paths, URLs, server addresses, and clear instructions.
+Cron 作业提示在完全新鲜的会话中运行，没有对先前对话的记忆。确保每个提示包含**所有**智能体需要的上下文 — 文件路径、URL、服务器地址和明确的指令。
 :::
 
 ---
 
-## Production Tips
+## 生产提示
 
-### Use Docker for Safety
+### 使用 Docker 确保安全
 
-On a shared team bot, use Docker as the terminal backend so agent commands run in a container instead of on your host:
+在共享团队机器人上，使用 Docker 作为终端后端，以便智能体命令在容器中运行而不是在您的主机上：
 
 ```bash
 # In ~/.hermes/.env
@@ -378,7 +378,7 @@ TERMINAL_BACKEND=docker
 TERMINAL_DOCKER_IMAGE=nikolaik/python-nodejs:python3.11-nodejs20
 ```
 
-Or in `~/.hermes/config.yaml`:
+或在 `~/.hermes/config.yaml` 中：
 
 ```yaml
 terminal:
@@ -388,9 +388,9 @@ terminal:
   container_persistent: true
 ```
 
-This way, even if someone asks the bot to run something destructive, your host system is protected.
+这样，即使有人要求机器人运行破坏性的东西，您的主机系统也会受到保护。
 
-### Monitor the Gateway
+### 监控网关
 
 ```bash
 # Check if the gateway is running
@@ -403,39 +403,39 @@ journalctl --user -u hermes-gateway -f
 tail -f ~/.hermes/logs/gateway.log
 ```
 
-### Keep Hermes Updated
+### 保持 Hermes 更新
 
-From Telegram, send `/update` to the bot — it will pull the latest version and restart. Or from the server:
+从 Telegram 向机器人发送 `/update` — 它将拉取最新版本并重启。或从服务器：
 
 ```bash
 hermes update
 hermes gateway stop && hermes gateway start
 ```
 
-### Log Locations
+### 日志位置
 
-| What | Location |
+| 内容 | 位置 |
 |------|----------|
-| Gateway logs | `journalctl --user -u hermes-gateway` (Linux) or `~/.hermes/logs/gateway.log` (macOS) |
-| Cron job output | `~/.hermes/cron/output/{job_id}/{timestamp}.md` |
-| Cron job definitions | `~/.hermes/cron/jobs.json` |
-| Pairing data | `~/.hermes/pairing/` |
-| Session history | `~/.hermes/sessions/` |
+| 网关日志 | `journalctl --user -u hermes-gateway`（Linux）或 `~/.hermes/logs/gateway.log`（macOS） |
+| Cron 作业输出 | `~/.hermes/cron/output/{job_id}/{timestamp}.md` |
+| Cron 作业定义 | `~/.hermes/cron/jobs.json` |
+| 配对数据 | `~/.hermes/pairing/` |
+| 会话历史 | `~/.hermes/sessions/` |
 
 ---
 
-## Going Further
+## 进一步发展
 
-You've got a working team Telegram assistant. Here are some next steps:
+您已经有了一个工作的团队 Telegram 助手。以下是一些后续步骤：
 
-- **[Security Guide](/docs/user-guide/security)** — deep dive into authorization, container isolation, and command approval
-- **[Messaging Gateway](/docs/user-guide/messaging)** — full reference for gateway architecture, session management, and chat commands
-- **[Telegram Setup](/docs/user-guide/messaging/telegram)** — platform-specific details including voice messages and TTS
-- **[Scheduled Tasks](/docs/user-guide/features/cron)** — advanced cron scheduling with delivery options and cron expressions
-- **[Context Files](/docs/user-guide/features/context-files)** — AGENTS.md, SOUL.md, and .cursorrules for project knowledge
-- **[Personality](/docs/user-guide/features/personality)** — built-in personality presets and custom persona definitions
-- **Add more platforms** — the same gateway can simultaneously run [Discord](/docs/user-guide/messaging/discord), [Slack](/docs/user-guide/messaging/slack), and [WhatsApp](/docs/user-guide/messaging/whatsapp)
+- **[安全指南](/docs/user-guide/security)** — 深入了解授权、容器隔离和命令审批
+- **[消息网关](/docs/user-guide/messaging)** — 网关架构、会话管理和聊天命令的完整参考
+- **[Telegram 设置](/docs/user-guide/messaging/telegram)** — 平台特定详细信息，包括语音消息和 TTS
+- **[定时任务](/docs/user-guide/features/cron)** — 具有传递选项和 cron 表达式的高级 cron 调度
+- **[上下文文件](/docs/user-guide/features/context-files)** — AGENTS.md、SOUL.md 和用于项目知识的 .cursorrules
+- **[个性](/docs/user-guide/features/personality)** — 内置个性预设和自定义角色定义
+- **添加更多平台** — 同一个网关可以同时运行 [Discord](/docs/user-guide/messaging/discord)、[Slack](/docs/user-guide/messaging/slack) 和 [WhatsApp](/docs/user-guide/messaging/whatsapp)
 
 ---
 
-*Questions or issues? Open an issue on GitHub — contributions are welcome.*
+*有问题或问题？在 GitHub 上打开一个问题 — 欢迎贡献。*

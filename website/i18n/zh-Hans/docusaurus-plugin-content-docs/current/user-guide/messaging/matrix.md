@@ -1,71 +1,71 @@
 ---
 sidebar_position: 9
 title: "Matrix"
-description: "Set up Hermes Agent as a Matrix bot"
+description: "将 Hermes Agent 设置为 Matrix 机器人"
 ---
 
-# Matrix Setup
+# Matrix 设置
 
-Hermes Agent integrates with Matrix, the open, federated messaging protocol. Matrix lets you run your own homeserver or use a public one like matrix.org — either way, you keep control of your communications. The bot connects via the `mautrix` Python SDK, processes messages through the Hermes Agent pipeline (including tool use, memory, and reasoning), and responds in real time. It supports text, file attachments, images, audio, video, and optional end-to-end encryption (E2EE).
+Hermes Agent 与 Matrix（开放的联邦消息传递协议）集成。Matrix 允许您运行自己的 homeserver 或使用 matrix.org 等公共服务器 — 无论哪种方式，您都可以控制自己的通信。机器人通过 `mautrix` Python SDK 连接，通过 Hermes Agent 管道处理消息（包括工具使用、内存和推理），并实时响应。它支持文本、文件附件、图像、音频、视频和可选的端到端加密（E2EE）。
 
-Hermes works with any Matrix homeserver — Synapse, Conduit, Dendrite, or matrix.org.
+Hermes 适用于任何 Matrix homeserver — Synapse、Conduit、Dendrite 或 matrix.org。
 
-Before setup, here's the part most people want to know: how Hermes behaves once it's connected.
+在设置之前，这里是大多数人想知道的：Hermes 连接后如何行为。
 
-## How Hermes Behaves
+## Hermes 的行为
 
-| Context | Behavior |
+| 上下文 | 行为 |
 |---------|----------|
-| **DMs** | Hermes responds to every message. No `@mention` needed. Each DM has its own session. Set `MATRIX_DM_MENTION_THREADS=true` to start a thread when the bot is `@mentioned` in a DM. |
-| **Rooms** | By default, Hermes requires an `@mention` to respond. Set `MATRIX_REQUIRE_MENTION=false` or add room IDs to `MATRIX_FREE_RESPONSE_ROOMS` for free-response rooms. Room invites are auto-accepted. |
-| **Threads** | Hermes supports Matrix threads (MSC3440). If you reply in a thread, Hermes keeps the thread context isolated from the main room timeline. Threads where the bot has already participated do not require a mention. |
-| **Auto-threading** | By default, Hermes auto-creates a thread for each message it responds to in a room. This keeps conversations isolated. Set `MATRIX_AUTO_THREAD=false` to disable. |
-| **Shared rooms with multiple users** | By default, Hermes isolates session history per user inside the room. Two people talking in the same room do not share one transcript unless you explicitly disable that. |
+| **私聊** | Hermes 响应每条消息。不需要 `@提及`。每个私聊都有自己的会话。设置 `MATRIX_DM_MENTION_THREADS=true` 以在机器人在私聊中被 `@提及` 时启动线程。 |
+| **房间** | 默认情况下，Hermes 需要 `@提及` 才能响应。设置 `MATRIX_REQUIRE_MENTION=false` 或将房间 ID 添加到 `MATRIX_FREE_RESPONSE_ROOMS` 以获得自由响应房间。房间邀请会被自动接受。 |
+| **线程** | Hermes 支持 Matrix 线程（MSC3440）。如果您在线程中回复，Hermes 会将线程上下文与主房间时间线隔离。机器人已经参与的线程不需要提及。 |
+| **自动线程** | 默认情况下，Hermes 会为它在房间中响应的每条消息自动创建线程。这使对话保持隔离。设置 `MATRIX_AUTO_THREAD=false` 以禁用。 |
+| **与多个用户共享房间** | 默认情况下，Hermes 在房间内为每个用户隔离会话历史记录。两个人在同一个房间交谈不会共享一个转录本，除非您明确禁用它。 |
 
 :::tip
-The bot automatically joins rooms when invited. Just invite the bot's Matrix user to any room and it will join and start responding.
+机器人在被邀请时会自动加入房间。只需邀请机器人的 Matrix 用户到任何房间，它就会加入并开始响应。
 :::
 
-### Session Model in Matrix
+### Matrix 中的会话模型
 
-By default:
+默认情况下：
 
-- each DM gets its own session
-- each thread gets its own session namespace
-- each user in a shared room gets their own session inside that room
+- 每个私聊获得自己的会话
+- 每个线程获得自己的会话命名空间
+- 共享房间中的每个用户在该房间内获得自己的会话
 
-This is controlled by `config.yaml`:
+这由 `config.yaml` 控制：
 
 ```yaml
 group_sessions_per_user: true
 ```
 
-Set it to `false` only if you explicitly want one shared conversation for the entire room:
+只有当您明确希望整个房间有一个共享对话时，才将其设置为 `false`：
 
 ```yaml
 group_sessions_per_user: false
 ```
 
-Shared sessions can be useful for a collaborative room, but they also mean:
+共享会话对于协作房间很有用，但它们也意味着：
 
-- users share context growth and token costs
-- one person's long tool-heavy task can bloat everyone else's context
-- one person's in-flight run can interrupt another person's follow-up in the same room
+- 用户共享上下文增长和令牌成本
+- 一个人繁重的工具任务可能会使其他人的上下文膨胀
+- 一个人正在进行的运行可能会中断同一房间中另一个人的后续操作
 
-### Mention and Threading Configuration
+### 提及和线程配置
 
-You can configure mention and auto-threading behavior via environment variables or `config.yaml`:
+您可以通过环境变量或 `config.yaml` 配置提及和自动线程行为：
 
 ```yaml
 matrix:
-  require_mention: true           # Require @mention in rooms (default: true)
-  free_response_rooms:            # Rooms exempt from mention requirement
+  require_mention: true           # 在房间中需要 @提及（默认：true）
+  free_response_rooms:            # 免于提及要求的房间
     - "!abc123:matrix.org"
-  auto_thread: true               # Auto-create threads for responses (default: true)
-  dm_mention_threads: false       # Create thread when @mentioned in DM (default: false)
+  auto_thread: true               # 自动为响应创建线程（默认：true）
+  dm_mention_threads: false       # 在私聊中 @提及时创建线程（默认：false）
 ```
 
-Or via environment variables:
+或通过环境变量：
 
 ```bash
 MATRIX_REQUIRE_MENTION=true
@@ -75,52 +75,52 @@ MATRIX_DM_MENTION_THREADS=false
 ```
 
 :::note
-If you are upgrading from a version that did not have `MATRIX_REQUIRE_MENTION`, the bot previously responded to all messages in rooms. To preserve that behavior, set `MATRIX_REQUIRE_MENTION=false`.
+如果您从没有 `MATRIX_REQUIRE_MENTION` 的版本升级，机器人以前会响应房间中的所有消息。要保留该行为，请设置 `MATRIX_REQUIRE_MENTION=false`。
 :::
 
-This guide walks you through the full setup process — from creating your bot account to sending your first message.
+本指南引导您完成完整的设置过程 — 从创建机器人账户到发送第一条消息。
 
-## Step 1: Create a Bot Account
+## 步骤 1：创建机器人账户
 
-You need a Matrix user account for the bot. There are several ways to do this:
+您需要一个 Matrix 用户账户作为机器人。有几种方法可以做到这一点：
 
-### Option A: Register on Your Homeserver (Recommended)
+### 选项 A：在您的 Homeserver 上注册（推荐）
 
-If you run your own homeserver (Synapse, Conduit, Dendrite):
+如果您运行自己的 homeserver（Synapse、Conduit、Dendrite）：
 
-1. Use the admin API or registration tool to create a new user:
+1. 使用管理 API 或注册工具创建新用户：
 
 ```bash
-# Synapse example
+# Synapse 示例
 register_new_matrix_user -c /etc/synapse/homeserver.yaml http://localhost:8008
 ```
 
-2. Choose a username like `hermes` — the full user ID will be `@hermes:your-server.org`.
+2. 选择一个用户名，如 `hermes` — 完整用户 ID 将是 `@hermes:your-server.org`。
 
-### Option B: Use matrix.org or Another Public Homeserver
+### 选项 B：使用 matrix.org 或其他公共 Homeserver
 
-1. Go to [Element Web](https://app.element.io) and create a new account.
-2. Pick a username for your bot (e.g., `hermes-bot`).
+1. 转到 [Element Web](https://app.element.io) 并创建一个新账户。
+2. 为您的机器人选择一个用户名（例如，`hermes-bot`）。
 
-### Option C: Use Your Own Account
+### 选项 C：使用您自己的账户
 
-You can also run Hermes as your own user. This means the bot posts as you — useful for personal assistants.
+您也可以以自己的用户身份运行 Hermes。这意味着机器人以您的身份发布 — 对个人助理很有用。
 
-## Step 2: Get an Access Token
+## 步骤 2：获取访问令牌
 
-Hermes needs an access token to authenticate with the homeserver. You have two options:
+Hermes 需要访问令牌才能向 homeserver 进行身份验证。您有两个选项：
 
-### Option A: Access Token (Recommended)
+### 选项 A：访问令牌（推荐）
 
-The most reliable way to get a token:
+获取令牌的最可靠方法：
 
-**Via Element:**
-1. Log in to [Element](https://app.element.io) with the bot account.
-2. Go to **Settings** → **Help & About**.
-3. Scroll down and expand **Advanced** — the access token is displayed there.
-4. **Copy it immediately.**
+**通过 Element：**
+1. 使用机器人账户登录 [Element](https://app.element.io)。
+2. 转到 **Settings** → **Help & About**。
+3. 向下滚动并展开 **Advanced** — 访问令牌显示在那里。
+4. **立即复制它**。
 
-**Via the API:**
+**通过 API：**
 
 ```bash
 curl -X POST https://your-server/_matrix/client/v3/login \
@@ -132,119 +132,119 @@ curl -X POST https://your-server/_matrix/client/v3/login \
   }'
 ```
 
-The response includes an `access_token` field — copy it.
+响应包含 `access_token` 字段 — 复制它。
 
-:::warning[Keep your access token safe]
-The access token gives full access to the bot's Matrix account. Never share it publicly or commit it to Git. If compromised, revoke it by logging out all sessions for that user.
+:::warning[保持您的访问令牌安全]
+访问令牌授予对机器人 Matrix 账户的完全访问权限。永远不要公开分享它或将其提交到 Git。如果被泄露，通过注销该用户的所有会话来撤销它。
 :::
 
-### Option B: Password Login
+### 选项 B：密码登录
 
-Instead of providing an access token, you can give Hermes the bot's user ID and password. Hermes will log in automatically on startup. This is simpler but means the password is stored in your `.env` file.
+您可以向 Hermes 提供机器人的用户 ID 和密码，而不是提供访问令牌。Hermes 将在启动时自动登录。这更简单，但意味着密码存储在您的 `.env` 文件中。
 
 ```bash
 MATRIX_USER_ID=@hermes:your-server.org
 MATRIX_PASSWORD=your-password
 ```
 
-## Step 3: Find Your Matrix User ID
+## 步骤 3：查找您的 Matrix 用户 ID
 
-Hermes Agent uses your Matrix User ID to control who can interact with the bot. Matrix User IDs follow the format `@username:server`.
+Hermes Agent 使用您的 Matrix 用户 ID 来控制谁可以与机器人交互。Matrix 用户 ID 遵循 `@username:server` 格式。
 
-To find yours:
+要找到您的：
 
-1. Open [Element](https://app.element.io) (or your preferred Matrix client).
-2. Click your avatar → **Settings**.
-3. Your User ID is displayed at the top of the profile (e.g., `@alice:matrix.org`).
+1. 打开 [Element](https://app.element.io)（或您首选的 Matrix 客户端）。
+2. 点击您的头像 → **Settings**。
+3. 您的用户 ID 显示在个人资料顶部（例如，`@alice:matrix.org`）。
 
 :::tip
-Matrix User IDs always start with `@` and contain a `:` followed by the server name. For example: `@alice:matrix.org`, `@bob:your-server.com`.
+Matrix 用户 ID 始终以 `@` 开头，并包含一个 `:` 后跟服务器名称。例如：`@alice:matrix.org`、`@bob:your-server.com`。
 :::
 
-## Step 4: Configure Hermes Agent
+## 步骤 4：配置 Hermes Agent
 
-### Option A: Interactive Setup (Recommended)
+### 选项 A：交互式设置（推荐）
 
-Run the guided setup command:
+运行引导设置命令：
 
 ```bash
 hermes gateway setup
 ```
 
-Select **Matrix** when prompted, then provide your homeserver URL, access token (or user ID + password), and allowed user IDs when asked.
+当提示时选择 **Matrix**，然后在询问时提供您的 homeserver URL、访问令牌（或用户 ID + 密码）和允许的用户 ID。
 
-### Option B: Manual Configuration
+### 选项 B：手动配置
 
-Add the following to your `~/.hermes/.env` file:
+将以下内容添加到您的 `~/.hermes/.env` 文件：
 
-**Using an access token:**
+**使用访问令牌：**
 
 ```bash
-# Required
+# 必需
 MATRIX_HOMESERVER=https://matrix.example.org
 MATRIX_ACCESS_TOKEN=***
 
-# Optional: user ID (auto-detected from token if omitted)
+# 可选：用户 ID（如果省略，从令牌自动检测）
 # MATRIX_USER_ID=@hermes:matrix.example.org
 
-# Security: restrict who can interact with the bot
+# 安全：限制谁可以与机器人交互
 MATRIX_ALLOWED_USERS=@alice:matrix.example.org
 
-# Multiple allowed users (comma-separated)
+# 多个允许的用户（逗号分隔）
 # MATRIX_ALLOWED_USERS=@alice:matrix.example.org,@bob:matrix.example.org
 ```
 
-**Using password login:**
+**使用密码登录：**
 
 ```bash
-# Required
+# 必需
 MATRIX_HOMESERVER=https://matrix.example.org
 MATRIX_USER_ID=@hermes:matrix.example.org
 MATRIX_PASSWORD=***
 
-# Security
+# 安全
 MATRIX_ALLOWED_USERS=@alice:matrix.example.org
 ```
 
-Optional behavior settings in `~/.hermes/config.yaml`:
+`~/.hermes/config.yaml` 中的可选行为设置：
 
 ```yaml
 group_sessions_per_user: true
 ```
 
-- `group_sessions_per_user: true` keeps each participant's context isolated inside shared rooms
+- `group_sessions_per_user: true` 在共享房间内保持每个参与者的上下文隔离
 
-### Start the Gateway
+### 启动网关
 
-Once configured, start the Matrix gateway:
+配置完成后，启动 Matrix 网关：
 
 ```bash
 hermes gateway
 ```
 
-The bot should connect to your homeserver and start syncing within a few seconds. Send it a message — either a DM or in a room it has joined — to test.
+机器人应该在几秒钟内连接到您的 homeserver 并开始同步。向它发送消息 — 无论是私聊还是在它已加入的房间中 — 进行测试。
 
 :::tip
-You can run `hermes gateway` in the background or as a systemd service for persistent operation. See the deployment docs for details.
+您可以在后台或作为 systemd 服务运行 `hermes gateway` 以实现持久操作。有关详细信息，请参阅部署文档。
 :::
 
-## End-to-End Encryption (E2EE)
+## 端到端加密（E2EE）
 
-Hermes supports Matrix end-to-end encryption, so you can chat with your bot in encrypted rooms.
+Hermes 支持 Matrix 端到端加密，因此您可以在加密房间中与您的机器人聊天。
 
-### Requirements
+### 要求
 
-E2EE requires the `mautrix` library with encryption extras and the `libolm` C library:
+E2EE 需要带有加密附加功能的 `mautrix` 库和 `libolm` C 库：
 
 ```bash
-# Install mautrix with E2EE support
+# 安装带有 E2EE 支持的 mautrix
 pip install 'mautrix[encryption]'
 
-# Or install with hermes extras
+# 或使用 hermes 附加功能安装
 pip install 'hermes-agent[matrix]'
 ```
 
-You also need `libolm` installed on your system:
+您还需要在系统上安装 `libolm`：
 
 ```bash
 # Debian/Ubuntu
@@ -257,128 +257,119 @@ brew install libolm
 sudo dnf install libolm-devel
 ```
 
-### Enable E2EE
+### 启用 E2EE
 
-Add to your `~/.hermes/.env`:
+添加到您的 `~/.hermes/.env`：
 
 ```bash
 MATRIX_ENCRYPTION=true
 ```
 
-When E2EE is enabled, Hermes:
+启用 E2EE 时，Hermes：
 
-- Stores encryption keys in `~/.hermes/platforms/matrix/store/` (legacy installs: `~/.hermes/matrix/store/`)
-- Uploads device keys on first connection
-- Decrypts incoming messages and encrypts outgoing messages automatically
-- Auto-joins encrypted rooms when invited
+- 将加密密钥存储在 `~/.hermes/platforms/matrix/store/` 中（旧版安装：`~/.hermes/matrix/store/`）
+- 在首次连接时上传设备密钥
+- 自动解密传入消息并加密传出消息
+- 被邀请时自动加入加密房间
 
-### Cross-Signing Verification (Recommended)
+### 交叉签名验证（推荐）
 
-If your Matrix account has cross-signing enabled (the default in Element), set the recovery key so the bot can self-sign its device on startup. Without this, other Matrix clients may refuse to share encryption sessions with the bot after a device key rotation.
+如果您的 Matrix 账户启用了交叉签名（Element 中的默认设置），请设置恢复密钥，以便机器人可以在启动时自签名其设备。没有这一点，在设备密钥轮换后，其他 Matrix 客户端可能会拒绝与机器人共享加密会话。
 
 ```bash
-MATRIX_RECOVERY_KEY=EsT... your recovery key here
+MATRIX_RECOVERY_KEY=EsT... 您的恢复密钥在这里
 ```
 
-**Where to find it:** In Element, go to **Settings** → **Security & Privacy** → **Encryption** → your recovery key (also called the "Security Key"). This is the key you were asked to save when you first set up cross-signing.
+**在哪里找到它：** 在 Element 中，转到 **Settings** → **Security & Privacy** → **Encryption** → 您的恢复密钥（也称为"安全密钥"）。这是您首次设置交叉签名时被要求保存的密钥。
 
-On each startup, if `MATRIX_RECOVERY_KEY` is set, Hermes imports cross-signing keys from the homeserver's secure secret storage and signs the current device. This is idempotent and safe to leave enabled permanently.
+在每次启动时，如果设置了 `MATRIX_RECOVERY_KEY`，Hermes 会从 homeserver 的安全秘密存储中导入交叉签名密钥并对当前设备进行签名。这是幂等的，可以安全地永久启用。
 
 :::warning
-If you delete the `~/.hermes/platforms/matrix/store/` directory, the bot loses its encryption keys. You'll need to verify the device again in your Matrix client. Back up this directory if you want to preserve encrypted sessions.
+如果您删除 `~/.hermes/platforms/matrix/store/` 目录，机器人将失去其加密密钥。您需要在 Matrix 客户端中再次验证设备。如果您想保留加密会话，请备份此目录。
 :::
 
 :::info
-If `mautrix[encryption]` is not installed or `libolm` is missing, the bot falls back to a plain (unencrypted) client automatically. You'll see a warning in the logs.
+如果未安装 `mautrix[encryption]` 或缺少 `libolm`，机器人会自动回退到普通（未加密）客户端。您会在日志中看到警告。
 :::
 
-## Home Room
+## 主房间
 
-You can designate a "home room" where the bot sends proactive messages (such as cron job output, reminders, and notifications). There are two ways to set it:
+您可以指定一个"主房间"，机器人在其中发送主动消息（例如 cron 作业输出、提醒和通知）。有两种设置方法：
 
-### Using the Slash Command
+### 使用斜杠命令
 
-Type `/sethome` in any Matrix room where the bot is present. That room becomes the home room.
+在机器人所在的任何 Matrix 房间中输入 `/sethome`。该房间成为主房间。
 
-### Manual Configuration
+### 手动配置
 
-Add this to your `~/.hermes/.env`:
+将此添加到您的 `~/.hermes/.env`：
 
 ```bash
 MATRIX_HOME_ROOM=!abc123def456:matrix.example.org
 ```
 
 :::tip
-To find a Room ID: in Element, go to the room → **Settings** → **Advanced** → the **Internal room ID** is shown there (starts with `!`).
+要查找房间 ID：在 Element 中，转到房间 → **Settings** → **Advanced** → **Internal room ID** 显示在那里（以 `!` 开头）。
 :::
 
-## Troubleshooting
+## 故障排除
 
-### Bot is not responding to messages
+### 机器人不响应消息
 
-**Cause**: The bot hasn't joined the room, or `MATRIX_ALLOWED_USERS` doesn't include your User ID.
+**原因**：机器人尚未加入房间，或者 `MATRIX_ALLOWED_USERS` 不包含您的用户 ID。
 
-**Fix**: Invite the bot to the room — it auto-joins on invite. Verify your User ID is in `MATRIX_ALLOWED_USERS` (use the full `@user:server` format). Restart the gateway.
+**解决方法**：邀请机器人到房间 — 它会在邀请时自动加入。验证您的用户 ID 是否在 `MATRIX_ALLOWED_USERS` 中（使用完整的 `@user:server` 格式）。重启网关。
 
-### "Failed to authenticate" / "whoami failed" on startup
+### 启动时"Failed to authenticate" / "whoami failed"
 
-**Cause**: The access token or homeserver URL is incorrect.
+**原因**：访问令牌或 homeserver URL 不正确。
 
-**Fix**: Verify `MATRIX_HOMESERVER` points to your homeserver (include `https://`, no trailing slash). Check that `MATRIX_ACCESS_TOKEN` is valid — try it with curl:
+**解决方法**：验证 `MATRIX_HOMESERVER` 指向您的 homeserver（包含 `https://`，无尾部斜杠）。检查 `MATRIX_ACCESS_TOKEN` 是否有效 — 尝试使用 curl：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
   https://your-server/_matrix/client/v3/account/whoami
 ```
 
-If this returns your user info, the token is valid. If it returns an error, generate a new token.
+如果这返回您的用户信息，则令牌有效。如果返回错误，请生成新令牌。
 
-### "mautrix not installed" error
+### "mautrix not installed" 错误
 
-**Cause**: The `mautrix` Python package is not installed.
+**原因**：未安装 `mautrix` Python 包。
 
-**Fix**: Install it:
+**解决方法**：安装它：
 
 ```bash
 pip install 'mautrix[encryption]'
 ```
 
-Or with Hermes extras:
+或使用 Hermes 附加功能：
 
 ```bash
 pip install 'hermes-agent[matrix]'
 ```
 
-### Encryption errors / "could not decrypt event"
+### 加密错误 / "could not decrypt event"
 
-**Cause**: Missing encryption keys, `libolm` not installed, or the bot's device isn't trusted.
+**原因**：缺少加密密钥、未安装 `libolm` 或机器人的设备不受信任。
 
-**Fix**:
-1. Verify `libolm` is installed on your system (see the E2EE section above).
-2. Make sure `MATRIX_ENCRYPTION=true` is set in your `.env`.
-3. In your Matrix client (Element), go to the bot's profile -> Sessions -> verify/trust the bot's device.
-4. If the bot just joined an encrypted room, it can only decrypt messages sent *after* it joined. Older messages are inaccessible.
+**解决方法**：
+1. 验证 `libolm` 是否已安装在您的系统上（请参阅上面的 E2EE 部分）。
+2. 确保 `MATRIX_ENCRYPTION=true` 在您的 `.env` 中设置。
+3. 在您的 Matrix 客户端（Element）中，转到机器人的个人资料 -> 会话 -> 验证/信任机器人的设备。
+4. 如果机器人刚刚加入加密房间，它只能解密在它加入后发送的消息。旧消息无法访问。
 
-### Upgrading from a previous version with E2EE
+### 从以前版本的 E2EE 升级
 
-If you previously used Hermes with `MATRIX_ENCRYPTION=true` and are upgrading to
-a version that uses the new SQLite-based crypto store, the bot's encryption
-identity has changed. Your Matrix client (Element) may cache the old device keys
-and refuse to share encryption sessions with the bot.
+如果您以前使用带有 `MATRIX_ENCRYPTION=true` 的 Hermes 并正在升级到使用新的基于 SQLite 的加密存储的版本，机器人的加密身份已更改。您的 Matrix 客户端（Element）可能会缓存旧设备密钥并拒绝与机器人共享加密会话。
 
-**Symptoms**: The bot connects and shows "E2EE enabled" in the logs, but all
-messages show "could not decrypt event" and the bot never responds.
+**症状**：机器人连接并在日志中显示"E2EE enabled"，但所有消息都显示"could not decrypt event"，机器人从不响应。
 
-**What's happening**: The old encryption state (from the previous `matrix-nio` or
-serialization-based `mautrix` backend) is incompatible with the new SQLite crypto
-store. The bot creates a fresh encryption identity, but your Matrix client still
-has the old keys cached and won't share the room's encryption session with a
-device whose keys changed. This is a Matrix security feature -- clients treat
-changed identity keys for the same device as suspicious.
+**发生了什么**：旧的加密状态（来自以前的 `matrix-nio` 或基于序列化的 `mautrix` 后端）与新的 SQLite 加密存储不兼容。机器人创建了一个新的加密身份，但您的 Matrix 客户端仍然缓存旧密钥，并且不会与密钥已更改的设备共享房间的加密会话。这是 Matrix 安全功能 — 客户端将同一设备的更改身份密钥视为可疑。
 
-**Fix** (one-time migration):
+**解决方法**（一次性迁移）：
 
-1. **Generate a new access token** to get a fresh device ID. The simplest way:
+1. **生成新的访问令牌**以获取新的设备 ID。最简单的方法：
 
    ```bash
    curl -X POST https://your-server/_matrix/client/v3/login \
@@ -391,82 +382,73 @@ changed identity keys for the same device as suspicious.
      }'
    ```
 
-   Copy the new `access_token` and update `MATRIX_ACCESS_TOKEN` in `~/.hermes/.env`.
+   复制新的 `access_token` 并更新 `~/.hermes/.env` 中的 `MATRIX_ACCESS_TOKEN`。
 
-2. **Delete old encryption state**:
+2. **删除旧的加密状态**：
 
    ```bash
    rm -f ~/.hermes/platforms/matrix/store/crypto.db
    rm -f ~/.hermes/platforms/matrix/store/crypto_store.*
    ```
 
-3. **Set your recovery key** (if you use cross-signing — most Element users do). Add to `~/.hermes/.env`:
+3. **设置您的恢复密钥**（如果您使用交叉签名 — 大多数 Element 用户都这样做）。添加到 `~/.hermes/.env`：
 
    ```bash
-   MATRIX_RECOVERY_KEY=EsT... your recovery key here
+   MATRIX_RECOVERY_KEY=EsT... 您的恢复密钥在这里
    ```
 
-   This lets the bot self-sign with cross-signing keys on startup, so Element trusts the new device immediately. Without this, Element may see the new device as unverified and refuse to share encryption sessions. Find your recovery key in Element under **Settings** → **Security & Privacy** → **Encryption**.
+   这让机器人在启动时使用交叉签名密钥自签名，因此 Element 立即信任新设备。没有这一点，Element 可能会将新设备视为未验证并拒绝共享加密会话。在 Element 中的 **Settings** → **Security & Privacy** → **Encryption** 下找到您的恢复密钥。
 
-4. **Force your Matrix client to rotate the encryption session**. In Element,
-   open the DM room with the bot and type `/discardsession`. This forces Element
-   to create a new encryption session and share it with the bot's new device.
+4. **强制您的 Matrix 客户端轮换加密会话**。在 Element 中，打开与机器人的私聊房间并输入 `/discardsession`。这会强制 Element 创建新的加密会话并与机器人的新设备共享。
 
-5. **Restart the gateway**:
+5. **重启网关**：
 
    ```bash
    hermes gateway run
    ```
 
-   If `MATRIX_RECOVERY_KEY` is set, you should see `Matrix: cross-signing verified via recovery key` in the logs.
+   如果设置了 `MATRIX_RECOVERY_KEY`，您应该在日志中看到 `Matrix: cross-signing verified via recovery key`。
 
-6. **Send a new message**. The bot should decrypt and respond normally.
+6. **发送新消息**。机器人应该正常解密并响应。
 
 :::note
-After migration, messages sent *before* the upgrade cannot be decrypted -- the old
-encryption keys are gone. This only affects the transition; new messages work
-normally.
+迁移后，在**升级前**发送的消息无法解密 — 旧的加密密钥已丢失。这仅影响转换；新消息正常工作。
 :::
 
 :::tip
-**New installations are not affected.** This migration is only needed if you had
-a working E2EE setup with a previous version of Hermes and are upgrading.
+**新安装不受影响**。只有当您使用 Hermes 的先前版本设置了有效的 E2EE 并正在升级时，才需要此迁移。
 
-**Why a new access token?** Each Matrix access token is bound to a specific device
-ID. Reusing the same device ID with new encryption keys causes other Matrix
-clients to distrust the device (they see changed identity keys as a potential
-security breach). A new access token gets a new device ID with no stale key
-history, so other clients trust it immediately.
+**为什么需要新的访问令牌？** 每个 Matrix 访问令牌都绑定到特定的设备 ID。重用具有新加密密钥的相同设备 ID 会导致其他 Matrix 客户端不信任该设备（它们将更改的身份密钥视为潜在的安全漏洞）。新的访问令牌会获得一个没有过时密钥历史的新设备 ID，因此其他客户端会立即信任它。
 :::
 
-## Proxy Mode (E2EE on macOS)
+## 代理模式（macOS 上的 E2EE）
 
-Matrix E2EE requires `libolm`, which doesn't compile on macOS ARM64 (Apple Silicon). The `hermes-agent[matrix]` extra is gated to Linux only. If you're on macOS, proxy mode lets you run E2EE in a Docker container on a Linux VM while the actual agent runs natively on macOS with full access to your local files, memory, and skills.
+Matrix E2EE 需要 `libolm`，它在 macOS ARM64（Apple Silicon）上不编译。`hermes-agent[matrix]` 附加功能仅在 Linux 上可用。如果您在 macOS 上，代理模式允许您在 Linux VM 的 Docker 容器中运行 E2EE，而实际的智能体在 macOS 上本地运行，可以完全访问您的本地文件、内存和技能。
 
-### How It Works
+### 工作原理
 
 ```
-macOS (Host):
+macOS (主机):
   └─ hermes gateway
-       ├─ api_server adapter ← listens on 0.0.0.0:8642
-       ├─ AIAgent ← single source of truth
-       ├─ Sessions, memory, skills
-       └─ Local file access (Obsidian, projects, etc.)
+       ├─ api_server 适配器 ← 监听 0.0.0.0:8642
+       ├─ AIAgent ← 单一事实来源
+       ├─ 会话、内存、技能
+       └─ 本地文件访问（Obsidian、项目等）
 
 Linux VM (Docker):
-  └─ hermes gateway (proxy mode)
-       ├─ Matrix adapter ← E2EE decryption/encryption
-       └─ HTTP forward → macOS:8642/v1/chat/completions
-           (no LLM API keys, no agent, no inference)
+  └─ hermes gateway (代理模式)
+       ├─ Matrix 适配器 ← E2EE 解密/加密
+       └─ HTTP 转发 → macOS:8642/v1/chat/completions
+           (无 LLM API 密钥，无智能体，无推理)
 ```
 
-The Docker container only handles Matrix protocol + E2EE. When a message arrives, it decrypts it and forwards the text to the host via a standard HTTP request. The host runs the agent, calls tools, generates a response, and streams it back. The container encrypts and sends the response to Matrix. All sessions are unified — CLI, Matrix, Telegram, and any other platform share the same memory and conversation history.
+Docker 容器仅处理 Matrix 协议 + E2EE。当消息到达时，它解密并通过标准 HTTP 请求将文本转发到主机。主机运行智能体，调用工具，生成响应，并将其流式传输回。容器加密并将响应发送到 Matrix。所有会话都是统一的 — CLI、Matrix、Telegram 和任何其他平台共享相同的内存和对话历史。
 
-### Step 1: Configure the Host (macOS)
+### 步骤 1：配置主机（macOS）
 
-Enable the API server so the host accepts incoming requests from the Docker container.
+启用 API 服务器，以便主机接受来自 Docker 容器的传入请求。
 
-Add to `~/.hermes/.env`:
+添加到 `~/.hermes/.env`：
 
 ```bash
 API_SERVER_ENABLED=true
@@ -474,49 +456,49 @@ API_SERVER_KEY=your-secret-key-here
 API_SERVER_HOST=0.0.0.0
 ```
 
-- `API_SERVER_HOST=0.0.0.0` binds to all interfaces so the Docker container can reach it.
-- `API_SERVER_KEY` is required for non-loopback binding. Pick a strong random string.
-- The API server runs on port 8642 by default (change with `API_SERVER_PORT` if needed).
+- `API_SERVER_HOST=0.0.0.0` 绑定到所有接口，以便 Docker 容器可以访问它。
+- `API_SERVER_KEY` 是非环回绑定所必需的。选择一个强随机字符串。
+- API 服务器默认在端口 8642 上运行（如果需要，可使用 `API_SERVER_PORT` 更改）。
 
-Start the gateway:
+启动网关：
 
 ```bash
 hermes gateway
 ```
 
-You should see the API server start alongside any other platforms you have configured. Verify it's reachable from the VM:
+您应该看到 API 服务器与您配置的任何其他平台一起启动。验证它是否可从 VM 访问：
 
 ```bash
-# From the Linux VM
+# 从 Linux VM
 curl http://<mac-ip>:8642/health
 ```
 
-### Step 2: Configure the Docker Container (Linux VM)
+### 步骤 2：配置 Docker 容器（Linux VM）
 
-The container needs Matrix credentials and the proxy URL. It does NOT need LLM API keys.
+容器需要 Matrix 凭据和代理 URL。它**不需要** LLM API 密钥。
 
-**`docker-compose.yml`:**
+**`docker-compose.yml`：**
 
 ```yaml
 services:
   hermes-matrix:
     build: .
     environment:
-      # Matrix credentials
+      # Matrix 凭据
       MATRIX_HOMESERVER: "https://matrix.example.org"
       MATRIX_ACCESS_TOKEN: "syt_..."
       MATRIX_ALLOWED_USERS: "@you:matrix.example.org"
       MATRIX_ENCRYPTION: "true"
       MATRIX_DEVICE_ID: "HERMES_BOT"
 
-      # Proxy mode — forward to host agent
+      # 代理模式 — 转发到主机智能体
       GATEWAY_PROXY_URL: "http://192.168.1.100:8642"
       GATEWAY_PROXY_KEY: "your-secret-key-here"
     volumes:
       - ./matrix-store:/root/.hermes/platforms/matrix/store
 ```
 
-**`Dockerfile`:**
+**`Dockerfile`：**
 
 ```dockerfile
 FROM python:3.11-slim
@@ -527,83 +509,83 @@ RUN pip install 'hermes-agent[matrix]'
 CMD ["hermes", "gateway"]
 ```
 
-That's the entire container. No API keys for OpenRouter, Anthropic, or any inference provider.
+这就是整个容器。没有用于 OpenRouter、Anthropic 或任何推理提供商的 API 密钥。
 
-### Step 3: Start Both
+### 步骤 3：启动两者
 
-1. Start the host gateway first:
+1. 首先启动主机网关：
    ```bash
    hermes gateway
    ```
 
-2. Start the Docker container:
+2. 启动 Docker 容器：
    ```bash
    docker compose up -d
    ```
 
-3. Send a message in an encrypted Matrix room. The container decrypts it, forwards it to the host, and streams the response back.
+3. 在加密的 Matrix 房间中发送消息。容器解密它，将其转发到主机，并将响应流式传输回。
 
-### Configuration Reference
+### 配置参考
 
-Proxy mode is configured on the **container side** (the thin gateway):
+代理模式在**容器侧**（薄网关）上配置：
 
-| Setting | Description |
+| 设置 | 描述 |
 |---------|-------------|
-| `GATEWAY_PROXY_URL` | URL of the remote Hermes API server (e.g., `http://192.168.1.100:8642`) |
-| `GATEWAY_PROXY_KEY` | Bearer token for authentication (must match `API_SERVER_KEY` on the host) |
-| `gateway.proxy_url` | Same as `GATEWAY_PROXY_URL` but in `config.yaml` |
+| `GATEWAY_PROXY_URL` | 远程 Hermes API 服务器的 URL（例如，`http://192.168.1.100:8642`） |
+| `GATEWAY_PROXY_KEY` | 用于身份验证的 Bearer 令牌（必须与主机上的 `API_SERVER_KEY` 匹配） |
+| `gateway.proxy_url` | 与 `GATEWAY_PROXY_URL` 相同，但在 `config.yaml` 中 |
 
-The host side needs:
+主机侧需要：
 
-| Setting | Description |
+| 设置 | 描述 |
 |---------|-------------|
-| `API_SERVER_ENABLED` | Set to `true` |
-| `API_SERVER_KEY` | Bearer token (shared with the container) |
-| `API_SERVER_HOST` | Set to `0.0.0.0` for network access |
-| `API_SERVER_PORT` | Port number (default: `8642`) |
+| `API_SERVER_ENABLED` | 设置为 `true` |
+| `API_SERVER_KEY` | Bearer 令牌（与容器共享） |
+| `API_SERVER_HOST` | 设置为 `0.0.0.0` 以进行网络访问 |
+| `API_SERVER_PORT` | 端口号（默认：`8642`） |
 
-### Works for Any Platform
+### 适用于任何平台
 
-Proxy mode is not limited to Matrix. Any platform adapter can use it — set `GATEWAY_PROXY_URL` on any gateway instance and it will forward to the remote agent instead of running one locally. This is useful for any deployment where the platform adapter needs to run in a different environment from the agent (network isolation, E2EE requirements, resource constraints).
+代理模式不限于 Matrix。任何平台适配器都可以使用它 — 在任何网关实例上设置 `GATEWAY_PROXY_URL`，它将转发到远程智能体，而不是在本地运行一个。这对于平台适配器需要在与智能体不同的环境中运行的任何部署都很有用（网络隔离、E2EE 要求、资源约束）。
 
 :::tip
-Session continuity is maintained via the `X-Hermes-Session-Id` header. The host's API server tracks sessions by this ID, so conversations persist across messages just like they would with a local agent.
+会话连续性通过 `X-Hermes-Session-Id` 头维护。主机的 API 服务器通过此 ID 跟踪会话，因此对话在消息之间保持持久，就像使用本地智能体一样。
 :::
 
 :::note
-**Limitations (v1):** Tool progress messages from the remote agent are not relayed back — the user sees the streamed final response only, not individual tool calls. Dangerous command approval prompts are handled on the host side, not relayed to the Matrix user. These can be addressed in future updates.
+**限制（v1）：** 来自远程智能体的工具进度消息不会被中继回来 — 用户只看到流式最终响应，而不是单个工具调用。危险的命令批准提示在主机端处理，不会中继到 Matrix 用户。这些可以在未来的更新中解决。
 :::
 
-### Sync issues / bot falls behind
+### 同步问题 / 机器人落后
 
-**Cause**: Long-running tool executions can delay the sync loop, or the homeserver is slow.
+**原因**：长时间运行的工具执行可能会延迟同步循环，或者 homeserver 速度慢。
 
-**Fix**: The sync loop automatically retries every 5 seconds on error. Check the Hermes logs for sync-related warnings. If the bot consistently falls behind, ensure your homeserver has adequate resources.
+**解决方法**：同步循环在错误时每 5 秒自动重试。检查 Hermes 日志中的同步相关警告。如果机器人持续落后，请确保您的 homeserver 有足够的资源。
 
-### Bot is offline
+### 机器人离线
 
-**Cause**: The Hermes gateway isn't running, or it failed to connect.
+**原因**：Hermes 网关未运行，或连接失败。
 
-**Fix**: Check that `hermes gateway` is running. Look at the terminal output for error messages. Common issues: wrong homeserver URL, expired access token, homeserver unreachable.
+**解决方法**：检查 `hermes gateway` 是否在运行。查看终端输出以获取错误消息。常见问题：错误的 homeserver URL、过期的访问令牌、homeserver 无法访问。
 
-### "User not allowed" / Bot ignores you
+### "User not allowed" / 机器人忽略您
 
-**Cause**: Your User ID isn't in `MATRIX_ALLOWED_USERS`.
+**原因**：您的用户 ID 不在 `MATRIX_ALLOWED_USERS` 中。
 
-**Fix**: Add your User ID to `MATRIX_ALLOWED_USERS` in `~/.hermes/.env` and restart the gateway. Use the full `@user:server` format.
+**解决方法**：将您的用户 ID 添加到 `~/.hermes/.env` 中的 `MATRIX_ALLOWED_USERS` 并重启网关。使用完整的 `@user:server` 格式。
 
-## Security
+## 安全性
 
 :::warning
-Always set `MATRIX_ALLOWED_USERS` to restrict who can interact with the bot. Without it, the gateway denies all users by default as a safety measure. Only add User IDs of people you trust — authorized users have full access to the agent's capabilities, including tool use and system access.
+始终设置 `MATRIX_ALLOWED_USERS` 以限制谁可以与机器人交互。没有它，网关默认拒绝所有用户作为安全措施。只添加您信任的人的用户 ID — 授权用户可以完全访问智能体的功能，包括工具使用和系统访问。
 :::
 
-For more information on securing your Hermes Agent deployment, see the [Security Guide](../security.md).
+有关保护您的 Hermes Agent 部署的更多信息，请参阅 [安全指南](../security.md)。
 
-## Notes
+## 注意事项
 
-- **Any homeserver**: Works with Synapse, Conduit, Dendrite, matrix.org, or any spec-compliant Matrix homeserver. No specific homeserver software required.
-- **Federation**: If you're on a federated homeserver, the bot can communicate with users from other servers — just add their full `@user:server` IDs to `MATRIX_ALLOWED_USERS`.
-- **Auto-join**: The bot automatically accepts room invites and joins. It starts responding immediately after joining.
-- **Media support**: Hermes can send and receive images, audio, video, and file attachments. Media is uploaded to your homeserver using the Matrix content repository API.
-- **Native voice messages (MSC3245)**: The Matrix adapter automatically tags outgoing voice messages with the `org.matrix.msc3245.voice` flag. This means TTS responses and voice audio are rendered as **native voice bubbles** in Element and other clients that support MSC3245, rather than as generic audio file attachments. Incoming voice messages with the MSC3245 flag are also correctly identified and routed to speech-to-text transcription. No configuration is needed — this works automatically.
+- **任何 homeserver**：适用于 Synapse、Conduit、Dendrite、matrix.org 或任何符合规范的 Matrix homeserver。不需要特定的 homeserver 软件。
+- **联邦**：如果您在联邦 homeserver 上，机器人可以与来自其他服务器的用户通信 — 只需将他们的完整 `@user:server` ID 添加到 `MATRIX_ALLOWED_USERS`。
+- **自动加入**：机器人自动接受房间邀请并加入。加入后立即开始响应。
+- **媒体支持**：Hermes 可以发送和接收图像、音频、视频和文件附件。媒体使用 Matrix 内容存储库 API 上传到您的 homeserver。
+- **原生语音消息（MSC3245）**：Matrix 适配器自动为传出语音消息添加 `org.matrix.msc3245.voice` 标志。这意味着 TTS 响应和语音音频在 Element 和其他支持 MSC3245 的客户端中呈现为**原生语音气泡**，而不是通用音频文件附件。带有 MSC3245 标志的传入语音消息也被正确识别并路由到语音到文本转录。无需配置 — 这会自动工作。
