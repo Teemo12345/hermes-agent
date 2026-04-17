@@ -491,56 +491,56 @@ auxiliary:
 | any | set | Use the custom endpoint directly (provider ignored) |
 
 :::warning Summary model context length requirement
-The summary model **must** have a context window at least as large as your main agent model's. The compressor sends the full middle section of the conversation to the summary model — if that model's context window is smaller than the main model's, the summarization call will fail with a context length error. When this happens, the middle turns are **dropped without a summary**, losing conversation context silently. If you override the model, verify its context length meets or exceeds your main model's.
+摘要模型**必须**具有至少与您主智能体模型一样大的上下文窗口。压缩器将对话的完整中间部分发送到摘要模型 — 如果该模型的上下文窗口小于主模型的，摘要调用将因上下文长度错误而失败。发生这种情况时，中间轮次**会在没有摘要的情况下被丢弃**，静默丢失对话上下文。如果您覆盖了模型，请验证其上下文长度是否满足或超过您主模型的。
 :::
 
 ## Context Engine
 
-The context engine controls how conversations are managed when approaching the model's token limit. The built-in `compressor` engine uses lossy summarization (see [Context Compression](/docs/developer-guide/context-compression-and-caching)). Plugin engines can replace it with alternative strategies.
+上下文引擎控制接近模型令牌限制时对话的管理方式。内置的 `compressor` 引擎使用有损摘要（请参阅[上下文压缩](/docs/developer-guide/context-compression-and-caching)）。插件引擎可以用替代策略替换它。
 
 ```yaml
 context:
-  engine: "compressor"    # default — built-in lossy summarization
+  engine: "compressor"    # 默认 — 内置有损摘要
 ```
 
-To use a plugin engine (e.g., LCM for lossless context management):
+要使用插件引擎（例如，用于无损上下文管理的 LCM）：
 
 ```yaml
 context:
-  engine: "lcm"          # must match the plugin's name
+  engine: "lcm"          # 必须与插件名称匹配
 ```
 
-Plugin engines are **never auto-activated** — you must explicitly set `context.engine` to the plugin name. Available engines can be browsed and selected via `hermes plugins` → Provider Plugins → Context Engine.
+插件引擎**永远不会自动激活** — 您必须明确设置 `context.engine` 为插件名称。可用的引擎可以通过 `hermes plugins` → Provider Plugins → Context Engine 浏览和选择。
 
-See [Memory Providers](/docs/user-guide/features/memory-providers) for the analogous single-select system for memory plugins.
+请参阅[记忆提供商](/docs/user-guide/features/memory-providers) 了解类似的记忆插件单选系统。
 
 ## Iteration Budget Pressure
 
-When the agent is working on a complex task with many tool calls, it can burn through its iteration budget (default: 90 turns) without realizing it's running low. Budget pressure automatically warns the model as it approaches the limit:
+当智能体正在处理具有许多工具调用的复杂任务时，它可能会在不知不觉中耗尽其迭代预算（默认：90 轮）。预算压力会在接近限制时自动警告模型：
 
-| Threshold | Level | What the model sees |
-|-----------|-------|---------------------|
-| **70%** | Caution | `[BUDGET: 63/90. 27 iterations left. Start consolidating.]` |
-| **90%** | Warning | `[BUDGET WARNING: 81/90. Only 9 left. Respond NOW.]` |
+| 阈值 | 级别 | 模型看到的内容 |
+|---------|-------|---------------------|
+| **70%** | 谨慎 | `[BUDGET: 63/90. 27 iterations left. Start consolidating.]` |
+| **90%** | 警告 | `[BUDGET WARNING: 81/90. Only 9 left. Respond NOW.]` |
 
-Warnings are injected into the last tool result's JSON (as a `_budget_warning` field) rather than as separate messages — this preserves prompt caching and doesn't disrupt the conversation structure.
+警告被注入到最后一个工具结果的 JSON 中（作为 `_budget_warning` 字段）而不是作为单独的消息 — 这保留了提示缓存并不会破坏对话结构。
 
 ```yaml
 agent:
-  max_turns: 90                # Max iterations per conversation turn (default: 90)
+  max_turns: 90                # 每次对话轮次的最大迭代次数（默认：90）
 ```
 
-Budget pressure is enabled by default. The agent sees warnings naturally as part of tool results, encouraging it to consolidate its work and deliver a response before running out of iterations.
+预算压力默认启用。智能体会自然地将警告视为工具结果的一部分，鼓励它在迭代耗尽之前整合工作并交付响应。
 
-When the iteration budget is fully exhausted, the CLI shows a notification to the user: `⚠ Iteration budget reached (90/90) — response may be incomplete`. If the budget runs out during active work, the agent generates a summary of what was accomplished before stopping.
+当迭代预算完全耗尽时，CLI 会向用户显示通知：`⚠ Iteration budget reached (90/90) — response may be incomplete`。如果预算在积极工作期间耗尽，智能体会生成所完成工作的摘要，然后停止。
 
-### Streaming Timeouts
+### 流式传输超时
 
-The LLM streaming connection has two timeout layers. Both auto-adjust for local providers (localhost, LAN IPs) — no configuration needed for most setups.
+LLM 流式传输连接有两层超时。两者都会为本地提供商（localhost、LAN IP）自动调整 — 大多数设置不需要配置。
 
-| Timeout | Default | Local providers | Env var |
+| 超时 | 默认 | 本地提供商 | 环境变量 |
 |---------|---------|----------------|---------|
-| Socket read timeout | 120s | Auto-raised to 1800s | `HERMES_STREAM_READ_TIMEOUT` |
+| 套接字读取超时 | 120s | 自动提高到 1800s | `HERMES_STREAM_READ_TIMEOUT` |
 | Stale stream detection | 180s | Auto-disabled | `HERMES_STREAM_STALE_TIMEOUT` |
 | API call (non-streaming) | 1800s | Unchanged | `HERMES_API_TIMEOUT` |
 
@@ -786,55 +786,55 @@ Auxiliary models can also be configured via environment variables. However, `con
 Compression and fallback model settings are config.yaml-only.
 
 :::tip
-Run `hermes config` to see your current auxiliary model settings. Overrides only show up when they differ from the defaults.
+运行 `hermes config` 查看您当前的辅助模型设置。覆盖只在与默认值不同时才会显示。
 :::
 
 ## Reasoning Effort
 
-Control how much "thinking" the model does before responding:
+控制模型在响应之前进行多少"思考"：
 
 ```yaml
 agent:
-  reasoning_effort: ""   # empty = medium (default). Options: none, minimal, low, medium, high, xhigh (max)
+  reasoning_effort: ""   # 空 = medium（默认）。选项：none、minimal、low、medium、high、xhigh（最大）
 ```
 
-When unset (default), reasoning effort defaults to "medium" — a balanced level that works well for most tasks. Setting a value overrides it — higher reasoning effort gives better results on complex tasks at the cost of more tokens and latency.
+当未设置（默认）时，推理努力默认为"medium" — 一个对大多数任务都有效的平衡级别。设置一个值会覆盖它 — 更高的推理努力会在复杂任务上给出更好的结果，但代价是更多的令牌和延迟。
 
-You can also change the reasoning effort at runtime with the `/reasoning` command:
+您也可以在运行时使用 `/reasoning` 命令更改推理努力：
 
 ```
-/reasoning           # Show current effort level and display state
-/reasoning high      # Set reasoning effort to high
-/reasoning none      # Disable reasoning
-/reasoning show      # Show model thinking above each response
-/reasoning hide      # Hide model thinking
+/reasoning           # 显示当前努力级别和显示状态
+/reasoning high      # 将推理努力设置为高
+/reasoning none      # 禁用推理
+/reasoning show      # 在每个响应上方显示模型思考
+/reasoning hide      # 隐藏模型思考
 ```
 
 ## Tool-Use Enforcement
 
-Some models occasionally describe intended actions as text instead of making tool calls ("I would run the tests..." instead of actually calling the terminal). Tool-use enforcement injects system prompt guidance that steers the model back to actually calling tools.
+一些模型偶尔会将预期动作描述为文本而不是进行工具调用（"我会运行测试..."而不是真正调用终端）。工具使用强制注入系统提示引导，将模型重新引导到实际调用工具。
 
 ```yaml
 agent:
   tool_use_enforcement: "auto"   # "auto" | true | false | ["model-substring", ...]
 ```
 
-| Value | Behavior |
+| 值 | 行为 |
 |-------|----------|
-| `"auto"` (default) | Enabled for models matching: `gpt`, `codex`, `gemini`, `gemma`, `grok`. Disabled for all others (Claude, DeepSeek, Qwen, etc.). |
-| `true` | Always enabled, regardless of model. Useful if you notice your current model describing actions instead of performing them. |
-| `false` | Always disabled, regardless of model. |
-| `["gpt", "codex", "qwen", "llama"]` | Enabled only when the model name contains one of the listed substrings (case-insensitive). |
+| `"auto"`（默认） | 对匹配的模型启用：`gpt`、`codex`、`gemini`、`gemma`、`grok`。对所有其他模型禁用（Claude、DeepSeek、Qwen 等）。 |
+| `true` | 始终启用，无论模型如何。如果您注意到当前模型描述动作而不是执行它们，这很有用。 |
+| `false` | 始终禁用，无论模型如何。 |
+| `["gpt", "codex", "qwen", "llama"]` | 仅当模型名称包含列出的子字符串之一时启用（不区分大小写）。 |
 
-### What it injects
+### 它注入的内容
 
-When enabled, three layers of guidance may be added to the system prompt:
+启用时，三层引导可能会被添加到系统提示中：
 
-1. **General tool-use enforcement** (all matched models) — instructs the model to make tool calls immediately instead of describing intentions, keep working until the task is complete, and never end a turn with a promise of future action.
+1. **通用工具使用强制**（所有匹配的模型）— 指示模型立即进行工具调用而不是描述意图，继续工作直到任务完成，永不以承诺未来行动来结束一轮。
 
-2. **OpenAI execution discipline** (GPT and Codex models only) — additional guidance addressing GPT-specific failure modes: abandoning work on partial results, skipping prerequisite lookups, hallucinating instead of using tools, and declaring "done" without verification.
+2. **OpenAI 执行纪律**（仅限 GPT 和 Codex 模型）— 解决 GPT 特定失败模式的额外指导：在部分结果时放弃工作、跳过先决条件查找、幻觉而不是使用工具、以及在没有验证的情况下声明"完成"。
 
-3. **Google operational guidance** (Gemini and Gemma models only) — conciseness, absolute paths, parallel tool calls, and verify-before-edit patterns.
+3. **Google 操作指导**（仅限 Gemini 和 Gemma 模型）— 简洁性、绝对路径、并行工具调用和验证后编辑模式。
 
 These are transparent to the user and only affect the system prompt. Models that already use tools reliably (like Claude) don't need this guidance, which is why `"auto"` excludes them.
 
@@ -876,52 +876,52 @@ tts:
 
 This controls both the `text_to_speech` tool and spoken replies in voice mode (`/voice tts` in the CLI or messaging gateway).
 
-**Speed fallback hierarchy:** provider-specific speed (e.g. `tts.edge.speed`) → global `tts.speed` → `1.0` default. Set the global `tts.speed` to apply a uniform speed across all providers, or override per-provider for fine-grained control.
+**速度回退层次结构：** 提供商特定速度（例如 `tts.edge.speed`）→ 全局 `tts.speed` → `1.0` 默认值。设置全局 `tts.speed` 以在所有提供商之间应用统一速度，或为每个提供商覆盖以进行细粒度控制。
 
 ## Display Settings
 
 ```yaml
 display:
   tool_progress: all      # off | new | all | verbose
-  tool_progress_command: false  # Enable /verbose slash command in messaging gateway
-  tool_progress_overrides: {}  # Per-platform overrides (see below)
-  interim_assistant_messages: true  # Gateway: send natural mid-turn assistant updates as separate messages
-  skin: default           # Built-in or custom CLI skin (see user-guide/features/skins)
-  personality: "kawaii"  # Legacy cosmetic field still surfaced in some summaries
-  compact: false          # Compact output mode (less whitespace)
-  resume_display: full    # full (show previous messages on resume) | minimal (one-liner only)
-  bell_on_complete: false # Play terminal bell when agent finishes (great for long tasks)
-  show_reasoning: false   # Show model reasoning/thinking above each response (toggle with /reasoning show|hide)
-  streaming: false        # Stream tokens to terminal as they arrive (real-time output)
-  show_cost: false        # Show estimated $ cost in the CLI status bar
-  tool_preview_length: 0  # Max chars for tool call previews (0 = no limit, show full paths/commands)
+  tool_progress_command: false  # 在消息网关中启用 /verbose 斜杠命令
+  tool_progress_overrides: {}  # 每个平台的覆盖（见下文）
+  interim_assistant_messages: true  # 网关：将自然的回合中助手更新作为单独消息发送
+  skin: default           # 内置或自定义 CLI 皮肤（请参阅 user-guide/features/skins）
+  personality: "kawaii"  # 传统 cosmetic 字段仍在某些摘要中显示
+  compact: false          # 紧凑输出模式（更少空白）
+  resume_display: full    # full（恢复时显示之前消息）| minimal（仅一行）
+  bell_on_complete: false # 智能体完成时播放终端铃声（非常适合长时间任务）
+  show_reasoning: false   # 在每个响应上方显示模型推理/思考（使用 /reasoning show|hide 切换）
+  streaming: false        # 实时将令牌流式传输到终端（实时输出）
+  show_cost: false        # 在 CLI 状态栏显示估计费用
+  tool_preview_length: 0  # 工具调用预览的最大字符数（0 = 无限制，显示完整路径/命令）
 ```
 
-| Mode | What you see |
+| 模式 | 您看到的内容 |
 |------|-------------|
-| `off` | Silent — just the final response |
-| `new` | Tool indicator only when the tool changes |
-| `all` | Every tool call with a short preview (default) |
-| `verbose` | Full args, results, and debug logs |
+| `off` | 静默 — 仅最终响应 |
+| `new` | 仅在工具更改时显示工具指示器 |
+| `all` | 每个工具调用带简短预览（默认） |
+| `verbose` | 完整参数、结果和调试日志 |
 
-In the CLI, cycle through these modes with `/verbose`. To use `/verbose` in messaging platforms (Telegram, Discord, Slack, etc.), set `tool_progress_command: true` in the `display` section above. The command will then cycle the mode and save to config.
+在 CLI 中，使用 `/verbose` 循环切换这些模式。要在消息平台（Telegram、Discord、Slack 等）中使用 `/verbose`，请在上面 的 `display` 部分设置 `tool_progress_command: true`。该命令将循环切换模式并保存到配置中。
 
-### Per-platform progress overrides
+### 每平台进度覆盖
 
-Different platforms have different verbosity needs. For example, Signal can't edit messages, so each progress update becomes a separate message — noisy. Use `tool_progress_overrides` to set per-platform modes:
+不同的平台有不同的详细程度需求。例如，Signal 无法编辑消息，因此每个进度更新都会成为一条单独的消息 — 很吵杂。使用 `tool_progress_overrides` 设置每平台模式：
 
 ```yaml
 display:
-  tool_progress: all          # global default
+  tool_progress: all          # 全局默认
   tool_progress_overrides:
-    signal: 'off'             # silence progress on Signal
-    telegram: verbose         # detailed progress on Telegram
-    slack: 'off'              # quiet in shared Slack workspace
+    signal: 'off'             # 在 Signal 上静音进度
+    telegram: verbose         # 在 Telegram 上详细进度
+    slack: 'off'              # 在共享 Slack 工作区中安静
 ```
 
-Platforms without an override fall back to the global `tool_progress` value. Valid platform keys: `telegram`, `discord`, `slack`, `signal`, `whatsapp`, `matrix`, `mattermost`, `email`, `sms`, `homeassistant`, `dingtalk`, `feishu`, `wecom`, `weixin`, `bluebubbles`, `qqbot`.
+没有覆盖的平台回退到全局 `tool_progress` 值。有效的平台键：`telegram`、`discord`、`slack`、`signal`、`whatsapp`、`matrix`、`mattermost`、`email`、`sms`、`homeassistant`、`dingtalk`、`feishu`、`wecom`、`weixin`、`bluebubbles`、`qqbot`。
 
-`interim_assistant_messages` is gateway-only. When enabled, Hermes sends completed mid-turn assistant updates as separate chat messages. This is independent from `tool_progress` and does not require gateway streaming.
+`interim_assistant_messages` 仅限网关。当启用时，Hermes 会将完成的回合中助手更新作为单独的聊天消息发送。这独立于 `tool_progress`，不需要网关流式传输。
 
 ## Privacy
 
@@ -930,19 +930,19 @@ privacy:
   redact_pii: false  # Strip PII from LLM context (gateway only)
 ```
 
-When `redact_pii` is `true`, the gateway redacts personally identifiable information from the system prompt before sending it to the LLM on supported platforms:
+当 `redact_pii` 为 `true` 时，网关会在将系统提示发送到支持的平台上的 LLM 之前，对其进行个人身份信息编辑：
 
-| Field | Treatment |
+| 字段 | 处理方式 |
 |-------|-----------|
-| Phone numbers (user ID on WhatsApp/Signal) | Hashed to `user_<12-char-sha256>` |
-| User IDs | Hashed to `user_<12-char-sha256>` |
-| Chat IDs | Numeric portion hashed, platform prefix preserved (`telegram:<hash>`) |
-| Home channel IDs | Numeric portion hashed |
-| User names / usernames | **Not affected** (user-chosen, publicly visible) |
+| 电话号码（WhatsApp/Signal 上的用户 ID）| 哈希为 `user_<12-char-sha256>` |
+| 用户 ID | 哈希为 `user_<12-char-sha256>` |
+| 聊天 ID | 数字部分哈希，保留平台前缀（`telegram:<hash>`）|
+| 主页频道 ID | 数字部分哈希 |
+| 用户名 / 用户昵称 | **不受影响**（用户选择、公开可见）|
 
-**Platform support:** Redaction applies to WhatsApp, Signal, and Telegram. Discord and Slack are excluded because their mention systems (`<@user_id>`) require the real ID in the LLM context.
+**平台支持：** 编辑适用于 WhatsApp、Signal 和 Telegram。Discord 和 Slack 被排除，因为它们的提及系统（`<@user_id>`）需要在 LLM 上下文中使用真实 ID。
 
-Hashes are deterministic — the same user always maps to the same hash, so the model can still distinguish between users in group chats. Routing and delivery use the original values internally.
+哈希是确定性的 — 同一用户始终映射到同一哈希，因此模型仍然可以区分群聊中的用户。路由和传递在内部使用原始值。
 
 ## Speech-to-Text (STT)
 
@@ -953,18 +953,18 @@ stt:
     model: "base"              # tiny, base, small, medium, large-v3
   openai:
     model: "whisper-1"         # whisper-1 | gpt-4o-mini-transcribe | gpt-4o-transcribe
-  # model: "whisper-1"         # Legacy fallback key still respected
+  # model: "whisper-1"         # 仍会识别传统回退键
 ```
 
-Provider behavior:
+提供商行为：
 
-- `local` uses `faster-whisper` running on your machine. Install it separately with `pip install faster-whisper`.
-- `groq` uses Groq's Whisper-compatible endpoint and reads `GROQ_API_KEY`.
-- `openai` uses the OpenAI speech API and reads `VOICE_TOOLS_OPENAI_KEY`.
+- `local` 使用在您机器上运行的 `faster-whisper`。使用 `pip install faster-whisper` 单独安装。
+- `groq` 使用 Groq 的 Whisper 兼容端点并读取 `GROQ_API_KEY`。
+- `openai` 使用 OpenAI 语音 API 并读取 `VOICE_TOOLS_OPENAI_KEY`。
 
-If the requested provider is unavailable, Hermes falls back automatically in this order: `local` → `groq` → `openai`.
+如果请求的提供商不可用，Hermes 会按此顺序自动回退：`local` → `groq` → `openai`。
 
-Groq and OpenAI model overrides are environment-driven:
+Groq 和 OpenAI 模型覆盖由环境驱动：
 
 ```bash
 STT_GROQ_MODEL=whisper-large-v3-turbo
@@ -977,68 +977,68 @@ STT_OPENAI_BASE_URL=https://api.openai.com/v1
 
 ```yaml
 voice:
-  record_key: "ctrl+b"         # Push-to-talk key inside the CLI
-  max_recording_seconds: 120    # Hard stop for long recordings
-  auto_tts: false               # Enable spoken replies automatically when /voice on
-  silence_threshold: 200        # RMS threshold for speech detection
-  silence_duration: 3.0         # Seconds of silence before auto-stop
+  record_key: "ctrl+b"         # CLI 内的按键说话键
+  max_recording_seconds: 120    # 长时间录音的硬性停止
+  auto_tts: false               # 启用 /voice on 时自动启用语音回复
+  silence_threshold: 200        # 语音检测的 RMS 阈值
+  silence_duration: 3.0         # 自动停止前的沉默秒数
 ```
 
-Use `/voice on` in the CLI to enable microphone mode, `record_key` to start/stop recording, and `/voice tts` to toggle spoken replies. See [Voice Mode](/docs/user-guide/features/voice-mode) for end-to-end setup and platform-specific behavior.
+在 CLI 中使用 `/voice on` 启用麦克风模式，使用 `record_key` 开始/停止录音，以及使用 `/voice tts` 切换语音回复。请参阅[语音模式](/docs/user-guide/features/voice-mode) 了解端到端设置和平台特定行为。
 
 ## Streaming
 
-Stream tokens to the terminal or messaging platforms as they arrive, instead of waiting for the full response.
+将令牌流式传输到终端或消息平台，而不是等待完整响应。
 
-### CLI Streaming
+### CLI 流式传输
 
 ```yaml
 display:
-  streaming: true         # Stream tokens to terminal in real-time
-  show_reasoning: true    # Also stream reasoning/thinking tokens (optional)
+  streaming: true         # 实时将令牌流式传输到终端
+  show_reasoning: true    # 也流式传输推理/思考令牌（可选）
 ```
 
-When enabled, responses appear token-by-token inside a streaming box. Tool calls are still captured silently. If the provider doesn't support streaming, it falls back to the normal display automatically.
+启用后，响应会在流式传输框中逐个令牌显示。工具调用仍然会被静默捕获。如果提供商不支持流式传输，它会自动回退到正常显示。
 
-### Gateway Streaming (Telegram, Discord, Slack)
+### 网关流式传输（Telegram、Discord、Slack）
 
 ```yaml
 streaming:
-  enabled: true           # Enable progressive message editing
-  transport: edit         # "edit" (progressive message editing) or "off"
-  edit_interval: 0.3      # Seconds between message edits
-  buffer_threshold: 40    # Characters before forcing an edit flush
-  cursor: " ▉"            # Cursor shown during streaming
+  enabled: true           # 启用渐进式消息编辑
+  transport: edit         # "edit"（渐进式消息编辑）或 "off"
+  edit_interval: 0.3      # 消息编辑之间的秒数
+  buffer_threshold: 40    # 强制刷新编辑前的字符数
+  cursor: " ▉"            # 流式传输期间显示的光标
 ```
 
-When enabled, the bot sends a message on the first token, then progressively edits it as more tokens arrive. Platforms that don't support message editing (Signal, Email, Home Assistant) are auto-detected on the first attempt — streaming is gracefully disabled for that session with no flood of messages.
+启用后，机器人在第一个令牌时发送一条消息，然后随着更多令牌的到达逐步编辑它。不支持消息编辑的平台（Signal、Email、Home Assistant）会在首次尝试时自动检测 — 该会话的流式传输会被优雅地禁用，不会产生大量消息。
 
-For separate natural mid-turn assistant updates without progressive token editing, set `display.interim_assistant_messages: true`.
+要获取单独的、自然的回合中助手更新而不是渐进式令牌编辑，请设置 `display.interim_assistant_messages: true`。
 
-**Overflow handling:** If the streamed text exceeds the platform's message length limit (~4096 chars), the current message is finalized and a new one starts automatically.
+**溢出处理：** 如果流式传输的文本超过平台的消息长度限制（~4096 字符），当前消息会被完成并自动开始新消息。
 
 :::note
-Streaming is disabled by default. Enable it in `~/.hermes/config.yaml` to try the streaming UX.
+流式传输默认禁用。在 `~/.hermes/config.yaml` 中启用它以尝试流式传输用户体验。
 :::
 
 ## Group Chat Session Isolation
 
-Control whether shared chats keep one conversation per room or one conversation per participant:
+控制共享聊天是每个房间保持一个对话还是每个参与者保持一个对话：
 
 ```yaml
-group_sessions_per_user: true  # true = per-user isolation in groups/channels, false = one shared session per chat
+group_sessions_per_user: true  # true = 组/频道中的按用户隔离，false = 每个聊天一个共享会话
 ```
 
-- `true` is the default and recommended setting. In Discord channels, Telegram groups, Slack channels, and similar shared contexts, each sender gets their own session when the platform provides a user ID.
-- `false` reverts to the old shared-room behavior. That can be useful if you explicitly want Hermes to treat a channel like one collaborative conversation, but it also means users share context, token costs, and interrupt state.
-- Direct messages are unaffected. Hermes still keys DMs by chat/DM ID as usual.
-- Threads stay isolated from their parent channel either way; with `true`, each participant also gets their own session inside the thread.
+- `true` 是默认和推荐设置。在 Discord 频道、Telegram 群组、Slack 频道和类似的共享上下文中，当平台提供用户 ID 时，每个发送者都会获得自己的会话。
+- `false` 恢复为旧的共享房间行为。如果您明确希望 Hermes 将频道视为一次协作对话，这可能很有用，但它也意味着用户共享上下文、令牌成本和中断状态。
+- 私聊不受影响。Hermes 仍然像往常一样按聊天/私聊 ID 密钥化私聊。
+- 线程无论如何都会与父频道隔离；使用 `true` 时，每个参与者在线程内也有自己的会话。
 
-For the behavior details and examples, see [Sessions](/docs/user-guide/sessions) and the [Discord guide](/docs/user-guide/messaging/discord).
+有关行为详情和示例，请参阅[Sessions](/docs/user-guide/sessions)和[Discord 指南](/docs/user-guide/messaging/discord)。
 
 ## Unauthorized DM Behavior
 
-Control what Hermes does when an unknown user sends a direct message:
+控制当未知用户发送直接消息时 Hermes 的行为：
 
 ```yaml
 unauthorized_dm_behavior: pair
@@ -1047,13 +1047,13 @@ whatsapp:
   unauthorized_dm_behavior: ignore
 ```
 
-- `pair` is the default. Hermes denies access, but replies with a one-time pairing code in DMs.
-- `ignore` silently drops unauthorized DMs.
-- Platform sections override the global default, so you can keep pairing enabled broadly while making one platform quieter.
+- `pair` 是默认设置。Hermes 拒绝访问，但在私聊中回复一次性的配对码。
+- `ignore` 静默丢弃未经授权的私聊。
+- 平台部分会覆盖全局默认值，因此您可以在保持广泛启用配对的同时让一个平台更安静。
 
 ## Quick Commands
 
-Define custom commands that run shell commands without invoking the LLM — zero token usage, instant execution. Especially useful from messaging platforms (Telegram, Discord, etc.) for quick server checks or utility scripts.
+定义自定义命令，无需调用 LLM 即可运行 shell 命令 — 零令牌使用，即时执行。特别适用于消息平台（Telegram、Discord 等）进行快速服务器检查或实用脚本。
 
 ```yaml
 quick_commands:
@@ -1071,96 +1071,96 @@ quick_commands:
     command: nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total --format=csv,noheader
 ```
 
-Usage: type `/status`, `/disk`, `/update`, or `/gpu` in the CLI or any messaging platform. The command runs locally on the host and returns the output directly — no LLM call, no tokens consumed.
+用法：在 CLI 或任何消息平台中输入 `/status`、`/disk`、`/update` 或 `/gpu`。命令在主机上本地运行并直接返回输出 — 无 LLM 调用，无令牌消耗。
 
-- **30-second timeout** — long-running commands are killed with an error message
-- **Priority** — quick commands are checked before skill commands, so you can override skill names
-- **Autocomplete** — quick commands are resolved at dispatch time and are not shown in the built-in slash-command autocomplete tables
-- **Type** — only `exec` is supported (runs a shell command); other types show an error
-- **Works everywhere** — CLI, Telegram, Discord, Slack, WhatsApp, Signal, Email, Home Assistant
+- **30 秒超时** — 长时间运行的命令会被终止并返回错误消息
+- **优先级** — 快速命令在技能命令之前检查，因此您可以覆盖技能名称
+- **自动补全** — 快速命令在分发时解析，不会显示在内置斜杠命令自动补全表中
+- **类型** — 仅支持 `exec`（运行 shell 命令）；其他类型会显示错误
+- **随时可用** — CLI、Telegram、Discord、Slack、WhatsApp、Signal、Email、Home Assistant
 
 ## Human Delay
 
-Simulate human-like response pacing in messaging platforms:
+在消息平台中模拟类似人类的响应节奏：
 
 ```yaml
 human_delay:
   mode: "off"                  # off | natural | custom
-  min_ms: 800                  # Minimum delay (custom mode)
-  max_ms: 2500                 # Maximum delay (custom mode)
+  min_ms: 800                  # 最小延迟（自定义模式）
+  max_ms: 2500                 # 最大延迟（自定义模式）
 ```
 
 ## Code Execution
 
-Configure the sandboxed Python code execution tool:
+配置沙盒 Python 代码执行工具：
 
 ```yaml
 code_execution:
-  timeout: 300                 # Max execution time in seconds
-  max_tool_calls: 50           # Max tool calls within code execution
+  timeout: 300                 # 最大执行时间（秒）
+  max_tool_calls: 50           # 代码执行内的最大工具调用次数
 ```
 
 ## Web Search Backends
 
-The `web_search`, `web_extract`, and `web_crawl` tools support four backend providers. Configure the backend in `config.yaml` or via `hermes tools`:
+`web_search`、`web_extract` 和 `web_crawl` 工具支持四个后端提供商。在 `config.yaml` 中或通过 `hermes tools` 配置后端：
 
 ```yaml
 web:
   backend: firecrawl    # firecrawl | parallel | tavily | exa
 ```
 
-| Backend | Env Var | Search | Extract | Crawl |
+| 后端 | 环境变量 | 搜索 | 提取 | 爬取 |
 |---------|---------|--------|---------|-------|
-| **Firecrawl** (default) | `FIRECRAWL_API_KEY` | ✔ | ✔ | ✔ |
+| **Firecrawl**（默认）| `FIRECRAWL_API_KEY` | ✔ | ✔ | ✔ |
 | **Parallel** | `PARALLEL_API_KEY` | ✔ | ✔ | — |
 | **Tavily** | `TAVILY_API_KEY` | ✔ | ✔ | ✔ |
 | **Exa** | `EXA_API_KEY` | ✔ | ✔ | — |
 
-**Backend selection:** If `web.backend` is not set, the backend is auto-detected from available API keys. If only `EXA_API_KEY` is set, Exa is used. If only `TAVILY_API_KEY` is set, Tavily is used. If only `PARALLEL_API_KEY` is set, Parallel is used. Otherwise Firecrawl is the default.
+**后端选择：** 如果未设置 `web.backend`，后端会从可用的 API 密钥自动检测。如果仅设置了 `EXA_API_KEY`，则使用 Exa。如果仅设置了 `TAVILY_API_KEY`，则使用 Tavily。如果仅设置了 `PARALLEL_API_KEY`，则使用 Parallel。否则默认为 Firecrawl。
 
-**Self-hosted Firecrawl:** Set `FIRECRAWL_API_URL` to point at your own instance. When a custom URL is set, the API key becomes optional (set `USE_DB_AUTHENTICATION=false` on the server to disable auth).
+**自托管 Firecrawl：** 设置 `FIRECRAWL_API_URL` 指向您自己的实例。设置自定义 URL 时，API 密钥变为可选（在服务器上设置 `USE_DB_AUTHENTICATION=false` 以禁用认证）。
 
-**Parallel search modes:** Set `PARALLEL_SEARCH_MODE` to control search behavior — `fast`, `one-shot`, or `agentic` (default: `agentic`).
+**Parallel 搜索模式：** 设置 `PARALLEL_SEARCH_MODE` 来控制搜索行为 — `fast`、`one-shot` 或 `agentic`（默认：`agentic`）。
 
 ## Browser
 
-Configure browser automation behavior:
+配置浏览器自动化行为：
 
 ```yaml
 browser:
-  inactivity_timeout: 120        # Seconds before auto-closing idle sessions
-  command_timeout: 30             # Timeout in seconds for browser commands (screenshot, navigate, etc.)
-  record_sessions: false         # Auto-record browser sessions as WebM videos to ~/.hermes/browser_recordings/
+  inactivity_timeout: 120        # 空闲会话自动关闭前的秒数
+  command_timeout: 30             # 浏览器命令超时秒数（截图、导航等）
+  record_sessions: false         # 自动将浏览器会话录制为 WebM 视频到 ~/.hermes/browser_recordings/
   camofox:
-    managed_persistence: false   # When true, Camofox sessions persist cookies/logins across restarts
+    managed_persistence: false   # 为 true 时，Camofox 会话在重启后保留 cookie/登录
 ```
 
-The browser toolset supports multiple providers. See the [Browser feature page](/docs/user-guide/features/browser) for details on Browserbase, Browser Use, and local Chrome CDP setup.
+浏览器工具集支持多个提供商。请参阅[浏览器功能页面](/docs/user-guide/features/browser) 了解 Browserbase、Browser Use 和本地 Chrome CDP 设置的详细信息。
 
 ## Timezone
 
-Override the server-local timezone with an IANA timezone string. Affects timestamps in logs, cron scheduling, and system prompt time injection.
+使用 IANA 时区字符串覆盖服务器本地时区。影响日志中的时间戳、cron 调度和系统提示时间注入。
 
 ```yaml
-timezone: "America/New_York"   # IANA timezone (default: "" = server-local time)
+timezone: "America/New_York"   # IANA 时区（默认："" = 服务器本地时间）
 ```
 
-Supported values: any IANA timezone identifier (e.g. `America/New_York`, `Europe/London`, `Asia/Kolkata`, `UTC`). Leave empty or omit for server-local time.
+支持的值：任何 IANA 时区标识符（例如 `America/New_York`、`Europe/London`、`Asia/Kolkata`、`UTC`）。留空或省略以使用服务器本地时间。
 
 ## Discord
 
-Configure Discord-specific behavior for the messaging gateway:
+为消息网关配置 Discord 特定行为：
 
 ```yaml
 discord:
-  require_mention: true          # Require @mention to respond in server channels
-  free_response_channels: ""     # Comma-separated channel IDs where bot responds without @mention
-  auto_thread: true              # Auto-create threads on @mention in channels
+  require_mention: true          # 要求在服务器频道中 @mention 才能响应
+  free_response_channels: ""     # 逗号分隔的频道 ID，机器人在这些频道中无需 @mention 即可响应
+  auto_thread: true              # 在频道中 @mention 时自动创建线程
 ```
 
-- `require_mention` — when `true` (default), the bot only responds in server channels when mentioned with `@BotName`. DMs always work without mention.
-- `free_response_channels` — comma-separated list of channel IDs where the bot responds to every message without requiring a mention.
-- `auto_thread` — when `true` (default), mentions in channels automatically create a thread for the conversation, keeping channels clean (similar to Slack threading).
+- `require_mention` — 当 `true`（默认）时，机器人仅在服务器频道中被 @mention 时才响应。私信始终无需 mention 即可工作。
+- `free_response_channels` — 逗号分隔的频道 ID 列表，机器人在这些频道中对每条消息都响应，无需 mention。
+- `auto_thread` — 当 `true`（默认）时，频道中的 mention 会自动为对话创建线程，保持频道清洁（类似于 Slack 线程）。
 
 ## Security
 
@@ -1168,49 +1168,49 @@ Pre-execution security scanning and secret redaction:
 
 ```yaml
 security:
-  redact_secrets: true           # Redact API key patterns in tool output and logs
-  tirith_enabled: true           # Enable Tirith security scanning for terminal commands
-  tirith_path: "tirith"          # Path to tirith binary (default: "tirith" in $PATH)
-  tirith_timeout: 5              # Seconds to wait for tirith scan before timing out
-  tirith_fail_open: true         # Allow command execution if tirith is unavailable
-  website_blocklist:             # See Website Blocklist section below
+  redact_secrets: true           # 在工具输出和日志中编辑 API 密钥模式
+  tirith_enabled: true           # 启用 Tirith 安全扫描以检测终端命令
+  tirith_path: "tirith"          # tirith 二进制文件的路径（默认：$PATH 中的 "tirith"）
+  tirith_timeout: 5              # 等待 tirith 扫描的超时秒数
+  tirith_fail_open: true         # 当 tirith 不可用时允许命令执行
+  website_blocklist:             # 请参阅下面的网站黑名单部分
     enabled: false
     domains: []
     shared_files: []
 ```
 
-- `redact_secrets` — automatically detects and redacts patterns that look like API keys, tokens, and passwords in tool output before it enters the conversation context and logs.
-- `tirith_enabled` — when `true`, terminal commands are scanned by [Tirith](https://github.com/StackGuardian/tirith) before execution to detect potentially dangerous operations.
-- `tirith_path` — path to the tirith binary. Set this if tirith is installed in a non-standard location.
-- `tirith_timeout` — maximum seconds to wait for a tirith scan. Commands proceed if the scan times out.
-- `tirith_fail_open` — when `true` (default), commands are allowed to execute if tirith is unavailable or fails. Set to `false` to block commands when tirith cannot verify them.
+- `redact_secrets` — 自动检测并编辑工具输出中看起来像 API 密钥、令牌和密码的模式，然后它们才会进入对话上下文和日志。
+- `tirith_enabled` — 当 `true` 时，终端命令在执行前会由 [Tirith](https://github.com/StackGuardian/tirith) 扫描，以检测潜在的危险操作。
+- `tirith_path` — tirith 二进制文件的路径。如果 tirith 安装在非标准位置，请设置此项。
+- `tirith_timeout` — 等待 tirith 扫描的最大秒数。如果扫描超时，命令将继续执行。
+- `tirith_fail_open` — 当 `true`（默认）时，如果 tirith 不可用或失败，命令仍被允许执行。设置为 `false` 以在 tirith 无法验证时阻止命令。
 
 ## Website Blocklist
 
-Block specific domains from being accessed by the agent's web and browser tools:
+阻止特定域名被智能体的网络和浏览器工具访问：
 
 ```yaml
 security:
   website_blocklist:
-    enabled: false               # Enable URL blocking (default: false)
-    domains:                     # List of blocked domain patterns
+    enabled: false               # 启用 URL 阻止（默认：false）
+    domains:                     # 阻止的域名模式列表
       - "*.internal.company.com"
       - "admin.example.com"
       - "*.local"
-    shared_files:                # Load additional rules from external files
+    shared_files:                # 从外部文件加载额外规则
       - "/etc/hermes/blocked-sites.txt"
 ```
 
-When enabled, any URL matching a blocked domain pattern is rejected before the web or browser tool executes. This applies to `web_search`, `web_extract`, `browser_navigate`, and any tool that accesses URLs.
+启用后，在网络或浏览器工具执行前，任何匹配阻止域名模式的 URL 都会被拒绝。这适用于 `web_search`、`web_extract`、`browser_navigate` 以及任何访问 URL 的工具。
 
-Domain rules support:
-- Exact domains: `admin.example.com`
-- Wildcard subdomains: `*.internal.company.com` (blocks all subdomains)
-- TLD wildcards: `*.local`
+域名规则支持：
+- 精确域名：`admin.example.com`
+- 通配符子域名：`*.internal.company.com`（阻止所有子域名）
+- 顶级域名通配符：`*.local`
 
-Shared files contain one domain rule per line (blank lines and `#` comments are ignored). Missing or unreadable files log a warning but don't disable other web tools.
+共享文件每行包含一个域名规则（空行和 `#` 注释被忽略）。缺失或不可读的文件记录警告但不会禁用其他网络工具。
 
-The policy is cached for 30 seconds, so config changes take effect quickly without restart.
+策略被缓存 30 秒，因此配置更改会快速生效而无需重启。
 
 ## Smart Approvals
 
@@ -1221,79 +1221,79 @@ approvals:
   mode: manual   # manual | smart | off
 ```
 
-| Mode | Behavior |
+| 模式 | 行为 |
 |------|----------|
-| `manual` (default) | Prompt the user before executing any flagged command. In the CLI, shows an interactive approval dialog. In messaging, queues a pending approval request. |
-| `smart` | Use an auxiliary LLM to assess whether a flagged command is actually dangerous. Low-risk commands are auto-approved with session-level persistence. Genuinely risky commands are escalated to the user. |
-| `off` | Skip all approval checks. Equivalent to `HERMES_YOLO_MODE=true`. **Use with caution.** |
+| `manual`（默认）| 在执行任何标记的命令前提示用户。在 CLI 中，显示交互式批准对话框。在消息中，排队等待批准请求。 |
+| `smart` | 使用辅助 LLM 评估标记的命令是否真的危险。低风险命令会使用会话级持久性自动批准。真正危险的命令会上报给用户。 |
+| `off` | 跳过所有批准检查。相当于 `HERMES_YOLO_MODE=true`。**谨慎使用。** |
 
-Smart mode is particularly useful for reducing approval fatigue — it lets the agent work more autonomously on safe operations while still catching genuinely destructive commands.
+智能模式对于减少批准疲劳特别有用 — 它让智能体在安全操作上更加自主，同时仍然捕捉真正的破坏性命令。
 
 :::warning
-Setting `approvals.mode: off` disables all safety checks for terminal commands. Only use this in trusted, sandboxed environments.
+设置 `approvals.mode: off` 会禁用终端命令的所有安全检查。仅在受信任的沙盒环境中使用。
 :::
 
 ## Checkpoints
 
-Automatic filesystem snapshots before destructive file operations. See the [Checkpoints & Rollback](/docs/user-guide/checkpoints-and-rollback) for details.
+破坏性文件操作前的自动文件系统快照。详情请参阅[检查点和回滚](/docs/user-guide/checkpoints-and-rollback)。
 
 ```yaml
 checkpoints:
-  enabled: true                  # Enable automatic checkpoints (also: hermes --checkpoints)
-  max_snapshots: 50              # Max checkpoints to keep per directory
+  enabled: true                  # 启用自动检查点（也是：hermes --checkpoints）
+  max_snapshots: 50              # 每个目录保留的最大检查点数
 ```
 
 
 ## Delegation
 
-Configure subagent behavior for the delegate tool:
+为 delegate 工具配置子智能体行为：
 
 ```yaml
 delegation:
-  # model: "google/gemini-3-flash-preview"  # Override model (empty = inherit parent)
-  # provider: "openrouter"                  # Override provider (empty = inherit parent)
-  # base_url: "http://localhost:1234/v1"    # Direct OpenAI-compatible endpoint (takes precedence over provider)
-  # api_key: "local-key"                    # API key for base_url (falls back to OPENAI_API_KEY)
+  # model: "google/gemini-3-flash-preview"  # 覆盖模型（空 = 继承父级）
+  # provider: "openrouter"                  # 覆盖提供商（空 = 继承父级）
+  # base_url: "http://localhost:1234/v1"    # 直接 OpenAI 兼容端点（优先于提供商）
+  # api_key: "local-key"                    # base_url 的 API 密钥（回退到 OPENAI_API_KEY）
 ```
 
-**Subagent provider:model override:** By default, subagents inherit the parent agent's provider and model. Set `delegation.provider` and `delegation.model` to route subagents to a different provider:model pair — e.g., use a cheap/fast model for narrowly-scoped subtasks while your primary agent runs an expensive reasoning model.
+**子智能体提供商：模型覆盖：** 默认情况下，子智能体继承父智能体的提供商和模型。设置 `delegation.provider` 和 `delegation.model` 将子智能体路由到不同的提供商：模型对 — 例如，当您的主要智能体运行昂贵的推理模型时，使用便宜/快速的模型进行范围狭窄的子任务。
 
-**Direct endpoint override:** If you want the obvious custom-endpoint path, set `delegation.base_url`, `delegation.api_key`, and `delegation.model`. That sends subagents directly to that OpenAI-compatible endpoint and takes precedence over `delegation.provider`. If `delegation.api_key` is omitted, Hermes falls back to `OPENAI_API_KEY` only.
+**直接端点覆盖：** 如果您想要明显的自定义端点路径，请设置 `delegation.base_url`、`delegation.api_key` 和 `delegation.model`。这将子智能体直接发送到该 OpenAI 兼容端点，并优先于 `delegation.provider`。如果省略 `delegation.api_key`，Hermes 仅回退到 `OPENAI_API_KEY`。
 
-The delegation provider uses the same credential resolution as CLI/gateway startup. All configured providers are supported: `openrouter`, `nous`, `copilot`, `zai`, `kimi-coding`, `minimax`, `minimax-cn`. When a provider is set, the system automatically resolves the correct base URL, API key, and API mode — no manual credential wiring needed.
+委托提供商使用与 CLI/gateway 启动相同的凭证解析。支持所有配置的提供商：`openrouter`、`nous`、`copilot`、`zai`、`kimi-coding`、`minimax`、`minimax-cn`。设置提供商时，系统会自动解析正确的基础 URL、API 密钥和 API 模式 — 无需手动凭证连接。
 
-**Precedence:** `delegation.base_url` in config → `delegation.provider` in config → parent provider (inherited). `delegation.model` in config → parent model (inherited). Setting just `model` without `provider` changes only the model name while keeping the parent's credentials (useful for switching models within the same provider like OpenRouter).
+**优先级：** 配置中的 `delegation.base_url` → 配置中的 `delegation.provider` → 父提供商（继承）。配置中的 `delegation.model` → 父模型（继承）。仅设置 `model` 而不设置 `provider` 只更改模型名称，同时保持父级的凭证（在同一路由器内切换模型很有用，如 OpenRouter）。
 
 ## Clarify
 
-Configure the clarification prompt behavior:
+配置澄清提示行为：
 
 ```yaml
 clarify:
-  timeout: 120                 # Seconds to wait for user clarification response
+  timeout: 120                 # 等待用户澄清响应的秒数
 ```
 
 ## Context Files (SOUL.md, AGENTS.md)
 
-Hermes uses two different context scopes:
+Hermes 使用两种不同的上下文范围：
 
-| File | Purpose | Scope |
+| 文件 | 用途 | 范围 |
 |------|---------|-------|
-| `SOUL.md` | **Primary agent identity** — defines who the agent is (slot #1 in the system prompt) | `~/.hermes/SOUL.md` or `$HERMES_HOME/SOUL.md` |
-| `.hermes.md` / `HERMES.md` | Project-specific instructions (highest priority) | Walks to git root |
-| `AGENTS.md` | Project-specific instructions, coding conventions | Recursive directory walk |
-| `CLAUDE.md` | Claude Code context files (also detected) | Working directory only |
-| `.cursorrules` | Cursor IDE rules (also detected) | Working directory only |
-| `.cursor/rules/*.mdc` | Cursor rule files (also detected) | Working directory only |
+| `SOUL.md` | **主要智能体身份** — 定义智能体是谁（系统提示中的插槽 #1）| `~/.hermes/SOUL.md` 或 `$HERMES_HOME/SOUL.md` |
+| `.hermes.md` / `HERMES.md` | 项目特定指令（最高优先级）| 步进到 git 根目录 |
+| `AGENTS.md` | 项目特定指令、编码约定 | 递归目录遍历 |
+| `CLAUDE.md` | Claude Code 上下文文件（也检测）| 工作目录仅 |
+| `.cursorrules` | Cursor IDE 规则（也检测）| 工作目录仅 |
+| `.cursor/rules/*.mdc` | Cursor 规则文件（也检测）| 工作目录仅 |
 
-- **SOUL.md** is the agent's primary identity. It occupies slot #1 in the system prompt, completely replacing the built-in default identity. Edit it to fully customize who the agent is.
-- If SOUL.md is missing, empty, or cannot be loaded, Hermes falls back to a built-in default identity.
-- **Project context files use a priority system** — only ONE type is loaded (first match wins): `.hermes.md` → `AGENTS.md` → `CLAUDE.md` → `.cursorrules`. SOUL.md is always loaded independently.
-- **AGENTS.md** is hierarchical: if subdirectories also have AGENTS.md, all are combined.
-- Hermes automatically seeds a default `SOUL.md` if one does not already exist.
-- All loaded context files are capped at 20,000 characters with smart truncation.
+- **SOUL.md** 是智能体的主要身份。它占据系统提示中的插槽 #1，完全替换内置默认身份。编辑它以完全自定义智能体是谁。
+- 如果 SOUL.md 缺失、为空或无法加载，Hermes 回退到内置默认身份。
+- **项目上下文文件使用优先级系统** — 仅加载一种类型（首次匹配获胜）：`.hermes.md` → `AGENTS.md` → `CLAUDE.md` → `.cursorrules`。SOUL.md 始终独立加载。
+- **AGENTS.md** 是分层的：如果子目录也有 AGENTS.md，所有都将组合。
+- Hermes 在不存在默认 `SOUL.md` 时自动播种。
+- 所有加载的上下文文件最多限制为 20,000 个字符，并带有智能截断。
 
-See also:
+另请参阅：
 - [Personality & SOUL.md](/docs/user-guide/features/personality)
 - [Context Files](/docs/user-guide/features/context-files)
 
@@ -1302,12 +1302,12 @@ See also:
 | Context | Default |
 |---------|---------|
 | **CLI (`hermes`)** | Current directory where you run the command |
-| **Messaging gateway** | Home directory `~` (override with `MESSAGING_CWD`) |
-| **Docker / Singularity / Modal / SSH** | User's home directory inside the container or remote machine |
+| **消息网关** | 主目录 `~`（使用 `MESSAGING_CWD` 覆盖）|
+| **Docker / Singularity / Modal / SSH** | 容器或远程机器内的用户主目录 |
 
-Override the working directory:
+覆盖工作目录：
 ```bash
-# In ~/.hermes/.env or ~/.hermes/config.yaml:
-MESSAGING_CWD=/home/myuser/projects    # Gateway sessions
-TERMINAL_CWD=/workspace                # All terminal sessions
+# 在 ~/.hermes/.env 或 ~/.hermes/config.yaml 中：
+MESSAGING_CWD=/home/myuser/projects    # 网关会话
+TERMINAL_CWD=/workspace                # 所有终端会话
 ```

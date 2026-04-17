@@ -46,17 +46,17 @@ hermes chat
 
 例如：
 
-```text
-列出 /home/user/projects 中的文件并总结仓库结构。
+```
+List the files in /home/user/projects and summarize the repository structure.
 ```
 
-Hermes 将发现 MCP 服务器的工具并像使用任何其他工具一样使用它们。
+Hermes 会发现 MCP 服务器的工具并像使用其他工具一样使用它们。
 
-## 两种 MCP 服务器
+## 两种类型的 MCP 服务器
 
 ### Stdio 服务器
 
-Stdio 服务器作为本地子进程运行，通过 stdin/stdout 通信。
+Stdio 服务器作为本地子进程运行并通过 stdin/stdout 通信。
 
 ```yaml
 mcp_servers:
@@ -67,9 +67,9 @@ mcp_servers:
       GITHUB_PERSONAL_ACCESS_TOKEN: "***"
 ```
 
-在以下情况下使用 stdio 服务器：
-- 服务器在本地安装
-- 您希望低延迟访问本地资源
+Use stdio servers when:
+- The server is installed locally
+- You want low-latency access to local resources
 - 您正在遵循显示 `command`、`args` 和 `env` 的 MCP 服务器文档
 
 ### HTTP 服务器
@@ -84,18 +84,18 @@ mcp_servers:
       Authorization: "Bearer ***"
 ```
 
-在以下情况下使用 HTTP 服务器：
-- MCP 服务器托管在其他地方
-- 您的组织暴露内部 MCP 端点
-- 您不希望 Hermes 为该集成生成本地子进程
+Use HTTP servers when:
+- The MCP server is hosted elsewhere
+- Your organization exposes internal MCP endpoints
+- You don't want Hermes to spawn a local subprocess for that integration
 
-## 基本配置参考
+## 基础配置参考
 
 Hermes 从 `~/.hermes/config.yaml` 中的 `mcp_servers` 部分读取 MCP 配置。
 
-### 通用键
+### Common keys
 
-| 键 | 类型 | 含义 |
+| Key | Type | Meaning |
 |---|---|---|
 | `command` | string | stdio MCP 服务器的可执行文件 |
 | `args` | list | stdio 服务器的参数 |

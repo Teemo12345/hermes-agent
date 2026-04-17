@@ -2,192 +2,192 @@
 sidebar_position: 2
 ---
 
-# Profiles: Running Multiple Agents
+# 配置文件：运行多个智能体
 
-Run multiple independent Hermes agents on the same machine — each with its own config, API keys, memory, sessions, skills, and gateway.
+在同一台机器上运行多个独立的 Hermes 智能体 — 每个都有自己的配置、API 密钥、记忆、会话、技能和网关。
 
-## What are profiles?
+## 什么是配置文件？
 
-A profile is a fully isolated Hermes environment. Each profile gets its own directory containing its own `config.yaml`, `.env`, `SOUL.md`, memories, sessions, skills, cron jobs, and state database. Profiles let you run separate agents for different purposes — a coding assistant, a personal bot, a research agent — without any cross-contamination.
+配置文件是一个完全隔离的 Hermes 环境。每个配置文件都有自己的目录，包含自己的 `config.yaml`、`.env`、`SOUL.md`、记忆、会话、技能、定时任务和状态数据库。配置文件让您为不同目的运行独立的智能体 — 编码助手、个人机器人、研究智能体 — 而不会产生任何交叉污染。
 
-When you create a profile, it automatically becomes its own command. Create a profile called `coder` and you immediately have `coder chat`, `coder setup`, `coder gateway start`, etc.
+当您创建配置文件时，它会自动成为自己的命令。创建一个名为 `coder` 的配置文件，您立即拥有 `coder chat`、`coder setup`、`coder gateway start` 等。
 
-## Quick start
+## 快速开始
 
 ```bash
-hermes profile create coder       # creates profile + "coder" command alias
-coder setup                       # configure API keys and model
-coder chat                        # start chatting
+hermes profile create coder       # 创建配置文件 + "coder" 命令别名
+coder setup                       # 配置 API 密钥和模型
+coder chat                        # 开始聊天
 ```
 
-That's it. `coder` is now a fully independent agent. It has its own config, its own memory, its own everything.
+就是这样。`coder` 现在是一个完全独立的智能体。它有自己的配置、自己的记忆、自己的一切。
 
-## Creating a profile
+## 创建配置文件
 
-### Blank profile
+### 空白配置文件
 
 ```bash
 hermes profile create mybot
 ```
 
-Creates a fresh profile with bundled skills seeded. Run `mybot setup` to configure API keys, model, and gateway tokens.
+创建一个带有捆绑技能的新配置文件。运行 `mybot setup` 来配置 API 密钥、模型和网关令牌。
 
-### Clone config only (`--clone`)
+### 仅克隆配置（`--clone`）
 
 ```bash
 hermes profile create work --clone
 ```
 
-Copies your current profile's `config.yaml`, `.env`, and `SOUL.md` into the new profile. Same API keys and model, but fresh sessions and memory. Edit `~/.hermes/profiles/work/.env` for different API keys, or `~/.hermes/profiles/work/SOUL.md` for a different personality.
+将您当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新配置文件。相同的 API 密钥和模型，但新的会话和记忆。编辑 `~/.hermes/profiles/work/.env` 以获得不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以获得不同的个性。
 
-### Clone everything (`--clone-all`)
+### 克隆所有内容（`--clone-all`）
 
 ```bash
 hermes profile create backup --clone-all
 ```
 
-Copies **everything** — config, API keys, personality, all memories, full session history, skills, cron jobs, plugins. A complete snapshot. Useful for backups or forking an agent that already has context.
+复制**所有内容** — 配置、API 密钥、个性、所有记忆、完整的会话历史、技能、定时任务、插件。完整的快照。适用于备份或派生已经具有上下文的智能体。
 
-### Clone from a specific profile
+### 从特定配置文件克隆
 
 ```bash
 hermes profile create work --clone --clone-from coder
 ```
 
-:::tip Honcho memory + profiles
-When Honcho is enabled, `--clone` automatically creates a dedicated AI peer for the new profile while sharing the same user workspace. Each profile builds its own observations and identity. See [Honcho -- Multi-agent / Profiles](./features/memory-providers.md#honcho) for details.
+:::tip Honcho 记忆 + 配置文件
+当启用 Honcho 时，`--clone` 会自动为新配置文件创建专用的 AI 对等体，同时共享相同的用户工作区。每个配置文件建立自己的观察和身份。有关详细信息，请参阅 [Honcho -- 多智能体 / 配置文件](./features/memory-providers.md#honcho)。
 :::
 
-## Using profiles
+## 使用配置文件
 
-### Command aliases
+### 命令别名
 
-Every profile automatically gets a command alias at `~/.local/bin/<name>`:
+每个配置文件都会自动在 `~/.local/bin/<name>` 处获得一个命令别名：
 
 ```bash
-coder chat                    # chat with the coder agent
-coder setup                   # configure coder's settings
-coder gateway start           # start coder's gateway
-coder doctor                  # check coder's health
-coder skills list             # list coder's skills
+coder chat                    # 与 coder 智能体聊天
+coder setup                   # 配置 coder 的设置
+coder gateway start           # 启动 coder 的网关
+coder doctor                  # 检查 coder 的健康状态
+coder skills list             # 列出 coder 的技能
 coder config set model.model anthropic/claude-sonnet-4
 ```
 
-The alias works with every hermes subcommand — it's just `hermes -p <name>` under the hood.
+别名适用于每个 hermes 子命令 — 它只是底层的 `hermes -p <name>`。
 
-### The `-p` flag
+### `-p` 标志
 
-You can also target a profile explicitly with any command:
+您还可以使用任何命令明确指定配置文件：
 
 ```bash
 hermes -p coder chat
 hermes --profile=coder doctor
-hermes chat -p coder -q "hello"    # works in any position
+hermes chat -p coder -q "你好"    # 在任何位置都有效
 ```
 
-### Sticky default (`hermes profile use`)
+### 粘性默认值（`hermes profile use`）
 
 ```bash
 hermes profile use coder
-hermes chat                   # now targets coder
-hermes tools                  # configures coder's tools
-hermes profile use default    # switch back
+hermes chat                   # 现在针对 coder
+hermes tools                  # 配置 coder 的工具
+hermes profile use default    # 切换回来
 ```
 
-Sets a default so plain `hermes` commands target that profile. Like `kubectl config use-context`.
+设置默认值，以便普通的 `hermes` 命令针对该配置文件。类似于 `kubectl config use-context`。
 
-### Knowing where you are
+### 了解您在哪里
 
-The CLI always shows which profile is active:
+CLI 始终显示哪个配置文件是活动的：
 
-- **Prompt**: `coder ❯` instead of `❯`
-- **Banner**: Shows `Profile: coder` on startup
-- **`hermes profile`**: Shows current profile name, path, model, gateway status
+- **提示符**: `coder ❯` 而不是 `❯`
+- **横幅**: 启动时显示 `Profile: coder`
+- **`hermes profile`**: 显示当前配置文件名称、路径、模型、网关状态
 
-## Running gateways
+## 运行网关
 
-Each profile runs its own gateway as a separate process with its own bot token:
+每个配置文件都运行自己的网关作为单独的进程，带有自己的机器人令牌：
 
 ```bash
-coder gateway start           # starts coder's gateway
-assistant gateway start       # starts assistant's gateway (separate process)
+coder gateway start           # 启动 coder 的网关
+assistant gateway start       # 启动 assistant 的网关（单独的进程）
 ```
 
-### Different bot tokens
+### 不同的机器人令牌
 
-Each profile has its own `.env` file. Configure a different Telegram/Discord/Slack bot token in each:
+每个配置文件都有自己的 `.env` 文件。在每个配置文件中配置不同的 Telegram/Discord/Slack 机器人令牌：
 
 ```bash
-# Edit coder's tokens
+# 编辑 coder 的令牌
 nano ~/.hermes/profiles/coder/.env
 
-# Edit assistant's tokens
+# 编辑 assistant 的令牌
 nano ~/.hermes/profiles/assistant/.env
 ```
 
-### Safety: token locks
+### 安全性：令牌锁
 
-If two profiles accidentally use the same bot token, the second gateway will be blocked with a clear error naming the conflicting profile. Supported for Telegram, Discord, Slack, WhatsApp, and Signal.
+如果两个配置文件意外使用相同的机器人令牌，第二个网关将被阻止，并显示一个清晰的错误，指出冲突的配置文件。支持 Telegram、Discord、Slack、WhatsApp 和 Signal。
 
-### Persistent services
+### 持久化服务
 
 ```bash
-coder gateway install         # creates hermes-gateway-coder systemd/launchd service
-assistant gateway install     # creates hermes-gateway-assistant service
+coder gateway install         # 创建 hermes-gateway-coder systemd/launchd 服务
+assistant gateway install     # 创建 hermes-gateway-assistant 服务
 ```
 
-Each profile gets its own service name. They run independently.
+每个配置文件都有自己的服务名称。它们独立运行。
 
-## Configuring profiles
+## 配置配置文件
 
-Each profile has its own:
+每个配置文件都有自己的：
 
-- **`config.yaml`** — model, provider, toolsets, all settings
-- **`.env`** — API keys, bot tokens
-- **`SOUL.md`** — personality and instructions
+- **`config.yaml`** — 模型、提供商、工具集、所有设置
+- **`.env`** — API 密钥、机器人令牌
+- **`SOUL.md`** — 个性和说明
 
 ```bash
 coder config set model.model anthropic/claude-sonnet-4
 echo "You are a focused coding assistant." > ~/.hermes/profiles/coder/SOUL.md
 ```
 
-## Updating
+## 更新
 
-`hermes update` pulls code once (shared) and syncs new bundled skills to **all** profiles automatically:
+`hermes update` 拉取一次代码（共享）并自动将新的捆绑技能同步到**所有**配置文件：
 
 ```bash
 hermes update
-# → Code updated (12 commits)
-# → Skills synced: default (up to date), coder (+2 new), assistant (+2 new)
+# → 代码已更新（12 个提交）
+# → 技能已同步：default（最新）、coder（+2 个新）、assistant（+2 个新）
 ```
 
-User-modified skills are never overwritten.
+用户修改的技能永远不会被覆盖。
 
-## Managing profiles
+## 管理配置文件
 
 ```bash
-hermes profile list           # show all profiles with status
-hermes profile show coder     # detailed info for one profile
-hermes profile rename coder dev-bot   # rename (updates alias + service)
-hermes profile export coder   # export to coder.tar.gz
-hermes profile import coder.tar.gz   # import from archive
+hermes profile list           # 显示所有配置文件及其状态
+hermes profile show coder     # 一个配置文件的详细信息
+hermes profile rename coder dev-bot   # 重命名（更新别名 + 服务）
+hermes profile export coder   # 导出到 coder.tar.gz
+hermes profile import coder.tar.gz   # 从档案导入
 ```
 
-## Deleting a profile
+## 删除配置文件
 
 ```bash
 hermes profile delete coder
 ```
 
-This stops the gateway, removes the systemd/launchd service, removes the command alias, and deletes all profile data. You'll be asked to type the profile name to confirm.
+这会停止网关、移除 systemd/launchd 服务、移除命令别名并删除所有配置文件数据。您将被要求输入配置文件名称以确认。
 
-Use `--yes` to skip confirmation: `hermes profile delete coder --yes`
+使用 `--yes` 跳过确认：`hermes profile delete coder --yes`
 
 :::note
-You cannot delete the default profile (`~/.hermes`). To remove everything, use `hermes uninstall`.
+您无法删除默认配置文件（`~/.hermes`）。要删除所有内容，请使用 `hermes uninstall`。
 :::
 
-## Tab completion
+## Tab 补全
 
 ```bash
 # Bash

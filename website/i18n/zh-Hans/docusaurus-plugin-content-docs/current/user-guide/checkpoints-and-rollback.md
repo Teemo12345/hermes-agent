@@ -1,122 +1,122 @@
 ---
 sidebar_position: 8
 sidebar_label: "Checkpoints & Rollback"
-title: "Checkpoints and /rollback"
-description: "Filesystem safety nets for destructive operations using shadow git repos and automatic snapshots"
+title: "检查点和 /rollback"
+description: "使用影子 git 仓库和自动快照为破坏性操作提供文件系统安全网"
 ---
 
-# Checkpoints and `/rollback`
+# 检查点和 `/rollback`
 
-Hermes Agent automatically snapshots your project before **destructive operations** and lets you restore it with a single command. Checkpoints are **enabled by default** — there's zero cost when no file-mutating tools fire.
+Hermes Agent 在**破坏性操作**之前自动为您的项目创建快照，并让您可以通过单个命令恢复它。检查点**默认启用** — 当没有文件修改工具触发时，零成本。
 
-This safety net is powered by an internal **Checkpoint Manager** that keeps a separate shadow git repository under `~/.hermes/checkpoints/` — your real project `.git` is never touched.
+这个安全网由内部**检查点管理器**提供支持，它在 `~/.hermes/checkpoints/` 下维护一个单独的影子 git 仓库 — 您的真实项目 `.git` 从未被触及。
 
-## What Triggers a Checkpoint
+## 什么会触发检查点
 
-Checkpoints are taken automatically before:
+在以下操作之前会自动创建检查点：
 
-- **File tools** — `write_file` and `patch`
-- **Destructive terminal commands** — `rm`, `mv`, `sed -i`, `truncate`, `shred`, output redirects (`>`), and `git reset`/`clean`/`checkout`
+- **文件工具** — `write_file` 和 `patch`
+- **破坏性终端命令** — `rm`、`mv`、`sed -i`、`truncate`、`shred`、输出重定向（`>`）和 `git reset`/`clean`/`checkout`
 
-The agent creates **at most one checkpoint per directory per turn**, so long-running sessions don't spam snapshots.
+智能体每轮对话每个目录**最多创建一个检查点**，因此长时间运行的会话不会产生大量快照。
 
-## Quick Reference
+## 快速参考
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `/rollback` | List all checkpoints with change stats |
-| `/rollback <N>` | Restore to checkpoint N (also undoes last chat turn) |
-| `/rollback diff <N>` | Preview diff between checkpoint N and current state |
-| `/rollback <N> <file>` | Restore a single file from checkpoint N |
+| `/rollback` | 列出所有检查点及其更改统计 |
+| `/rollback <N>` | 恢复到检查点 N（同时撤销最后一轮对话） |
+| `/rollback diff <N>` | 预览检查点 N 和当前状态之间的差异 |
+| `/rollback <N> <file>` | 从检查点 N 恢复单个文件 |
 
-## How Checkpoints Work
+## 检查点如何工作
 
-At a high level:
+从高层来看：
 
-- Hermes detects when tools are about to **modify files** in your working tree.
-- Once per conversation turn (per directory), it:
-  - Resolves a reasonable project root for the file.
-  - Initialises or reuses a **shadow git repo** tied to that directory.
-  - Stages and commits the current state with a short, human‑readable reason.
-- These commits form a checkpoint history that you can inspect and restore via `/rollback`.
+- Hermes 检测工具何时即将**修改**您的工作树中的文件。
+- 每轮对话一次（每个目录），它会：
+  - 为文件解析一个合理的项目根目录。
+  - 初始化或重用与该目录关联的**影子 git 仓库**。
+  - 使用简短、人类可读的原因暂存并提交当前状态。
+- 这些提交形成一个检查点历史记录，您可以通过 `/rollback` 检查和恢复。
 
 ```mermaid
 flowchart LR
-  user["User command\n(hermes, gateway)"]
+  user["用户命令\n(hermes, gateway)"]
   agent["AIAgent\n(run_agent.py)"]
-  tools["File & terminal tools"]
+  tools["文件和终端工具"]
   cpMgr["CheckpointManager"]
-  shadowRepo["Shadow git repo\n~/.hermes/checkpoints/<hash>"]
+  shadowRepo["影子 git 仓库\n~/.hermes/checkpoints/<hash>"]
 
   user --> agent
-  agent -->|"tool call"| tools
-  tools -->|"before mutate\nensure_checkpoint()"| cpMgr
+  agent -->|"工具调用"| tools
+  tools -->|"修改前\nensure_checkpoint()"| cpMgr
   cpMgr -->|"git add/commit"| shadowRepo
-  cpMgr -->|"OK / skipped"| tools
-  tools -->|"apply changes"| agent
+  cpMgr -->|"OK / 跳过"| tools
+  tools -->|"应用更改"| agent
 ```
 
-## Configuration
+## 配置
 
-Checkpoints are enabled by default. Configure in `~/.hermes/config.yaml`:
+检查点默认启用。在 `~/.hermes/config.yaml` 中配置：
 
 ```yaml
 checkpoints:
-  enabled: true          # master switch (default: true)
-  max_snapshots: 50      # max checkpoints per directory
+  enabled: true          # 主开关（默认：true）
+  max_snapshots: 50      # 每个目录的最大检查点数
 ```
 
-To disable:
+要禁用：
 
 ```yaml
 checkpoints:
   enabled: false
 ```
 
-When disabled, the Checkpoint Manager is a no‑op and never attempts git operations.
+禁用时，检查点管理器是无操作，从不尝试 git 操作。
 
-## Listing Checkpoints
+## 列出检查点
 
-From a CLI session:
+从 CLI 会话：
 
 ```
 /rollback
 ```
 
-Hermes responds with a formatted list showing change statistics:
+Hermes 响应一个格式化列表，显示更改统计：
 
 ```text
-📸 Checkpoints for /path/to/project:
+📸 /path/to/project 的检查点：
 
-  1. 4270a8c  2026-03-16 04:36  before patch  (1 file, +1/-0)
-  2. eaf4c1f  2026-03-16 04:35  before write_file
-  3. b3f9d2e  2026-03-16 04:34  before terminal: sed -i s/old/new/ config.py  (1 file, +1/-1)
+  1. 4270a8c  2026-03-16 04:36  补丁前  (1 个文件, +1/-0)
+  2. eaf4c1f  2026-03-16 04:35  write_file 前
+  3. b3f9d2e  2026-03-16 04:34  终端前：sed -i s/old/new/ config.py  (1 个文件, +1/-1)
 
-  /rollback <N>             restore to checkpoint N
-  /rollback diff <N>        preview changes since checkpoint N
-  /rollback <N> <file>      restore a single file from checkpoint N
+  /rollback <N>             恢复到检查点 N
+  /rollback diff <N>        预览检查点 N 以来的更改
+  /rollback <N> <file>      从检查点 N 恢复单个文件
 ```
 
-Each entry shows:
+每个条目显示：
 
-- Short hash
-- Timestamp
-- Reason (what triggered the snapshot)
-- Change summary (files changed, insertions/deletions)
+- 短哈希
+- 时间戳
+- 原因（触发快照的内容）
+- 更改摘要（文件更改、插入/删除）
 
-## Previewing Changes with `/rollback diff`
+## 使用 `/rollback diff` 预览更改
 
-Before committing to a restore, preview what has changed since a checkpoint:
+在提交恢复之前，预览检查点以来的更改：
 
 ```
 /rollback diff 1
 ```
 
-This shows a git diff stat summary followed by the actual diff:
+这显示 git diff 统计摘要，后跟实际差异：
 
 ```text
 test.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ 1 个文件更改，1 次插入(+)，1 次删除(-)
 
 diff --git a/test.py b/test.py
 --- a/test.py
@@ -126,79 +126,81 @@ diff --git a/test.py b/test.py
 +print('modified content')
 ```
 
-Long diffs are capped at 80 lines to avoid flooding the terminal.
+长差异限制为 80 行，以避免淹没终端。
 
-## Restoring with `/rollback`
+## 使用 `/rollback` 恢复
 
-Restore to a checkpoint by number:
+通过编号恢复到检查点：
 
 ```
 /rollback 1
 ```
 
-Behind the scenes, Hermes:
+在后台，Hermes：
 
-1. Verifies the target commit exists in the shadow repo.
-2. Takes a **pre‑rollback snapshot** of the current state so you can "undo the undo" later.
-3. Restores tracked files in your working directory.
-4. **Undoes the last conversation turn** so the agent's context matches the restored filesystem state.
+1. 验证目标提交存在于影子仓库中。
+2. 对当前状态进行**恢复前快照**，以便您可以稍后"撤销撤销"。
+3. 恢复工作目录中的跟踪文件。
+4. **撤销最后一轮对话**，以便智能体的上下文与恢复的文件系统状态匹配。
 
-On success:
+成功时：
 
 ```text
-✅ Restored to checkpoint 4270a8c5: before patch
-A pre-rollback snapshot was saved automatically.
-(^_^)b Undid 4 message(s). Removed: "Now update test.py to ..."
-  4 message(s) remaining in history.
-  Chat turn undone to match restored file state.
+✅ 恢复到检查点 4270a8c5：补丁前
+```text
+✅ 恢复到检查点 4270a8c5：补丁前
+已自动保存恢复前快照。
+(^_^)b 撤销了 4 条消息。已删除："Now update test.py to ..."
+  历史记录中剩余 4 条消息。
+  对话轮次已撤销以匹配恢复的文件状态。
 ```
 
-The conversation undo ensures the agent doesn't "remember" changes that have been rolled back, avoiding confusion on the next turn.
+对话撤销确保智能体不会"记住"已回滚的更改，避免下一轮对话中的混淆。
 
-## Single-File Restore
+## 单文件恢复
 
-Restore just one file from a checkpoint without affecting the rest of the directory:
+从检查点仅恢复一个文件，而不影响目录的其余部分：
 
 ```
 /rollback 1 src/broken_file.py
 ```
 
-This is useful when the agent made changes to multiple files but only one needs to be reverted.
+当智能体更改了多个文件但只需要恢复其中一个时，这很有用。
 
-## Safety and Performance Guards
+## 安全和性能保护
 
-To keep checkpointing safe and fast, Hermes applies several guardrails:
+为了保持检查点的安全和快速，Hermes 应用了几项保护措施：
 
-- **Git availability** — if `git` is not found on `PATH`, checkpoints are transparently disabled.
-- **Directory scope** — Hermes skips overly broad directories (root `/`, home `$HOME`).
-- **Repository size** — directories with more than 50,000 files are skipped to avoid slow git operations.
-- **No‑change snapshots** — if there are no changes since the last snapshot, the checkpoint is skipped.
-- **Non‑fatal errors** — all errors inside the Checkpoint Manager are logged at debug level; your tools continue to run.
+- **Git 可用性** — 如果在 `PATH` 上找不到 `git`，检查点将被透明地禁用。
+- **目录范围** — Hermes 跳过过于广泛的目录（根目录 `/`、主目录 `$HOME`）。
+- **仓库大小** — 跳过超过 50,000 个文件的目录，以避免缓慢的 git 操作。
+- **无更改快照** — 如果自上次快照以来没有更改，则跳过检查点。
+- **非致命错误** — 检查点管理器内的所有错误都在调试级别记录；您的工具继续运行。
 
-## Where Checkpoints Live
+## 检查点的位置
 
-All shadow repos live under:
+所有影子仓库位于：
 
 ```text
 ~/.hermes/checkpoints/
-  ├── <hash1>/   # shadow git repo for one working directory
+  ├── <hash1>/   # 一个工作目录的影子 git 仓库
   ├── <hash2>/
   └── ...
 ```
 
-Each `<hash>` is derived from the absolute path of the working directory. Inside each shadow repo you'll find:
+每个 `<hash>` 派生自工作目录的绝对路径。在每个影子仓库中，您会发现：
 
-- Standard git internals (`HEAD`, `refs/`, `objects/`)
-- An `info/exclude` file containing a curated ignore list
-- A `HERMES_WORKDIR` file pointing back to the original project root
+- 标准 git 内部文件（`HEAD`、`refs/`、`objects/`）
+- 包含精心策划的忽略列表的 `info/exclude` 文件
+- 指回原始项目根目录的 `HERMES_WORKDIR` 文件
 
-You normally never need to touch these manually.
+您通常永远不需要手动触摸这些。
 
-## Best Practices
+## 最佳实践
 
-- **Leave checkpoints enabled** — they're on by default and have zero cost when no files are modified.
-- **Use `/rollback diff` before restoring** — preview what will change to pick the right checkpoint.
-- **Use `/rollback` instead of `git reset`** when you want to undo agent-driven changes only.
-- **Combine with Git worktrees** for maximum safety — keep each Hermes session in its own worktree/branch, with checkpoints as an extra layer.
+- **保持检查点启用** — 它们默认启用，当没有文件被修改时零成本。
+- **恢复前使用 `/rollback diff`** — 预览将要更改的内容以选择正确的检查点。
+- **使用 `/rollback` 而不是 `git reset`** — 当您只想撤销智能体驱动的更改时。
+- **与 Git 工作树结合**以获得最大安全性 — 将每个 Hermes 会话保留在自己的工作树/分支中，检查点作为额外层。
 
-For running multiple agents in parallel on the same repo, see the guide on [Git worktrees](./git-worktrees.md).
+有关在同一仓库中并行运行多个智能体的信息，请参阅 [Git 工作树](./git-worktrees.md) 指南。

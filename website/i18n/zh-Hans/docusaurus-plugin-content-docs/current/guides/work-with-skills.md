@@ -188,20 +188,20 @@ metadata:
 
 # My Skill
 
-## When to Use
-Use this skill when the user asks about [specific topic] or needs to [specific task].
+## 何时使用
+当用户询问[特定主题]或需要[特定任务]时使用此技能。
 
-## Procedure
-1. First, check if [prerequisite] is available
-2. Run `command --with-flags`
-3. Parse the output and present results
+## 步骤
+1. 首先，检查[先决条件]是否可用
+2. 运行 `command --with-flags`
+3. 解析输出并呈现结果
 
-## Pitfalls
-- Common failure: [description]. Fix: [solution]
-- Watch out for [edge case]
+## 陷阱
+- 常见失败：[描述]。解决方法：[解决方案]
+- 注意[边缘情况]
 
-## Verification
-Run `check-command` to confirm the result is correct.
+## 验证
+运行 `check-command` 确认结果正确。
 ```
 
 ### 3. 添加参考文件（可选）

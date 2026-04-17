@@ -94,9 +94,13 @@ metadata:
 
 技能可以使用 `platforms` 字段将自己限制在特定的操作系统上：
 
+```
 | 值 | 匹配 |
 |-------|---------|
 | `macos` | macOS (Darwin) |
+| `linux` | Linux |
+| `windows` | Windows |
+```
 | `linux` | Linux |
 | `windows` | Windows |
 
@@ -161,39 +165,39 @@ metadata:
         prompt: Wiki directory path
 ```
 
-Settings are stored under `skills.config` in your config.yaml. `hermes config migrate` prompts for unconfigured settings, and `hermes config show` displays them. When a skill loads, its resolved config values are injected into the context so the agent knows the configured values automatically.
+设置存储在您的 config.yaml 中的 `skills.config` 下。`hermes config migrate` 会提示未配置的设置，而 `hermes config show` 会显示它们。当技能加载时，其解析后的配置值会注入到上下文中，以便智能体自动知道配置的值。
 
-See [Skill Settings](/docs/user-guide/configuration#skill-settings) and [Creating Skills — Config Settings](/docs/developer-guide/creating-skills#config-settings-configyaml) for details.
+有关详细信息，请参阅[技能设置](/docs/user-guide/configuration#skill-settings)和[创建技能 — 配置设置](/docs/developer-guide/creating-skills#config-settings-configyaml)。
 
-## Skill Directory Structure
+## 技能目录结构
 
 ```text
-~/.hermes/skills/                  # Single source of truth
-├── mlops/                         # Category directory
+~/.hermes/skills/                  # 单一真实来源
+├── mlops/                         # 分类目录
 │   ├── axolotl/
-│   │   ├── SKILL.md               # Main instructions (required)
-│   │   ├── references/            # Additional docs
-│   │   ├── templates/             # Output formats
-│   │   ├── scripts/               # Helper scripts callable from the skill
-│   │   └── assets/                # Supplementary files
+│   │   ├── SKILL.md               # 主要说明（必需）
+│   │   ├── references/            # 附加文档
+│   │   ├── templates/             # 输出格式
+│   │   ├── scripts/               # 可从技能调用的辅助脚本
+│   │   └── assets/                # 补充文件
 │   └── vllm/
 │       └── SKILL.md
 ├── devops/
-│   └── deploy-k8s/                # Agent-created skill
+│   └── deploy-k8s/                # 智能体创建的技能
 │       ├── SKILL.md
 │       └── references/
-├── .hub/                          # Skills Hub state
+├── .hub/                          # 技能中心状态
 │   ├── lock.json
 │   ├── quarantine/
 │   └── audit.log
 └── .bundled_manifest              # Tracks seeded bundled skills
 ```
 
-## External Skill Directories
+## 外部技能目录
 
-If you maintain skills outside of Hermes — for example, a shared `~/.agents/skills/` directory used by multiple AI tools — you can tell Hermes to scan those directories too.
+如果您在 Hermes 之外维护技能 — 例如，多个 AI 工具共享的 `~/.agents/skills/` 目录 — 您可以告诉 Hermes 也扫描这些目录。
 
-Add `external_dirs` under the `skills` section in `~/.hermes/config.yaml`:
+在 `~/.hermes/config.yaml` 的 `skills` 部分下添加 `external_dirs`：
 
 ```yaml
 skills:
@@ -203,84 +207,84 @@ skills:
     - ${SKILLS_REPO}/skills
 ```
 
-Paths support `~` expansion and `${VAR}` environment variable substitution.
+路径支持 `~` 扩展和 `${VAR}` 环境变量替换。
 
-### How it works
+### 工作原理
 
-- **Read-only**: External dirs are only scanned for skill discovery. When the agent creates or edits a skill, it always writes to `~/.hermes/skills/`.
-- **Local precedence**: If the same skill name exists in both the local dir and an external dir, the local version wins.
-- **Full integration**: External skills appear in the system prompt index, `skills_list`, `skill_view`, and as `/skill-name` slash commands — no different from local skills.
-- **Non-existent paths are silently skipped**: If a configured directory doesn't exist, Hermes ignores it without errors. Useful for optional shared directories that may not be present on every machine.
+- **只读**: 外部目录仅用于技能发现扫描。当智能体创建或编辑技能时，它总是写入 `~/.hermes/skills/`。
+- **本地优先**: 如果相同的技能名称同时存在于本地目录和外部目录中，本地版本优先。
+- **完全集成**: 外部技能出现在系统提示索引、`skills_list`、`skill_view` 中，并作为 `/skill-name` 斜杠命令 — 与本地技能没有区别。
+- **不存在的路径会被静默跳过**: 如果配置的目录不存在，Hermes 会忽略它而不会报错。对于可能并非每台机器上都存在的可选共享目录很有用。
 
-### Example
+### 示例
 
 ```text
-~/.hermes/skills/               # Local (primary, read-write)
+~/.hermes/skills/               # 本地（主要，读写）
 ├── devops/deploy-k8s/
 │   └── SKILL.md
 └── mlops/axolotl/
     └── SKILL.md
 
-~/.agents/skills/               # External (read-only, shared)
+~/.agents/skills/               # 外部（只读，共享）
 ├── my-custom-workflow/
 │   └── SKILL.md
 └── team-conventions/
     └── SKILL.md
 ```
 
-All four skills appear in your skill index. If you create a new skill called `my-custom-workflow` locally, it shadows the external version.
+所有四个技能都出现在您的技能索引中。如果您在本地创建一个名为 `my-custom-workflow` 的新技能，它会遮蔽外部版本。
 
-## Agent-Managed Skills (skill_manage tool)
+## 智能体管理的技能（skill_manage 工具）
 
-The agent can create, update, and delete its own skills via the `skill_manage` tool. This is the agent's **procedural memory** — when it figures out a non-trivial workflow, it saves the approach as a skill for future reuse.
+智能体可以通过 `skill_manage` 工具创建、更新和删除自己的技能。这是智能体的**程序记忆** — 当它发现一个非平凡的工作流时，它会将方法保存为技能以供将来重用。
 
-### When the Agent Creates Skills
+### 智能体何时创建技能
 
-- After completing a complex task (5+ tool calls) successfully
-- When it hit errors or dead ends and found the working path
-- When the user corrected its approach
-- When it discovered a non-trivial workflow
+- 成功完成复杂任务（5+ 工具调用）后
+- 当它遇到错误或死胡同并找到可行路径时
+- 当用户纠正其方法时
+- 当它发现非平凡的工作流时
 
-### Actions
+### 操作
 
-| Action | Use for | Key params |
+| 操作 | 用途 | 关键参数 |
 |--------|---------|------------|
-| `create` | New skill from scratch | `name`, `content` (full SKILL.md), optional `category` |
-| `patch` | Targeted fixes (preferred) | `name`, `old_string`, `new_string` |
-| `edit` | Major structural rewrites | `name`, `content` (full SKILL.md replacement) |
-| `delete` | Remove a skill entirely | `name` |
-| `write_file` | Add/update supporting files | `name`, `file_path`, `file_content` |
-| `remove_file` | Remove a supporting file | `name`, `file_path` |
+| `create` | 从零开始创建新技能 | `name`, `content`（完整的 SKILL.md），可选的 `category` |
+| `patch` | 定向修复（首选） | `name`, `old_string`, `new_string` |
+| `edit` | 主要结构重写 | `name`, `content`（完整的 SKILL.md 替换） |
+| `delete` | 完全删除技能 | `name` |
+| `write_file` | 添加/更新支持文件 | `name`, `file_path`, `file_content` |
+| `remove_file` | 删除支持文件 | `name`, `file_path` |
 
 :::tip
-The `patch` action is preferred for updates — it's more token-efficient than `edit` because only the changed text appears in the tool call.
+`patch` 操作是更新的首选 — 它比 `edit` 更令牌高效，因为只有更改的文本出现在工具调用中。
 :::
 
-## Skills Hub
+## 技能中心
 
-Browse, search, install, and manage skills from online registries, `skills.sh`, direct well-known skill endpoints, and official optional skills.
+浏览、搜索、安装和管理来自在线注册表、`skills.sh`、直接知名技能端点和官方可选技能的技能。
 
-### Common commands
+### 常用命令
 
 ```bash
-hermes skills browse                              # Browse all hub skills (official first)
-hermes skills browse --source official            # Browse only official optional skills
-hermes skills search kubernetes                   # Search all sources
-hermes skills search react --source skills-sh     # Search the skills.sh directory
+hermes skills browse                              # 浏览所有中心技能（官方优先）
+hermes skills browse --source official            # 仅浏览官方可选技能
+hermes skills search kubernetes                   # 搜索所有来源
+hermes skills search react --source skills-sh     # 搜索 skills.sh 目录
 hermes skills search https://mintlify.com/docs --source well-known
-hermes skills inspect openai/skills/k8s           # Preview before installing
-hermes skills install openai/skills/k8s           # Install with security scan
+hermes skills inspect openai/skills/k8s           # 安装前预览
+hermes skills install openai/skills/k8s           # 安装并安全扫描
 hermes skills install official/security/1password
 hermes skills install skills-sh/vercel-labs/json-render/json-render-react --force
 hermes skills install well-known:https://mintlify.com/docs/.well-known/skills/mintlify
-hermes skills list --source hub                   # List hub-installed skills
-hermes skills check                               # Check installed hub skills for upstream updates
-hermes skills update                              # Reinstall hub skills with upstream changes when needed
-hermes skills audit                               # Re-scan all hub skills for security
-hermes skills uninstall k8s                       # Remove a hub skill
+hermes skills list --source hub                   # 列出中心安装的技能
+hermes skills check                               # 检查已安装的中心技能是否有上游更新
+hermes skills update                              # 在需要时重新安装具有上游更改的中心技能
+hermes skills audit                               # 重新扫描所有中心技能的安全性
+hermes skills uninstall k8s                       # 移除中心技能
 hermes skills publish skills/my-skill --to github --repo owner/repo
-hermes skills snapshot export setup.json          # Export skill config
-hermes skills tap add myorg/skills-repo           # Add a custom GitHub source
+hermes skills snapshot export setup.json          # 导出技能配置
+hermes skills tap add myorg/skills-repo           # 添加自定义 GitHub 来源
 ```
 
 ### Supported hub sources

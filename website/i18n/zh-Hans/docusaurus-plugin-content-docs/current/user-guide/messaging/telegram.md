@@ -170,13 +170,13 @@ fly secrets set TELEGRAM_WEBHOOK_SECRET=$(openssl rand -hex 32)
 fly deploy
 ```
 
-The gateway log should show: `[telegram] Connected to Telegram (webhook mode)`.
+网关日志应该显示：`[telegram] Connected to Telegram (webhook mode)`。
 
 ## Home Channel
 
-Use the `/sethome` command in any Telegram chat (DM or group) to designate it as the **home channel**. Scheduled tasks (cron jobs) deliver their results to this channel.
+使用任何 Telegram 聊天（私信或群组）中的 `/sethome` 命令来指定它作为**主频道**。计划任务（cron 作业）会将其结果传递到此频道。
 
-You can also set it manually in `~/.hermes/.env`:
+您也可以在 `~/.hermes/.env` 中手动设置：
 
 ```bash
 TELEGRAM_HOME_CHANNEL=-1001234567890
@@ -184,20 +184,20 @@ TELEGRAM_HOME_CHANNEL_NAME="My Notes"
 ```
 
 :::tip
-Group chat IDs are negative numbers (e.g., `-1001234567890`). Your personal DM chat ID is the same as your user ID.
+群组聊天 ID 是负数（例如，`-1001234567890`）。您的个人私信聊天 ID 与您的用户 ID 相同。
 :::
 
 ## Voice Messages
 
-### Incoming Voice (Speech-to-Text)
+### 传入语音（语音转文字）
 
-Voice messages you send on Telegram are automatically transcribed by Hermes's configured STT provider and injected as text into the conversation.
+您在 Telegram 上发送的语音消息会自动由 Hermes 配置的 STT 提供商转录并作为文本注入到对话中。
 
-- `local` uses `faster-whisper` on the machine running Hermes — no API key required
-- `groq` uses Groq Whisper and requires `GROQ_API_KEY`
-- `openai` uses OpenAI Whisper and requires `VOICE_TOOLS_OPENAI_KEY`
+- `local` 使用运行 Hermes 的机器上的 `faster-whisper` — 不需要 API 密钥
+- `groq` 使用 Groq Whisper，需要 `GROQ_API_KEY`
+- `openai` 使用 OpenAI Whisper，需要 `VOICE_TOOLS_OPENAI_KEY`
 
-### Outgoing Voice (Text-to-Speech)
+### 传出语音（文字转语音）
 
 When the agent generates audio via TTS, it's delivered as native Telegram **voice bubbles** — the round, inline-playable kind.
 
@@ -214,25 +214,25 @@ brew install ffmpeg
 
 Without ffmpeg, Edge TTS audio is sent as a regular audio file (still playable, but uses the rectangular player instead of a voice bubble).
 
-Configure the TTS provider in your `config.yaml` under the `tts.provider` key.
+在您的 `config.yaml` 中的 `tts.provider` 键下配置 TTS 提供商。
 
 ## Group Chat Usage
 
-Hermes Agent works in Telegram group chats with a few considerations:
+Hermes Agent 在 Telegram 群组聊天中工作，需要注意以下几点：
 
-- **Privacy mode** determines what messages the bot can see (see [Step 3](#step-3-privacy-mode-critical-for-groups))
-- `TELEGRAM_ALLOWED_USERS` still applies — only authorized users can trigger the bot, even in groups
-- You can keep the bot from responding to ordinary group chatter with `telegram.require_mention: true`
-- With `telegram.require_mention: true`, group messages are accepted when they are:
-  - slash commands
-  - replies to one of the bot's messages
-  - `@botusername` mentions
-  - matches for one of your configured regex wake words in `telegram.mention_patterns`
-- If `telegram.require_mention` is left unset or false, Hermes keeps the previous open-group behavior and responds to normal group messages it can see
+- **隐私模式**决定机器人可以看到哪些消息（请参阅[步骤 3](#step-3-privacy-mode-critical-for-groups)）
+- `TELEGRAM_ALLOWED_USERS` 仍然适用 — 只有授权用户可以触发机器人，即使在群组中
+- 您可以使用 `telegram.require_mention: true` 让机器人不响应普通的群组闲聊
+- 使用 `telegram.require_mention: true` 时，群组消息在以下情况下会被接受：
+  - 斜杠命令
+  - 回复机器人的消息之一
+  - `@botusername` 提及其
+  - 匹配您在 `telegram.mention_patterns` 中配置的正则表达式唤醒词之一
+- 如果 `telegram.require_mention` 未设置或为 false，Hermes 会保持之前开放的群组行为并响应它可以看到的一般群组消息
 
-### Example group trigger configuration
+### 示例群组触发配置
 
-Add this to `~/.hermes/config.yaml`:
+将此添加到 `~/.hermes/config.yaml`：
 
 ```yaml
 telegram:
@@ -241,40 +241,40 @@ telegram:
     - "^\\s*chompy\\b"
 ```
 
-This example allows all the usual direct triggers plus messages that begin with `chompy`, even if they do not use an `@mention`.
+此示例允许所有通常的直接触发加上以 `chompy` 开头的消息，即使它们不使用 `@提及`。
 
 ### Notes on `mention_patterns`
 
 - Patterns use Python regular expressions
 - Matching is case-insensitive
 - Patterns are checked against both text messages and media captions
-- Invalid regex patterns are ignored with a warning in the gateway logs rather than crashing the bot
-- If you want a pattern to match only at the start of a message, anchor it with `^`
+- 无效的正则表达式模式会在网关日志中显示警告并被忽略，而不是导致机器人崩溃
+- 如果您希望模式仅在消息开头匹配，请使用 `^` 锚定它
 
 ## Private Chat Topics (Bot API 9.4)
 
-Telegram Bot API 9.4 (February 2026) introduced **Private Chat Topics** — bots can create forum-style topic threads directly in 1-on-1 DM chats, no supergroup needed. This lets you run multiple isolated workspaces within your existing DM with Hermes.
+Telegram Bot API 9.4（2026年2月）引入了**私人聊天话题** — 机器人可以直接在1对1私信中创建论坛风格的话题线程，无需超级群组。这允许您在现有的与 Hermes 的私信中运行多个隔离的工作空间。
 
-### Use case
+### 使用场景
 
-If you work on several long-running projects, topics keep their context separate:
+如果您从事多个长期运行的项目，话题可以保持它们的上下文分离：
 
-- **Topic "Website"** — work on your production web service
-- **Topic "Research"** — literature review and paper exploration
-- **Topic "General"** — miscellaneous tasks and quick questions
+- **"网站"话题** — 处理您的生产网络服务
+- **"研究"话题** — 文献综述和论文探索
+- **"一般"话题** — 杂项任务和快速问题
 
-Each topic gets its own conversation session, history, and context — completely isolated from the others.
+每个话题都有自己独立的会话、历史和上下文 — 彼此完全隔离。
 
-### Configuration
+### 配置
 
-Add topics under `platforms.telegram.extra.dm_topics` in `~/.hermes/config.yaml`:
+在 `~/.hermes/config.yaml` 中的 `platforms.telegram.extra.dm_topics` 下添加话题：
 
 ```yaml
 platforms:
   telegram:
     extra:
       dm_topics:
-      - chat_id: 123456789        # Your Telegram user ID
+      - chat_id: 123456789        # 您的 Telegram 用户 ID
         topics:
         - name: General
           icon_color: 7322096
@@ -282,12 +282,12 @@ platforms:
           icon_color: 9367192
         - name: Research
           icon_color: 16766590
-          skill: arxiv              # Auto-load a skill in this topic
+          skill: arxiv              # 在此话题中自动加载技能
 ```
 
-**Fields:**
+**字段：**
 
-| Field | Required | Description |
+| 字段 | 必需 | 描述 |
 |-------|----------|-------------|
 | `name` | Yes | Topic display name |
 | `icon_color` | No | Telegram icon color code (integer) |
@@ -309,31 +309,31 @@ Topics with a `skill` field automatically load that skill when a new session sta
 For example, a topic with `skill: arxiv` will have the arxiv skill pre-loaded whenever its session resets (due to idle timeout, daily reset, or manual `/reset`).
 
 :::tip
-Topics created outside of the config (e.g., by manually calling the Telegram API) are discovered automatically when a `forum_topic_created` service message arrives. You can also add topics to the config while the gateway is running — they'll be picked up on the next cache miss.
+在配置之外创建的话题（例如，通过手动调用 Telegram API）在 `forum_topic_created` 服务消息到达时会自动发现。您也可以在网关运行时将话题添加到配置中 — 它们会在下一次缓存未命中时被获取。
 :::
 
 ## Group Forum Topic Skill Binding
 
-Supergroups with **Topics mode** enabled (also called "forum topics") already get session isolation per topic — each `thread_id` maps to its own conversation. But you may want to **auto-load a skill** when messages arrive in a specific group topic, just like DM topic skill binding works.
+已启用**话题模式**的超级群组（也称为"论坛话题"）已经获得每个话题的会话隔离 — 每个 `thread_id` 映射到自己的对话。但您可能希望在特定群组话题中收到消息时**自动加载技能**，就像私信话题技能绑定一样工作。
 
-### Use case
+### 使用场景
 
-A team supergroup with forum topics for different workstreams:
+一个带有不同工作流论坛话题的团队超级群组：
 
-- **Engineering** topic → auto-loads the `software-development` skill
-- **Research** topic → auto-loads the `arxiv` skill
-- **General** topic → no skill, general-purpose assistant
+- **工程**话题 → 自动加载 `software-development` 技能
+- **研究**话题 → 自动加载 `arxiv` 技能
+- **一般**话题 → 无技能，通用助手
 
-### Configuration
+### 配置
 
-Add topic bindings under `platforms.telegram.extra.group_topics` in `~/.hermes/config.yaml`:
+在 `~/.hermes/config.yaml` 中的 `platforms.telegram.extra.group_topics` 下添加话题绑定：
 
 ```yaml
 platforms:
   telegram:
     extra:
       group_topics:
-      - chat_id: -1001234567890       # Supergroup ID
+      - chat_id: -1001234567890       # 超级群组 ID
         topics:
         - name: Engineering
           thread_id: 5
@@ -343,12 +343,12 @@ platforms:
           skill: arxiv
         - name: General
           thread_id: 1
-          # No skill — general purpose
+          # 无技能 — 通用目的
 ```
 
-**Fields:**
+**字段：**
 
-| Field | Required | Description |
+| 字段 | 必需 | 描述 |
 |-------|----------|-------------|
 | `chat_id` | Yes | The supergroup's numeric ID (negative number starting with `-100`) |
 | `name` | No | Human-readable label for the topic (informational only) |
@@ -374,50 +374,50 @@ platforms:
 | Session isolation | ✓ | ✓ (already built-in for forum topics) |
 
 :::tip
-To find a topic's `thread_id`, open the topic in Telegram Web or Desktop and look at the URL: `https://t.me/c/1234567890/5` — the last number (`5`) is the `thread_id`. The `chat_id` for supergroups is the group ID prefixed with `-100` (e.g., group `1234567890` becomes `-1001234567890`).
+要找到话题的 `thread_id`，在 Telegram Web 或 Desktop 中打开话题并查看 URL：`https://t.me/c/1234567890/5` — 最后的数字（`5`）就是 `thread_id`。超级群组的 `chat_id` 是群组 ID 前面加 `-100`（例如，群组 `1234567890` 变成 `-1001234567890`）。
 :::
 
 ## Recent Bot API Features
 
-- **Bot API 9.4 (Feb 2026):** Private Chat Topics — bots can create forum topics in 1-on-1 DM chats via `createForumTopic`. See [Private Chat Topics](#private-chat-topics-bot-api-94) above.
-- **Privacy policy:** Telegram now requires bots to have a privacy policy. Set one via BotFather with `/setprivacy_policy`, or Telegram may auto-generate a placeholder. This is particularly important if your bot is public-facing.
-- **Message streaming:** Bot API 9.x added support for streaming long responses, which can improve perceived latency for lengthy agent replies.
+- **Bot API 9.4（2026年2月）：** 私人聊天话题 — 机器人可以通过 `createForumTopic` 在1对1私信中创建论坛话题。请参阅上面的[私人聊天话题](#private-chat-topics-bot-api-94)。
+- **隐私政策：** Telegram 现在要求机器人具有隐私政策。通过 BotFather 使用 `/setprivacy_policy` 设置一个，否则 Telegram 可能会自动生成占位符。如果您的机器人是面向公众的，这尤其重要。
+- **消息流式传输：** Bot API 9.x 添加了对长响应流式传输的支持，这可以改善冗长智能体回复的感知延迟。
 
 ## Interactive Model Picker
 
-When you send `/model` with no arguments in a Telegram chat, Hermes shows an interactive inline keyboard for switching models:
+当您在 Telegram 聊天中发送不带参数的 `/model` 时，Hermes 会显示一个交互式内联键盘用于切换模型：
 
-1. **Provider selection** — buttons showing each available provider with model counts (e.g., "OpenAI (15)", "✓ Anthropic (12)" for the current provider).
-2. **Model selection** — paginated model list with **Prev**/**Next** navigation, a **Back** button to return to providers, and **Cancel**.
+1. **提供商选择** — 显示每个可用提供商的按钮，带有模型数量（例如，"OpenAI (15)"，"✓ Anthropic (12)" 表示当前提供商）。
+2. **模型选择** — 带 **Prev**/**Next** 导航的分页模型列表，一个 **Back** 按钮返回提供商，以及 **Cancel**。
 
-The current model and provider are displayed at the top. All navigation happens by editing the same message in-place (no chat clutter).
+当前模型和提供商显示在顶部。所有导航都通过就地编辑同一条消息来完成（不会弄乱聊天）。
 
 :::tip
-If you know the exact model name, type `/model <name>` directly to skip the picker. You can also type `/model <name> --global` to persist the change across sessions.
+如果您知道确切的模型名称，直接输入 `/model <name>` 可以跳过选择器。您也可以输入 `/model <name> --global` 以跨会话持久化更改。
 :::
 
 ## Webhook Mode
 
-By default, the Telegram adapter connects via **long polling** — the gateway makes outbound connections to Telegram's servers. This works everywhere but keeps a persistent connection open.
+默认情况下，Telegram 适配器通过**长轮询**连接 — 网关向 Telegram 的服务器发出出站连接。这在任何地方都能工作，但会保持持久连接打开。
 
-**Webhook mode** is an alternative where Telegram pushes updates to your server over HTTPS. This is ideal for **serverless and cloud deployments** (Fly.io, Railway, etc.) where inbound HTTP can wake a suspended machine.
+**Webhook 模式**是一种替代方案，Telegram 通过 HTTPS 将更新推送到您的服务器。这非常适合**无服务器和云部署**（Fly.io、Railway 等），因为入站 HTTP 可以唤醒暂停的机器。
 
-### Configuration
+### 配置
 
-Set the `TELEGRAM_WEBHOOK_URL` environment variable to enable webhook mode:
+设置 `TELEGRAM_WEBHOOK_URL` 环境变量以启用 webhook 模式：
 
 ```bash
-# Required — your public HTTPS endpoint
+# 必需 — 您的公共 HTTPS 端点
 TELEGRAM_WEBHOOK_URL=https://app.fly.dev/telegram
 
-# Optional — local listen port (default: 8443)
+# 可选 — 本地监听端口（默认：8443）
 TELEGRAM_WEBHOOK_PORT=8443
 
-# Optional — secret token for update verification (auto-generated if not set)
+# 可选 — 用于更新验证的密钥令牌（如果未设置则自动生成）
 TELEGRAM_WEBHOOK_SECRET=my-secret-token
 ```
 
-Or in `~/.hermes/config.yaml`:
+或在 `~/.hermes/config.yaml` 中：
 
 ```yaml
 telegram:
@@ -427,29 +427,29 @@ telegram:
 When `TELEGRAM_WEBHOOK_URL` is set, the gateway starts an HTTP server listening on `0.0.0.0:<port>` and registers the webhook URL with Telegram. The URL path is extracted from the webhook URL (defaults to `/telegram`).
 
 :::warning
-Telegram requires a **valid TLS certificate** on the webhook endpoint. Self-signed certificates will be rejected. Use a reverse proxy (nginx, Caddy) or a platform that provides TLS termination (Fly.io, Railway, Cloudflare Tunnel).
+Telegram 需要 webhook 端点上的**有效 TLS 证书**。自签名证书将被拒绝。使用反向代理（nginx、Caddy）或提供 TLS 终止的平台（Fly.io、Railway、Cloudflare Tunnel）。
 :::
 
 ## DNS-over-HTTPS Fallback IPs
 
-In some restricted networks, `api.telegram.org` may resolve to an IP that is unreachable. The Telegram adapter includes a **fallback IP** mechanism that transparently retries connections against alternative IPs while preserving the correct TLS hostname and SNI.
+在某些受限网络中，`api.telegram.org` 可能会解析到一个无法访问的 IP。Telegram 适配器包含一个**备用 IP**机制，可以透明地重试到备用 IP 的连接，同时保持正确的 TLS 主机名和 SNI。
 
-### How it works
+### 工作原理
 
-1. If `TELEGRAM_FALLBACK_IPS` is set, those IPs are used directly.
-2. Otherwise, the adapter automatically queries **Google DNS** and **Cloudflare DNS** via DNS-over-HTTPS (DoH) to discover alternative IPs for `api.telegram.org`.
-3. IPs returned by DoH that differ from the system DNS result are used as fallbacks.
-4. If DoH is also blocked, a hardcoded seed IP (`149.154.167.220`) is used as a last resort.
-5. Once a fallback IP succeeds, it becomes "sticky" — subsequent requests use it directly without retrying the primary path first.
+1. 如果设置了 `TELEGRAM_FALLBACK_IPS`，则直接使用这些 IP。
+2. 否则，适配器自动通过 **Google DNS** 和 **Cloudflare DNS** 的 DNS-over-HTTPS (DoH) 查询，为 `api.telegram.org` 发现备用 IP。
+3. DoH 返回的、与系统 DNS 结果不同的 IP 被用作备用。
+4. 如果 DoH 也被阻止，则使用硬编码的种子 IP（`149.154.167.220`）作为最后手段。
+5. 一旦备用 IP 成功，它就会变得"粘性" — 后续请求直接使用它而不先重试主路径。
 
-### Configuration
+### 配置
 
 ```bash
-# Explicit fallback IPs (comma-separated)
+# 显式备用 IP（逗号分隔）
 TELEGRAM_FALLBACK_IPS=149.154.167.220,149.154.167.221
 ```
 
-Or in `~/.hermes/config.yaml`:
+或在 `~/.hermes/config.yaml` 中：
 
 ```yaml
 platforms:
@@ -460,52 +460,52 @@ platforms:
 ```
 
 :::tip
-You usually don't need to configure this manually. The auto-discovery via DoH handles most restricted-network scenarios. The `TELEGRAM_FALLBACK_IPS` env var is only needed if DoH is also blocked on your network.
+您通常不需要手动配置这个。通过 DoH 的自动发现可以处理大多数受限网络场景。只有当 DoH 在您的网络上也被阻止时，才需要 `TELEGRAM_FALLBACK_IPS` 环境变量。
 :::
 
 ## Proxy Support
 
-If your network requires an HTTP proxy to reach the internet (common in corporate environments), the Telegram adapter automatically reads standard proxy environment variables and routes all connections through the proxy.
+如果您的网络需要 HTTP 代理来访问互联网（企业环境中常见），Telegram 适配器会自动读取标准代理环境变量并通过代理路由所有连接。
 
-### Supported variables
+### 支持的变量
 
-The adapter checks these environment variables in order, using the first one that is set:
+适配器按顺序检查这些环境变量，使用第一个被设置的：
 
 1. `HTTPS_PROXY`
 2. `HTTP_PROXY`
 3. `ALL_PROXY`
-4. `https_proxy` / `http_proxy` / `all_proxy` (lowercase variants)
+4. `https_proxy` / `http_proxy` / `all_proxy`（小写变体）
 
-### Configuration
+### 配置
 
-Set the proxy in your environment before starting the gateway:
+在启动网关之前在您的环境中设置代理：
 
 ```bash
 export HTTPS_PROXY=http://proxy.example.com:8080
 hermes gateway
 ```
 
-Or add it to `~/.hermes/.env`:
+或将其添加到 `~/.hermes/.env`：
 
 ```bash
 HTTPS_PROXY=http://proxy.example.com:8080
 ```
 
-The proxy applies to both the primary transport and all fallback IP transports. No additional Hermes configuration is needed — if the environment variable is set, it's used automatically.
+代理适用于主传输和所有备用 IP 传输。不需要额外的 Hermes 配置 — 如果环境变量被设置，它会自动使用。
 
 :::note
-This covers the custom fallback transport layer that Hermes uses for Telegram connections. The standard `httpx` client used elsewhere already respects proxy env vars natively.
+这涵盖了 Hermes 用于 Telegram 连接的自定义备用传输层。其他地方使用的标准 `httpx` 客户端本身已经原生尊重代理环境变量。
 :::
 
 ## Message Reactions
 
-The bot can add emoji reactions to messages as visual processing feedback:
+机器人可以向消息添加 emoji 反应作为视觉处理反馈：
 
-- 👀 when the bot starts processing your message
-- ✅ when the response is delivered successfully
-- ❌ if an error occurs during processing
+- 👀 当机器人开始处理您的消息时
+- ✅ 当响应成功传递时
+- 如果处理过程中发生错误
 
-Reactions are **disabled by default**. Enable them in `config.yaml`:
+反应**默认禁用**。在 `config.yaml` 中启用它们：
 
 ```yaml
 telegram:
@@ -523,35 +523,35 @@ Unlike Discord (where reactions are additive), Telegram's Bot API replaces all b
 :::
 
 :::tip
-If the bot doesn't have permission to add reactions in a group, the reaction calls fail silently and message processing continues normally.
+如果机器人没有在群组中添加反应的权限，反应调用会静默失败，消息处理会正常继续。
 :::
 
 ## Troubleshooting
 
-| Problem | Solution |
+| 问题 | 解决方案 |
 |---------|----------|
-| Bot not responding at all | Verify `TELEGRAM_BOT_TOKEN` is correct. Check `hermes gateway` logs for errors. |
-| Bot responds with "unauthorized" | Your user ID is not in `TELEGRAM_ALLOWED_USERS`. Double-check with @userinfobot. |
-| Bot ignores group messages | Privacy mode is likely on. Disable it (Step 3) or make the bot a group admin. **Remember to remove and re-add the bot after changing privacy.** |
-| Voice messages not transcribed | Verify STT is available: install `faster-whisper` for local transcription, or set `GROQ_API_KEY` / `VOICE_TOOLS_OPENAI_KEY` in `~/.hermes/.env`. |
-| Voice replies are files, not bubbles | Install `ffmpeg` (needed for Edge TTS Opus conversion). |
-| Bot token revoked/invalid | Generate a new token via `/revoke` then `/newbot` or `/token` in BotFather. Update your `.env` file. |
-| Webhook not receiving updates | Verify `TELEGRAM_WEBHOOK_URL` is publicly reachable (test with `curl`). Ensure your platform/reverse proxy routes inbound HTTPS traffic from the URL's port to the local listen port configured by `TELEGRAM_WEBHOOK_PORT` (they do not need to be the same number). Ensure SSL/TLS is active — Telegram only sends to HTTPS URLs. Check firewall rules. |
+| 机器人完全不响应 | 验证 `TELEGRAM_BOT_TOKEN` 是否正确。检查 `hermes gateway` 日志中的错误。 |
+| 机器人回复"未授权" | 您的用户 ID 不在 `TELEGRAM_ALLOWED_USERS` 中。使用 @userinfobot 仔细检查。 |
+| 机器人忽略群组消息 | 隐私模式可能已开启。禁用它（第3步）或让机器人成为群组管理员。**更改隐私设置后记得移除并重新添加机器人。** |
+| 语音消息未转录 | 验证 STT 是否可用：安装 `faster-whisper` 进行本地转录，或在 `~/.hermes/.env` 中设置 `GROQ_API_KEY` / `VOICE_TOOLS_OPENAI_KEY`。 |
+| 语音回复是文件而非气泡 | 安装 `ffmpeg`（Edge TTS Opus 转换需要）。 |
+| 机器人令牌被撤销/无效 | 通过 BotFather 中的 `/revoke` 然后 `/newbot` 或 `/token` 生成新令牌。更新您的 `.env` 文件。 |
+| Webhook 未收到更新 | 验证 `TELEGRAM_WEBHOOK_URL` 是否公开可访问（用 `curl` 测试）。确保您的平台/反向代理将来自 URL 端口的入站 HTTPS 流量路由到 `TELEGRAM_WEBHOOK_PORT` 配置的本地监听端口（它们不需要是相同的数字）。确保 SSL/TLS 已激活 — Telegram 只发送到 HTTPS URL。检查防火墙规则。 |
 
 ## Exec Approval
 
-When the agent tries to run a potentially dangerous command, it asks you for approval in the chat:
+当智能体尝试运行潜在危险命令时，它会在聊天中请求您的批准：
 
-> ⚠️ This command is potentially dangerous (recursive delete). Reply "yes" to approve.
+> ⚠️ 此命令可能有危险（递归删除）。回复 "yes" 以批准。
 
-Reply "yes"/"y" to approve or "no"/"n" to deny.
+回复 "yes"/"y" 批准或 "no"/"n" 拒绝。
 
 ## Security
 
 :::warning
-Always set `TELEGRAM_ALLOWED_USERS` to restrict who can interact with your bot. Without it, the gateway denies all users by default as a safety measure.
+始终设置 `TELEGRAM_ALLOWED_USERS` 以限制谁可以与您的机器人交互。没有它，网关默认拒绝所有用户作为安全措施。
 :::
 
-Never share your bot token publicly. If compromised, revoke it immediately via BotFather's `/revoke` command.
+永远不要公开分享您的机器人令牌。如果泄露，立即通过 BotFather 的 `/revoke` 命令撤销它。
 
-For more details, see the [Security documentation](/user-guide/security). You can also use [DM pairing](/user-guide/messaging#dm-pairing-alternative-to-allowlists) for a more dynamic approach to user authorization.
+有关更多详细信息，请参阅[安全文档](/user-guide/security)。您也可以使用[私信配对](/user-guide/messaging#dm-pairing-alternative-to-allowlists) 来获得更动态的用户授权方法。

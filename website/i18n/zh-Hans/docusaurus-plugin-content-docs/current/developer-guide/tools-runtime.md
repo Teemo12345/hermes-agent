@@ -63,149 +63,149 @@ Each import triggers the module's `registry.register()` calls. Errors in optiona
 
 After core tool discovery, MCP tools and plugin tools are also discovered:
 
-1. **MCP tools** — `tools.mcp_tool.discover_mcp_tools()` reads MCP server config and registers tools from external servers.
-2. **Plugin tools** — `hermes_cli.plugins.discover_plugins()` loads user/project/pip plugins that may register additional tools.
+1. **MCP 工具** — `tools.mcp_tool.discover_mcp_tools()` 读取 MCP 服务器配置并从外部服务器注册工具。
+2. **插件工具** — `hermes_cli.plugins.discover_plugins()` 加载可能注册额外工具的用户/项目/pip 插件。
 
-## Tool availability checking (`check_fn`)
+## 工具可用性检查（`check_fn`）
 
-Each tool can optionally provide a `check_fn` — a callable that returns `True` when the tool is available and `False` otherwise. Typical checks include:
+每个工具可以选择提供一个 `check_fn` — 一个在工具可用时返回 `True`、否则返回 `False` 的可调用对象。典型的检查包括：
 
-- **API key present** — e.g., `lambda: bool(os.environ.get("SERP_API_KEY"))` for web search
-- **Service running** — e.g., checking if the Honcho server is configured
-- **Binary installed** — e.g., verifying `playwright` is available for browser tools
+- **API 密钥存在** — 例如，`lambda: bool(os.environ.get("SERP_API_KEY"))` 用于网页搜索
+- **服务运行中** — 例如，检查是否配置了 Honcho 服务器
+- **二进制文件已安装** — 例如，验证 `playwright` 是否可用于浏览器工具
 
-When `registry.get_definitions()` builds the schema list for the model, it runs each tool's `check_fn()`:
+当 `registry.get_definitions()` 为模型构建模式列表时，它运行每个工具的 `check_fn()`：
 
 ```python
-# Simplified from registry.py
+# 简化自 registry.py
 if entry.check_fn:
     try:
         available = bool(entry.check_fn())
     except Exception:
-        available = False   # Exceptions = unavailable
+        available = False   # 异常 = 不可用
     if not available:
-        continue            # Skip this tool entirely
+        continue            # 完全跳过此工具
 ```
 
-Key behaviors:
-- Check results are **cached per-call** — if multiple tools share the same `check_fn`, it only runs once.
-- Exceptions in `check_fn()` are treated as "unavailable" (fail-safe).
-- The `is_toolset_available()` method checks whether a toolset's `check_fn` passes, used for UI display and toolset resolution.
+关键行为：
+- 检查结果**按调用缓存** — 如果多个工具共享相同的 `check_fn`，它只运行一次。
+- `check_fn()` 中的异常被视为"不可用"（故障安全）。
+- `is_toolset_available()` 方法检查工具集的 `check_fn` 是否通过，用于 UI 显示和工具集解析。
 
-## Toolset resolution
+## 工具集解析
 
-Toolsets are named bundles of tools. Hermes resolves them through:
+工具集是命名的工具捆绑包。Hermes 通过以下方式解析它们：
 
-- explicit enabled/disabled toolset lists
-- platform presets (`hermes-cli`, `hermes-telegram`, etc.)
-- dynamic MCP toolsets
-- curated special-purpose sets like `hermes-acp`
+- 显式启用/禁用工具集列表
+- 平台预设（`hermes-cli`、`hermes-telegram` 等）
+- 动态 MCP 工具集
+- 精选的特殊用途集如 `hermes-acp`
 
-### How `get_tool_definitions()` filters tools
+### `get_tool_definitions()` 如何过滤工具
 
-The main entry point is `model_tools.get_tool_definitions(enabled_toolsets, disabled_toolsets, quiet_mode)`:
+主要入口点是 `model_tools.get_tool_definitions(enabled_toolsets, disabled_toolsets, quiet_mode)`：
 
-1. **If `enabled_toolsets` is provided** — only tools from those toolsets are included. Each toolset name is resolved via `resolve_toolset()` which expands composite toolsets into individual tool names.
+1. **如果提供了 `enabled_toolsets`** — 仅包含来自这些工具集的工具。每个工具集名称通过 `resolve_toolset()` 解析，该函数将复合工具集展开为单独的工具名称。
 
-2. **If `disabled_toolsets` is provided** — start with ALL toolsets, then subtract the disabled ones.
+2. **如果提供了 `disabled_toolsets`** — 从所有工具集开始，然后减去禁用的工具集。
 
-3. **If neither** — include all known toolsets.
+3. **如果两者都没有** — 包含所有已知的工具集。
 
-4. **Registry filtering** — the resolved tool name set is passed to `registry.get_definitions()`, which applies `check_fn` filtering and returns OpenAI-format schemas.
+4. **注册表过滤** — 解析的工具名称集被传递给 `registry.get_definitions()`，它应用 `check_fn` 过滤并返回 OpenAI 格式的模式。
 
 5. **Dynamic schema patching** — after filtering, `execute_code` and `browser_navigate` schemas are dynamically adjusted to only reference tools that actually passed filtering (prevents model hallucination of unavailable tools).
 
 ### Legacy toolset names
 
-Old toolset names with `_tools` suffixes (e.g., `web_tools`, `terminal_tools`) are mapped to their modern tool names via `_LEGACY_TOOLSET_MAP` for backward compatibility.
+带有 `_tools` 后缀的旧工具集名称（例如 `web_tools`、`terminal_tools`）通过 `_LEGACY_TOOLSET_MAP` 映射到其现代工具名称，以保持向后兼容性。
 
-## Dispatch
+## 分发
 
-At runtime, tools are dispatched through the central registry, with agent-loop exceptions for some agent-level tools such as memory/todo/session-search handling.
+在运行时，工具通过中央注册表分发，智能体循环中有一些智能体级工具（如 memory/todo/session-search 处理）的异常处理。
 
-### Dispatch flow: model tool_call → handler execution
+### 分发流程：模型 tool_call → 处理程序执行
 
-When the model returns a `tool_call`, the flow is:
+当模型返回 `tool_call` 时，流程如下：
 
 ```
 Model response with tool_call
     ↓
-run_agent.py agent loop
+run_agent.py 智能体循环
     ↓
 model_tools.handle_function_call(name, args, task_id, user_task)
     ↓
-[Agent-loop tools?] → handled directly by agent loop (todo, memory, session_search, delegate_task)
+[智能体循环工具？] → 由智能体循环直接处理（todo、memory、session_search、delegate_task）
     ↓
-[Plugin pre-hook] → invoke_hook("pre_tool_call", ...)
+[插件预钩子] → invoke_hook("pre_tool_call", ...)
     ↓
 registry.dispatch(name, args, **kwargs)
     ↓
-Look up ToolEntry by name
+按名称查找 ToolEntry
     ↓
-[Async handler?] → bridge via _run_async()
-[Sync handler?]  → call directly
+[异步处理程序？] → 通过 _run_async() 桥接
+[同步处理程序？] → 直接调用
     ↓
-Return result string (or JSON error)
+返回结果字符串（或 JSON 错误）
     ↓
-[Plugin post-hook] → invoke_hook("post_tool_call", ...)
+[插件后钩子] → invoke_hook("post_tool_call", ...)
 ```
 
-### Error wrapping
+### 错误包装
 
-All tool execution is wrapped in error handling at two levels:
+所有工具执行都在两个级别包装了错误处理：
 
-1. **`registry.dispatch()`** — catches any exception from the handler and returns `{"error": "Tool execution failed: ExceptionType: message"}` as JSON.
+1. **`registry.dispatch()`** — 捕获处理程序中的任何异常并返回 JSON 格式的 `{"error": "Tool execution failed: ExceptionType: message"}`。
 
-2. **`handle_function_call()`** — wraps the entire dispatch in a secondary try/except that returns `{"error": "Error executing tool_name: message"}`.
+2. **`handle_function_call()`** — 在第二次 try/except 中包装整个分发，返回 `{"error": "Error executing tool_name: message"}`。
 
-This ensures the model always receives a well-formed JSON string, never an unhandled exception.
+这确保模型始终收到格式良好的 JSON 字符串，而不是未处理的异常。
 
-### Agent-loop tools
+### 智能体循环工具
 
-Four tools are intercepted before registry dispatch because they need agent-level state (TodoStore, MemoryStore, etc.):
+四个工具在注册表分发之前被拦截，因为它们需要智能体级状态（TodoStore、MemoryStore 等）：
 
-- `todo` — planning/task tracking
-- `memory` — persistent memory writes
-- `session_search` — cross-session recall
+- `todo` — 规划/任务跟踪
+- `memory` — 持久内存写入
+- `session_search` — 跨会话回忆
 - `delegate_task` — spawns subagent sessions
 
 These tools' schemas are still registered in the registry (for `get_tool_definitions`), but their handlers return a stub error if dispatch somehow reaches them directly.
 
 ### Async bridging
 
-When a tool handler is async, `_run_async()` bridges it to the sync dispatch path:
+当工具处理程序是异步的时，`_run_async()` 将其桥接到同步分发路径：
 
-- **CLI path (no running loop)** — uses a persistent event loop to keep cached async clients alive
-- **Gateway path (running loop)** — spins up a disposable thread with `asyncio.run()`
-- **Worker threads (parallel tools)** — uses per-thread persistent loops stored in thread-local storage
+- **CLI 路径（无运行循环）** — 使用持久的事件循环保持缓存的异步客户端存活
+- **Gateway 路径（运行循环）** — 使用 `asyncio.run()` 启动可处置线程
+- **工作线程（并行工具）** — 使用存储在线程本地存储中的每线程持久循环
 
-## The DANGEROUS_PATTERNS approval flow
+## DANGEROUS_PATTERNS 审批流程
 
-The terminal tool integrates a dangerous-command approval system defined in `tools/approval.py`:
+终端工具集成了在 `tools/approval.py` 中定义的危险命令审批系统：
 
-1. **Pattern detection** — `DANGEROUS_PATTERNS` is a list of `(regex, description)` tuples covering destructive operations:
-   - Recursive deletes (`rm -rf`)
-   - Filesystem formatting (`mkfs`, `dd`)
-   - SQL destructive operations (`DROP TABLE`, `DELETE FROM` without `WHERE`)
-   - System config overwrites (`> /etc/`)
-   - Service manipulation (`systemctl stop`)
-   - Remote code execution (`curl | sh`)
-   - Fork bombs, process kills, etc.
+1. **模式检测** — `DANGEROUS_PATTERNS` 是一个涵盖破坏性操作的 `(regex, description)` 元组列表：
+   - 递归删除（`rm -rf`）
+   - 文件系统格式化（`mkfs`、`dd`）
+   - SQL 破坏性操作（`DROP TABLE`、`DELETE FROM` 没有 `WHERE`）
+   - 系统配置覆盖（`> /etc/`）
+   - 服务操作（`systemctl stop`）
+   - 远程代码执行（`curl | sh`）
+   - Fork 炸弹、进程终止等
 
-2. **Detection** — before executing any terminal command, `detect_dangerous_command(command)` checks against all patterns.
+2. **检测** — 在执行任何终端命令之前，`detect_dangerous_command(command)` 检查所有模式。
 
-3. **Approval prompt** — if a match is found:
-   - **CLI mode** — an interactive prompt asks the user to approve, deny, or allow permanently
-   - **Gateway mode** — an async approval callback sends the request to the messaging platform
-   - **Smart approval** — optionally, an auxiliary LLM can auto-approve low-risk commands that match patterns (e.g., `rm -rf node_modules/` is safe but matches "recursive delete")
+3. **审批提示** — 如果找到匹配：
+   - **CLI 模式** — 交互式提示要求用户批准、拒绝或永久允许
+   - **Gateway 模式** — 异步审批回调将请求发送到消息平台
+   - **智能审批** — 可选地，辅助 LLM 可以自动批准匹配模式的低风险命令（例如 `rm -rf node_modules/` 是安全的但匹配"递归删除"）
 
-4. **Session state** — approvals are tracked per-session. Once you approve "recursive delete" for a session, subsequent `rm -rf` commands don't re-prompt.
+4. **会话状态** — 审批按会话跟踪。一旦您批准了会话的"递归删除"，后续的 `rm -rf` 命令不会重新提示。
 
-5. **Permanent allowlist** — the "allow permanently" option writes the pattern to `config.yaml`'s `command_allowlist`, persisting across sessions.
+5. **永久允许列表** — "永久允许"选项将模式写入 `config.yaml` 的 `command_allowlist`，跨会话持久化。
 
-## Terminal/runtime environments
+## 终端/运行时环境
 
-The terminal system supports multiple backends:
+终端系统支持多种后端：
 
 - local
 - docker
@@ -214,20 +214,20 @@ The terminal system supports multiple backends:
 - modal
 - daytona
 
-It also supports:
+它还支持：
 
-- per-task cwd overrides
-- background process management
-- PTY mode
-- approval callbacks for dangerous commands
+- 每任务 cwd 覆盖
+- 后台进程管理
+- PTY 模式
+- 危险命令的审批回调
 
-## Concurrency
+## 并发
 
-Tool calls may execute sequentially or concurrently depending on the tool mix and interaction requirements.
+工具调用可以根据工具组合和交互需求顺序或并发执行。
 
-## Related docs
+## 相关文档
 
-- [Toolsets Reference](../reference/toolsets-reference.md)
-- [Built-in Tools Reference](../reference/tools-reference.md)
-- [Agent Loop Internals](./agent-loop.md)
-- [ACP Internals](./acp-internals.md)
+- [工具集参考](../reference/toolsets-reference.md)
+- [内置工具参考](../reference/tools-reference.md)
+- [智能体循环内部机制](./agent-loop.md)
+- [ACP 内部机制](./acp-internals.md)

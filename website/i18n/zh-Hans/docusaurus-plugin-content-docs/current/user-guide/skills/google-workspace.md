@@ -1,32 +1,32 @@
 ---
 sidebar_position: 2
 sidebar_label: "Google Workspace"
-title: "Google Workspace — Gmail, Calendar, Drive, Sheets & Docs"
-description: "Send email, manage calendar events, search Drive, read/write Sheets, and access Docs — all through OAuth2-authenticated Google APIs"
+title: "Google Workspace — Gmail、日历、云端硬盘、表格和文档"
+description: "发送电子邮件、管理日历事件、搜索云端硬盘、读/写表格和访问文档 — 全部通过 OAuth2 认证的 Google API"
 ---
 
-# Google Workspace Skill
+# Google Workspace 技能
 
-Gmail, Calendar, Drive, Contacts, Sheets, and Docs integration for Hermes. Uses OAuth2 with automatic token refresh. Prefers the [Google Workspace CLI (`gws`)](https://github.com/nicholasgasior/gws) when available for broader coverage, and falls back to Google's Python client libraries otherwise.
+Hermes 的 Gmail、日历、云端硬盘、联系人和表格与文档集成。使用 OAuth2 并自动刷新令牌。优先使用 [Google Workspace CLI (`gws`)](https://github.com/nicholasgasior/gws) 以获得更广泛的覆盖，否则回退到 Google 的 Python 客户端库。
 
-**Skill path:** `skills/productivity/google-workspace/`
+**技能路径：** `skills/productivity/google-workspace/`
 
-## Setup
+## 设置
 
-The setup is fully agent-driven — ask Hermes to set up Google Workspace and it walks you through each step. The flow:
+设置完全由智能体驱动 — 要求 Hermes 设置 Google Workspace，它会引导您完成每个步骤。流程：
 
-1. **Create a Google Cloud project** and enable the required APIs (Gmail, Calendar, Drive, Sheets, Docs, People)
-2. **Create OAuth 2.0 credentials** (Desktop app type) and download the client secret JSON
-3. **Authorize** — Hermes generates an auth URL, you approve in the browser, paste back the redirect URL
-4. **Done** — token auto-refreshes from that point on
+1. **创建 Google Cloud 项目** 并启用所需的 API（Gmail、日历、云端硬盘、表格、文档、人员）
+2. **创建 OAuth 2.0 凭据**（桌面应用类型）并下载客户端密钥 JSON
+3. **授权** — Hermes 生成授权 URL，您在浏览器中批准，粘贴回重定向 URL
+4. **完成** — 从该点开始令牌自动刷新
 
-:::tip Email-only users
-If you only need email (no Calendar/Drive/Sheets), use the **himalaya** skill instead — it works with a Gmail App Password and takes 2 minutes. No Google Cloud project needed.
+:::tip 仅电子邮件用户
+如果您只需要电子邮件（不需要日历/云端硬盘/表格），请改用 **himalaya** 技能 — 它使用 Gmail 应用密码，需要 2 分钟。无需 Google Cloud 项目。
 :::
 
 ## Gmail
 
-### Searching
+### 搜索
 
 ```bash
 $GAPI gmail search "is:unread" --max 10
@@ -34,158 +34,198 @@ $GAPI gmail search "from:boss@company.com newer_than:1d"
 $GAPI gmail search "has:attachment filename:pdf newer_than:7d"
 ```
 
-Returns JSON with `id`, `from`, `subject`, `date`, `snippet`, and `labels` for each message.
+返回 JSON，包含每条消息的 `id`、`from`、`subject`、`date`、`snippet` 和 `labels`。
 
-### Reading
+### 阅读
 
 ```bash
 $GAPI gmail get MESSAGE_ID
 ```
 
-Returns the full message body as text (prefers plain text, falls back to HTML).
+返回完整消息正文作为文本（首选纯文本，回退到 HTML）。
 
-### Sending
+### 发送
 
 ```bash
-# Basic send
-$GAPI gmail send --to user@example.com --subject "Hello" --body "Message text"
+# 基本发送
+$GAPI gmail send "Hello world" --to recipient@example.com
 
-# HTML email
-$GAPI gmail send --to user@example.com --subject "Report" \
-  --body "<h1>Q4 Results</h1><p>Details here</p>" --html
+# 带附件发送
+$GAPI gmail send "Report attached" --to boss@company.com --attach report.pdf
 
-# Custom From header (display name + email)
-$GAPI gmail send --to user@example.com --subject "Hello" \
-  --from '"Research Agent" <user@example.com>' --body "Message text"
-
-# With CC
-$GAPI gmail send --to user@example.com --cc "team@example.com" \
-  --subject "Update" --body "FYI"
+# HTML 邮件
+$GAPI gmail send "<h1>Title</h1><p>Content</p>" --to recipient@example.com --html
 ```
 
-### Custom From Header
-
-The `--from` flag lets you customize the sender display name on outgoing emails. This is useful when multiple agents share the same Gmail account but you want recipients to see different names:
+### 标签管理
 
 ```bash
-# Agent 1
-$GAPI gmail send --to client@co.com --subject "Research Summary" \
-  --from '"Research Agent" <shared@company.com>' --body "..."
-
-# Agent 2  
-$GAPI gmail send --to client@co.com --subject "Code Review" \
-  --from '"Code Assistant" <shared@company.com>' --body "..."
-```
-
-**How it works:** The `--from` value is set as the RFC 5322 `From` header on the MIME message. Gmail allows customizing the display name on your own authenticated email address without any additional configuration. Recipients see the custom display name (e.g. "Research Agent") while the email address stays the same.
-
-**Important:** If you use a *different email address* in `--from` (not the authenticated account), Gmail requires that address to be configured as a [Send As alias](https://support.google.com/mail/answer/22370) in Gmail Settings → Accounts → Send mail as.
-
-The `--from` flag works on both `send` and `reply`:
-
-```bash
-$GAPI gmail reply MESSAGE_ID \
-  --from '"Support Bot" <shared@company.com>' --body "We're on it"
-```
-
-### Replying
-
-```bash
-$GAPI gmail reply MESSAGE_ID --body "Thanks, that works for me."
-```
-
-Automatically threads the reply (sets `In-Reply-To` and `References` headers) and uses the original message's thread ID.
-
-### Labels
-
-```bash
-# List all labels
+# 列出所有标签
 $GAPI gmail labels
 
-# Add/remove labels
-$GAPI gmail modify MESSAGE_ID --add-labels LABEL_ID
-$GAPI gmail modify MESSAGE_ID --remove-labels UNREAD
+# 添加标签到消息
+$GAPI gmail label MESSAGE_ID --add "IMPORTANT"
+
+# 从消息移除标签
+$GAPI gmail label MESSAGE_ID --remove "INBOX"
 ```
 
-## Calendar
+## 日历
+
+### 创建事件
 
 ```bash
-# List events (defaults to next 7 days)
-$GAPI calendar list
-$GAPI calendar list --start 2026-03-01T00:00:00Z --end 2026-03-07T23:59:59Z
+# 基本事件
+$GAPI calendar create "Team meeting" --start "2025-04-20 14:00" --duration 60
 
-# Create event (timezone required)
-$GAPI calendar create --summary "Team Standup" \
-  --start 2026-03-01T10:00:00-07:00 --end 2026-03-01T10:30:00-07:00
+# 完整事件
+$GAPI calendar create "Project review" \
+  --start "2025-04-20 14:00" \
+  --end "2025-04-20 16:00" \
+  --location "Conference Room A" \
+  --description "Review Q1 progress" \
+  --attendees alice@example.com,bob@example.com
+```
 
-# With location and attendees
-$GAPI calendar create --summary "Lunch" \
-  --start 2026-03-01T12:00:00Z --end 2026-03-01T13:00:00Z \
-  --location "Cafe" --attendees "alice@co.com,bob@co.com"
+### 搜索事件
 
-# Delete event
+```bash
+# 即将到来的事件
+$GAPI calendar list --days 7
+
+# 特定日期范围
+$GAPI calendar list --start "2025-04-20" --end "2025-04-27"
+
+# 搜索关键词
+$GAPI calendar search "meeting"
+```
+
+### 更新/删除事件
+
+```bash
+# 更新事件
+$GAPI calendar update EVENT_ID --start "2025-04-20 15:00"
+
+# 删除事件
 $GAPI calendar delete EVENT_ID
 ```
 
-:::warning
-Calendar times **must** include a timezone offset (e.g. `-07:00`) or use UTC (`Z`). Bare datetimes like `2026-03-01T10:00:00` are ambiguous and will be treated as UTC.
-:::
+## 云端硬盘
 
-## Drive
+### 搜索文件
 
 ```bash
-$GAPI drive search "quarterly report" --max 10
-$GAPI drive search "mimeType='application/pdf'" --raw-query --max 5
+# 基本搜索
+$GAPI drive search "report"
+
+# 按类型搜索
+$GAPI drive search "report" --type spreadsheet
+
+# 按日期搜索
+$GAPI drive search "report" --newer-than "30d"
 ```
 
-## Sheets
+### 下载文件
 
 ```bash
-# Read a range
-$GAPI sheets get SHEET_ID "Sheet1!A1:D10"
+# 下载到当前目录
+$GAPI drive download FILE_ID
 
-# Write to a range
-$GAPI sheets update SHEET_ID "Sheet1!A1:B2" --values '[["Name","Score"],["Alice","95"]]'
-
-# Append rows
-$GAPI sheets append SHEET_ID "Sheet1!A:C" --values '[["new","row","data"]]'
+# 下载到特定路径
+$GAPI drive download FILE_ID --output /path/to/save
 ```
 
-## Docs
+### 上传文件
 
 ```bash
-$GAPI docs get DOC_ID
+# 上传文件
+$GAPI drive upload report.pdf --name "Q1 Report"
+
+# 上传到特定文件夹
+$GAPI drive upload report.pdf --folder FOLDER_ID
 ```
 
-Returns the document title and full text content.
+## 表格
 
-## Contacts
+### 读取数据
 
 ```bash
-$GAPI contacts list --max 20
+# 读取整个表格
+$GAPI sheets read SPREADSHEET_ID
+
+# 读取特定范围
+$GAPI sheets read SPREADSHEET_ID --range "Sheet1!A1:C10"
 ```
 
-## Output Format
+### 写入数据
 
-All commands return JSON. Key fields per service:
+```bash
+# 更新单个单元格
+$GAPI sheets write SPREADSHEET_ID --range "Sheet1!A1" --value "Hello"
 
-| Command | Fields |
-|---------|--------|
-| `gmail search` | `id`, `threadId`, `from`, `to`, `subject`, `date`, `snippet`, `labels` |
-| `gmail get` | `id`, `threadId`, `from`, `to`, `subject`, `date`, `labels`, `body` |
-| `gmail send/reply` | `status`, `id`, `threadId` |
-| `calendar list` | `id`, `summary`, `start`, `end`, `location`, `description`, `htmlLink` |
-| `calendar create` | `status`, `id`, `summary`, `htmlLink` |
-| `drive search` | `id`, `name`, `mimeType`, `modifiedTime`, `webViewLink` |
-| `contacts list` | `name`, `emails`, `phones` |
-| `sheets get` | 2D array of cell values |
+# 批量更新
+$GAPI sheets write SPREADSHEET_ID --range "Sheet1!A1:C3" --values "data.csv"
 
-## Troubleshooting
+# 追加行
+$GAPI sheets append SPREADSHEET_ID --range "Sheet1!A1" --values "new_data.csv"
+```
 
-| Problem | Fix |
-|---------|-----|
-| `NOT_AUTHENTICATED` | Run setup (ask Hermes to set up Google Workspace) |
-| `REFRESH_FAILED` | Token revoked — re-run authorization steps |
-| `HttpError 403: Insufficient Permission` | Missing scope — revoke and re-authorize with the right services |
-| `HttpError 403: Access Not Configured` | API not enabled in Google Cloud Console |
-| `ModuleNotFoundError` | Run setup script with `--install-deps` |
+### 创建表格
+
+```bash
+# 创建新表格
+$GAPI sheets create "Project Tracker" --rows 100 --cols 10
+```
+
+## 文档
+
+### 读取文档
+
+```bash
+# 读取文档内容
+$GAPI docs read DOCUMENT_ID
+```
+
+### 创建文档
+
+```bash
+# 创建新文档
+$GAPI docs create "Meeting Notes" --content "Discussion points..."
+```
+
+## 联系人
+
+### 搜索联系
+
+```bash
+# 搜索联系人
+$GAPI people search "John Doe"
+
+# 列出所有联系
+$GAPI people list
+```
+
+## 故障排除
+
+### 令牌刷新失败
+
+如果令牌刷新失败：
+
+1. 删除 `~/.hermes/skills/productivity/google-workspace/token.json`
+2. 重新运行设置：要求 Hermes "重新设置 Google Workspace"
+
+### 权限错误
+
+如果遇到权限错误：
+
+1. 检查 Google Cloud 控制台中的 API 是否已启用
+2. 验证 OAuth 同意屏幕是否包含所有必需的作用域
+3. 重新授权：删除令牌文件并重新运行设置
+
+### 配额限制
+
+Google API 有配额限制。如果遇到限制：
+
+- 使用 Google Workspace CLI (`gws`) 以获得更高的配额
+- 实施请求速率限制
+- 考虑升级到付费 Google Workspace 计划

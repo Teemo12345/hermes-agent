@@ -219,24 +219,24 @@ You can append routing suffixes to model names: `:fastest` (default), `:cheapest
 
 The base URL can be overridden with `HF_BASE_URL`.
 
-## Custom & Self-Hosted LLM Providers
+## 自定义和自托管 LLM 提供商
 
-Hermes Agent works with **any OpenAI-compatible API endpoint**. If a server implements `/v1/chat/completions`, you can point Hermes at it. This means you can use local models, GPU inference servers, multi-provider routers, or any third-party API.
+Hermes Agent 适用于**任何 OpenAI 兼容的 API 端点**。如果服务器实现了 `/v1/chat/completions`，您就可以指向它。这意味着您可以使用本地模型、GPU 推理服务器、多提供商路由或任何第三方 API。
 
-### General Setup
+### 常规设置
 
-Three ways to configure a custom endpoint:
+配置自定义端点的三种方式：
 
-**Interactive setup (recommended):**
+**交互式设置（推荐）：**
 ```bash
 hermes model
-# Select "Custom endpoint (self-hosted / VLLM / etc.)"
-# Enter: API base URL, API key, Model name
+# 选择 "Custom endpoint (self-hosted / VLLM / etc.)"
+# 输入：API 基础 URL、API 密钥、模型名称
 ```
 
-**Manual config (`config.yaml`):**
+**手动配置（`config.yaml`）：**
 ```yaml
-# In ~/.hermes/config.yaml
+# 在 ~/.hermes/config.yaml 中
 model:
   default: your-model-name
   provider: custom
@@ -244,27 +244,26 @@ model:
   api_key: your-key-or-leave-empty-for-local
 ```
 
-:::warning Legacy env vars
-`OPENAI_BASE_URL` and `LLM_MODEL` in `.env` are **removed**. Neither is read by any part of Hermes — `config.yaml` is the single source of truth for model and endpoint configuration. If you have stale entries in your `.env`, they are automatically cleared on the next `hermes setup` or config migration. Use `hermes model` or edit `config.yaml` directly.
-:::
+:::warning 旧环境变量
+`.env` 中的 `OPENAI_BASE_URL` 和 `LLM_MODEL` 已被**移除**。Hermes 的任何部分都不会读取它们 — `config.yaml` 是模型和端点配置的单一真相来源。如果您 `.env` 中有过时的条目，它们会在下次 `hermes setup` 或配置迁移时自动清除。请直接使用 `hermes model` 或编辑 `config.yaml`。
 
-Both approaches persist to `config.yaml`, which is the source of truth for model, provider, and base URL.
+两种方法都会持久化到 `config.yaml`，这是模型、提供商和基础 URL 的真相来源。
 
-### Switching Models with `/model`
+### 使用 `/model` 切换模型
 
-Once a custom endpoint is configured, you can switch models mid-session:
-
-```
-/model custom:qwen-2.5          # Switch to a model on your custom endpoint
-/model custom                    # Auto-detect the model from the endpoint
-/model openrouter:claude-sonnet-4 # Switch back to a cloud provider
-```
-
-If you have **named custom providers** configured (see below), use the triple syntax:
+配置自定义端点后，您可以中途切换模型：
 
 ```
-/model custom:local:qwen-2.5    # Use the "local" custom provider with model qwen-2.5
-/model custom:work:llama3       # Use the "work" custom provider with llama3
+/model custom:qwen-2.5          # 切换到自定义端点上的模型
+/model custom                    # 自动从端点检测模型
+/model openrouter:claude-sonnet-4 # 切换回云提供商
+```
+
+如果您配置了**命名自定义提供商**（见下文），请使用三语法：
+
+```
+/model custom:local:qwen-2.5    # 使用 "local" 自定义提供商和模型 qwen-2.5
+/model custom:work:llama3       # 使用 "work" 自定义提供商和 llama3
 ```
 
 When switching providers, Hermes persists the base URL and provider to config so the change survives restarts. When switching away from a custom endpoint to a built-in provider, the stale base URL is automatically cleared.
@@ -870,84 +869,84 @@ You can also select named custom providers from the interactive `hermes model` m
 You can switch between providers at any time with `hermes model` — no restart required. Your conversation history, memory, and skills carry over regardless of which provider you use.
 :::
 
-## Optional API Keys
+## 可选 API 密钥
 
-| Feature | Provider | Env Variable |
+| 功能 | 提供商 | 环境变量 |
 |---------|----------|--------------|
-| Web scraping | [Firecrawl](https://firecrawl.dev/) | `FIRECRAWL_API_KEY`, `FIRECRAWL_API_URL` |
-| Browser automation | [Browserbase](https://browserbase.com/) | `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID` |
-| Image generation | [FAL](https://fal.ai/) | `FAL_KEY` |
-| Premium TTS voices | [ElevenLabs](https://elevenlabs.io/) | `ELEVENLABS_API_KEY` |
-| OpenAI TTS + voice transcription | [OpenAI](https://platform.openai.com/api-keys) | `VOICE_TOOLS_OPENAI_KEY` |
-| Mistral TTS + voice transcription | [Mistral](https://console.mistral.ai/) | `MISTRAL_API_KEY` |
-| RL Training | [Tinker](https://tinker-console.thinkingmachines.ai/) + [WandB](https://wandb.ai/) | `TINKER_API_KEY`, `WANDB_API_KEY` |
-| Cross-session user modeling | [Honcho](https://honcho.dev/) | `HONCHO_API_KEY` |
-| Semantic long-term memory | [Supermemory](https://supermemory.ai) | `SUPERMEMORY_API_KEY` |
+| 网页抓取 | [Firecrawl](https://firecrawl.dev/) | `FIRECRAWL_API_KEY`、`FIRECRAWL_API_URL` |
+| 浏览器自动化 | [Browserbase](https://browserbase.com/) | `BROWSERBASE_API_KEY`、`BROWSERBASE_PROJECT_ID` |
+| 图像生成 | [FAL](https://fal.ai/) | `FAL_KEY` |
+| 高级 TTS 语音 | [ElevenLabs](https://elevenlabs.io/) | `ELEVENLABS_API_KEY` |
+| OpenAI TTS + 语音转录 | [OpenAI](https://platform.openai.com/api-keys) | `VOICE_TOOLS_OPENAI_KEY` |
+| Mistral TTS + 语音转录 | [Mistral](https://console.mistral.ai/) | `MISTRAL_API_KEY` |
+| RL 训练 | [Tinker](https://tinker-console.thinkingmachines.ai/) + [WandB](https://wandb.ai/) | `TINKER_API_KEY`、`WANDB_API_KEY` |
+| 跨会话用户建模 | [Honcho](https://honcho.dev/) | `HONCO_API_KEY` |
+| 语义长期记忆 | [Supermemory](https://supermemory.ai) | `SUPERMEMORY_API_KEY` |
 
-### Self-Hosting Firecrawl
+### 自托管 Firecrawl
 
-By default, Hermes uses the [Firecrawl cloud API](https://firecrawl.dev/) for web search and scraping. If you prefer to run Firecrawl locally, you can point Hermes at a self-hosted instance instead. See Firecrawl's [SELF_HOST.md](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) for complete setup instructions.
+默认情况下，Hermes 使用 [Firecrawl 云 API](https://firecrawl.dev/) 进行网页搜索和抓取。如果您更喜欢在本地运行 Firecrawl，您可以改为指向自托管实例。请参阅 Firecrawl 的 [SELF_HOST.md](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) 获取完整的设置说明。
 
-**What you get:** No API key required, no rate limits, no per-page costs, full data sovereignty.
+**您将获得：** 无需 API 密钥，无速率限制，无每页费用，完全数据主权。
 
-**What you lose:** The cloud version uses Firecrawl's proprietary "Fire-engine" for advanced anti-bot bypassing (Cloudflare, CAPTCHAs, IP rotation). Self-hosted uses basic fetch + Playwright, so some protected sites may fail. Search uses DuckDuckGo instead of Google.
+**您将失去：** 云版本使用 Firecrawl 专有的 "Fire-engine" 进行高级反机器人绕过（Cloudflare、CAPTCHA、IP 轮换）。自托管使用基本 fetch + Playwright，因此一些受保护的站点可能会失败。搜索使用 DuckDuckGo 而不是 Google。
 
-**Setup:**
+**设置：**
 
-1. Clone and start the Firecrawl Docker stack (5 containers: API, Playwright, Redis, RabbitMQ, PostgreSQL — requires ~4-8 GB RAM):
+1. 克隆并启动 Firecrawl Docker 堆栈（5 个容器：API、Playwright、Redis、RabbitMQ、PostgreSQL — 需要约 4-8 GB RAM）：
    ```bash
    git clone https://github.com/firecrawl/firecrawl
    cd firecrawl
-   # In .env, set: USE_DB_AUTHENTICATION=false, HOST=0.0.0.0, PORT=3002
+   # 在 .env 中设置：USE_DB_AUTHENTICATION=false, HOST=0.0.0.0, PORT=3002
    docker compose up -d
    ```
 
-2. Point Hermes at your instance (no API key needed):
+2. 将 Hermes 指向您的实例（无需 API 密钥）：
    ```bash
    hermes config set FIRECRAWL_API_URL http://localhost:3002
    ```
 
-You can also set both `FIRECRAWL_API_KEY` and `FIRECRAWL_API_URL` if your self-hosted instance has authentication enabled.
+如果您的自托管实例启用了身份验证，您也可以同时设置 `FIRECRAWL_API_KEY` 和 `FIRECRAWL_API_URL`。
 
-## OpenRouter Provider Routing
+## OpenRouter 提供商路由
 
-When using OpenRouter, you can control how requests are routed across providers. Add a `provider_routing` section to `~/.hermes/config.yaml`:
+当使用 OpenRouter 时，您可以控制请求在提供商之间的路由方式。在 `~/.hermes/config.yaml` 中添加 `provider_routing` 部分：
 
 ```yaml
 provider_routing:
-  sort: "throughput"          # "price" (default), "throughput", or "latency"
-  # only: ["anthropic"]      # Only use these providers
-  # ignore: ["deepinfra"]    # Skip these providers
-  # order: ["anthropic", "google"]  # Try providers in this order
-  # require_parameters: true  # Only use providers that support all request params
-  # data_collection: "deny"   # Exclude providers that may store/train on data
+  sort: "throughput"          # "price"（默认）、"throughput" 或 "latency"
+  # only: ["anthropic"]      # 只使用这些提供商
+  # ignore: ["deepinfra"]    # 跳过这些提供商
+  # order: ["anthropic", "google"]  # 按此顺序尝试提供商
+  # require_parameters: true  # 只使用支持所有请求参数的提供商
+  # data_collection: "deny"   # 排除可能存储/训练数据的提供商
 ```
 
-**Shortcuts:** Append `:nitro` to any model name for throughput sorting (e.g., `anthropic/claude-sonnet-4:nitro`), or `:floor` for price sorting.
+**快捷方式：** 在任何模型名称后附加 `:nitro` 以进行吞吐量排序（例如 `anthropic/claude-sonnet-4:nitro`），或附加 `:floor` 进行价格排序。
 
-## Fallback Model
+## 备用模型
 
-Configure a backup provider:model that Hermes switches to automatically when your primary model fails (rate limits, server errors, auth failures):
+配置备份的 provider:model，当您的主模型失败时（速率限制、服务器错误、身份验证失败），Hermes 会自动切换到该模型：
 
 ```yaml
 fallback_model:
-  provider: openrouter                    # required
-  model: anthropic/claude-sonnet-4        # required
-  # base_url: http://localhost:8000/v1    # optional, for custom endpoints
-  # api_key_env: MY_CUSTOM_KEY           # optional, env var name for custom endpoint API key
+  provider: openrouter                    # 必需
+  model: anthropic/claude-sonnet-4        # 必需
+  # base_url: http://localhost:8000/v1    # 可选，用于自定义端点
+  # api_key_env: MY_CUSTOM_KEY           # 可选，自定义端点 API 密钥的环境变量名
 ```
 
-When activated, the fallback swaps the model and provider mid-session without losing your conversation. It fires **at most once** per session.
+激活后，备用模型会在会话中途切换模型和提供商，而不会丢失您的对话。它每个会话最多触发**一次**。
 
-Supported providers: `openrouter`, `nous`, `openai-codex`, `copilot`, `copilot-acp`, `anthropic`, `huggingface`, `zai`, `kimi-coding`, `kimi-coding-cn`, `minimax`, `minimax-cn`, `deepseek`, `ai-gateway`, `opencode-zen`, `opencode-go`, `kilocode`, `xiaomi`, `arcee`, `alibaba`, `custom`.
+支持的提供商：`openrouter`、`nous`、`openai-codex`、`copilot`、`copilot-acp`、`anthropic`、`huggingface`、`zai`、`kimi-coding`、`kimi-coding-cn`、`minimax`、`minimax-cn`、`deepseek`、`ai-gateway`、`opencode-zen`、`opencode-go`、`kilocode`、`xiaomi`、`arcee`、`alibaba`、`custom`。
 
 :::tip
-Fallback is configured exclusively through `config.yaml` — there are no environment variables for it. For full details on when it triggers, supported providers, and how it interacts with auxiliary tasks and delegation, see [Fallback Providers](/docs/user-guide/features/fallback-providers).
+备用模型仅通过 `config.yaml` 配置 — 没有环境变量用于它。有关其触发时机、支持的提供商以及如何与辅助任务和委托交互的完整详细信息，请参阅[备用提供商](/docs/user-guide/features/fallback-providers)。
 :::
 
-## Smart Model Routing
+## 智能模型路由
 
-Optional cheap-vs-strong routing lets Hermes keep your main model for complex work while sending very short/simple turns to a cheaper model.
+可选的廉价与强路由让 Hermes 将您的主模型保留用于复杂工作，同时将非常短/简单的轮次发送到更便宜的模型。
 
 ```yaml
 smart_model_routing:
@@ -957,30 +956,30 @@ smart_model_routing:
   cheap_model:
     provider: openrouter
     model: google/gemini-2.5-flash
-    # base_url: http://localhost:8000/v1  # optional custom endpoint
-    # api_key_env: MY_CUSTOM_KEY          # optional env var name for that endpoint's API key
+    # base_url: http://localhost:8000/v1  # 可选自定义端点
+    # api_key_env: MY_CUSTOM_KEY          # 可选该端点 API 密钥的环境变量名
 ```
 
-How it works:
-- If a turn is short, single-line, and does not look code/tool/debug heavy, Hermes may route it to `cheap_model`
-- If the turn looks complex, Hermes stays on your primary model/provider
-- If the cheap route cannot be resolved cleanly, Hermes falls back to the primary model automatically
+工作原理：
+- 如果轮次很短、单行且看起来不像是代码/工具/调试密集型，Hermes 可能会将其路由到 `cheap_model`
+- 如果轮次看起来复杂，Hermes 会保持在您的主模型/提供商上
+- 如果廉价路由无法干净地解析，Hermes 会自动回退到主模型
 
-This is intentionally conservative. It is meant for quick, low-stakes turns like:
-- short factual questions
-- quick rewrites
-- lightweight summaries
+这是有意保守的。它适用于快速、低风险的轮次，例如：
+- 简短的事实问题
+- 快速重写
+- 轻量级摘要
 
-It will avoid routing prompts that look like:
-- coding/debugging work
-- tool-heavy requests
-- long or multi-line analysis asks
+它会避免路由看起来像以下内容的提示：
+- 编码/调试工作
+- 工具密集型请求
+- 长的或多行的分析请求
 
-Use this when you want lower latency or cost without fully changing your default model.
+当您想要更低的延迟或成本而不想完全更改默认模型时，请使用此功能。
 
 ---
 
-## See Also
+## 另请参阅
 
-- [Configuration](/docs/user-guide/configuration) — General configuration (directory structure, config precedence, terminal backends, memory, compression, and more)
-- [Environment Variables](/docs/reference/environment-variables) — Complete reference of all environment variables
+- [配置](/docs/user-guide/configuration) — 常规配置（目录结构、配置优先级、终端后端、内存、压缩等）
+- [环境变量](/docs/reference/environment-variables) — 所有环境变量的完整参考

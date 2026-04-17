@@ -128,37 +128,31 @@ END;
 
 ## Schema Version and Migrations
 
-Current schema version: **6**
+当前 schema 版本：**6**
 
-The `schema_version` table stores a single integer. On initialization,
-`_init_schema()` checks the current version and applies migrations sequentially:
+`schema_version` 表存储一个整数。初始化时，`_init_schema()` 检查当前版本并按顺序应用迁移：
 
-| Version | Change |
+| 版本 | 变更 |
 |---------|--------|
-| 1 | Initial schema (sessions, messages, FTS5) |
-| 2 | Add `finish_reason` column to messages |
-| 3 | Add `title` column to sessions |
-| 4 | Add unique index on `title` (NULLs allowed, non-NULL must be unique) |
-| 5 | Add billing columns: `cache_read_tokens`, `cache_write_tokens`, `reasoning_tokens`, `billing_provider`, `billing_base_url`, `billing_mode`, `estimated_cost_usd`, `actual_cost_usd`, `cost_status`, `cost_source`, `pricing_version` |
-| 6 | Add reasoning columns to messages: `reasoning`, `reasoning_details`, `codex_reasoning_items` |
+| 1 | 初始 schema（sessions、messages、FTS5） |
+| 2 | 向 messages 添加 `finish_reason` 列 |
+| 3 | 向 sessions 添加 `title` 列 |
+| 4 | 在 `title` 上添加唯一索引（允许 NULL，非 NULL 必须唯一） |
+| 5 | 添加计费列：`cache_read_tokens`、`cache_write_tokens`、`reasoning_tokens`、`billing_provider`、`billing_base_url`、`billing_mode`、`estimated_cost_usd`、`actual_cost_usd`、`cost_status`、`cost_source`、`pricing_version` |
+| 6 | 向 messages 添加推理列：`reasoning`、`reasoning_details`、`codex_reasoning_items` |
 
-Each migration uses `ALTER TABLE ADD COLUMN` wrapped in try/except to handle
-the column-already-exists case (idempotent). The version number is bumped after
-each successful migration block.
-
+每次迁移使用 `ALTER TABLE ADD COLUMN` 包装在 try/except 中以处理列已存在的情况（幂等）。版本号在每次成功的迁移块之后递增。
 
 ## Write Contention Handling
 
-Multiple hermes processes (gateway + CLI sessions + worktree agents) share one
-`state.db`. The `SessionDB` class handles write contention with:
+多个 hermes 进程（gateway + CLI 会话 + worktree 智能体）共享一个 `state.db`。`SessionDB` 类通过以下方式处理写竞争：
 
-- **Short SQLite timeout** (1 second) instead of the default 30s
-- **Application-level retry** with random jitter (20-150ms, up to 15 retries)
-- **BEGIN IMMEDIATE** transactions to surface lock contention at transaction start
-- **Periodic WAL checkpoints** every 50 successful writes (PASSIVE mode)
+- **短 SQLite 超时**（1 秒）而不是默认的 30 秒
+- **应用级重试**带有随机抖动（20-150ms，最多 15 次重试）
+- **BEGIN IMMEDIATE** 事务在事务开始时暴露锁竞争
+- **定期 WAL 检查点**每 50 次成功写入（PASSIVE 模式）
 
-This avoids the "convoy effect" where SQLite's deterministic internal backoff
-causes all competing writers to retry at the same intervals.
+这避免了" convoy 效应"，即 SQLite 的确定性内部退避导致所有竞争写入者在相同间隔重试。
 
 ```
 _WRITE_MAX_RETRIES = 15
@@ -168,6 +162,34 @@ _CHECKPOINT_EVERY_N_WRITES = 50
 ```
 
 
+## Schema Version and Migrations
+
+当前 schema 版本：**6**
+
+`schema_version` 表存储一个整数。初始化时，`_init_schema()` 检查当前版本并按顺序应用迁移：
+
+| 版本 | 变更 |
+|---------|--------|
+| 1 | 初始 schema（sessions、messages、FTS5） |
+| 2 | 向 messages 添加 `finish_reason` 列 |
+| 3 | 向 sessions 添加 `title` 列 |
+| 4 | 在 `title` 上添加唯一索引（允许 NULL，非 NULL 必须唯一） |
+| 5 | 添加计费列：`cache_read_tokens`、`cache_write_tokens`、`reasoning_tokens`、`billing_provider`、`billing_base_url`、`billing_mode`、`estimated_cost_usd`、`actual_cost_usd`、`cost_status`、`cost_source`、`pricing_version` |
+| 6 | 向 messages 添加推理列：`reasoning`、`reasoning_details`、`codex_reasoning_items` |
+
+每次迁移使用 `ALTER TABLE ADD COLUMN` 包装在 try/except 中以处理列已存在的情况（幂等）。版本号在每次成功的迁移块之后递增。
+
+## Write Contention Handling
+
+多个 hermes 进程（gateway + CLI 会话 + worktree 智能体）共享一个 `state.db`。`SessionDB` 类通过以下方式处理写竞争：
+
+- **短 SQLite 超时**（1 秒）而不是默认的 30 秒
+- **应用级重试**带有随机抖动（20-150ms，最多 15 次重试）
+- **BEGIN IMMEDIATE** 事务在事务开始时暴露锁竞争
+- **定期 WAL 检查点**每 50 次成功写入（PASSIVE 模式）
+
+这避免了" convoy 效应"，即 SQLite 的确定性内部退避导致所有竞争写入者在相同间隔重试。
+
 ## Common Operations
 
 ### Initialize
@@ -175,30 +197,30 @@ _CHECKPOINT_EVERY_N_WRITES = 50
 ```python
 from hermes_state import SessionDB
 
-db = SessionDB()                           # Default: ~/.hermes/state.db
-db = SessionDB(db_path=Path("/tmp/test.db"))  # Custom path
+db = SessionDB()                           # 默认: ~/.hermes/state.db
+db = SessionDB(db_path=Path("/tmp/test.db"))  # 自定义路径
 ```
 
-### Create and Manage Sessions
+### 创建和管理会话
 
 ```python
-# Create a new session
+# 创建新会话
 db.create_session(
     session_id="sess_abc123",
     source="cli",
     model="anthropic/claude-sonnet-4.6",
     user_id="user_1",
-    parent_session_id=None,  # or previous session ID for lineage
+    parent_session_id=None,  # 或用于谱系的先前会话 ID
 )
 
-# End a session
+# 结束会话
 db.end_session("sess_abc123", end_reason="user_exit")
 
-# Reopen a session (clear ended_at/end_reason)
+# 重新打开会话（清除 ended_at/end_reason）
 db.reopen_session("sess_abc123")
 ```
 
-### Store Messages
+### 存储消息
 
 ```python
 msg_id = db.append_message(
@@ -212,15 +234,15 @@ msg_id = db.append_message(
 )
 ```
 
-### Retrieve Messages
+### 检索消息
 
 ```python
-# Raw messages with all metadata
+# 带有所有元数据的原始消息
 messages = db.get_messages("sess_abc123")
 
-# OpenAI conversation format (for API replay)
+# OpenAI 对话格式（用于 API 重放）
 conversation = db.get_messages_as_conversation("sess_abc123")
-# Returns: [{"role": "user", "content": "..."}, {"role": "assistant", ...}]
+# 返回: [{"role": "user", "content": "..."}, {"role": "assistant", ...}]
 ```
 
 ### Session Titles
@@ -240,61 +262,59 @@ next_title = db.get_next_title_in_lineage("Fix Docker Build")
 
 ## Full-Text Search
 
-The `search_messages()` method supports FTS5 query syntax with automatic
-sanitization of user input.
+`search_messages()` 方法支持 FTS5 查询语法，并自动清理用户输入。
 
-### Basic Search
+### 基本搜索
 
 ```python
 results = db.search_messages("docker deployment")
 ```
 
-### FTS5 Query Syntax
+### FTS5 查询语法
 
-| Syntax | Example | Meaning |
+| 语法 | 示例 | 含义 |
 |--------|---------|---------|
-| Keywords | `docker deployment` | Both terms (implicit AND) |
-| Quoted phrase | `"exact phrase"` | Exact phrase match |
-| Boolean OR | `docker OR kubernetes` | Either term |
-| Boolean NOT | `python NOT java` | Exclude term |
-| Prefix | `deploy*` | Prefix match |
+| 关键词 | `docker deployment` | 两个术语（隐含 AND） |
+| 引号短语 | `"exact phrase"` | 精确短语匹配 |
+| 布尔 OR | `docker OR kubernetes` | 任一术语 |
+| 布尔 NOT | `python NOT java` | 排除术语 |
+| 前缀 | `deploy*` | 前缀匹配 |
 
-### Filtered Search
+### 过滤搜索
 
 ```python
-# Search only CLI sessions
+# 仅搜索 CLI 会话
 results = db.search_messages("error", source_filter=["cli"])
 
-# Exclude gateway sessions
+# 排除 gateway 会话
 results = db.search_messages("bug", exclude_sources=["telegram", "discord"])
 
-# Search only user messages
+# 仅搜索用户消息
 results = db.search_messages("help", role_filter=["user"])
 ```
 
-### Search Results Format
+### 搜索结果格式
 
-Each result includes:
-- `id`, `session_id`, `role`, `timestamp`
-- `snippet` — FTS5-generated snippet with `>>>match<<<` markers
-- `context` — 1 message before and after the match (content truncated to 200 chars)
-- `source`, `model`, `session_started` — from the parent session
+每个结果包括：
+- `id`、`session_id`、`role`、`timestamp`
+- `snippet` — FTS5 生成的片段，带有 `>>>match<<<` 标记
+- `context` — 匹配前后的 1 条消息（内容截断为 200 字符）
+- `source`、`model`、`session_started` — 来自父会话
 
-The `_sanitize_fts5_query()` method handles edge cases:
-- Strips unmatched quotes and special characters
-- Wraps hyphenated terms in quotes (`chat-send` → `"chat-send"`)
-- Removes dangling boolean operators (`hello AND` → `hello`)
+`_sanitize_fts5_query()` 方法处理边缘情况：
+- 剥离不匹配的引号和特殊字符
+- 将带连字符的术语用引号包装（`chat-send` → `"chat-send"`）
+- 移除悬空的布尔运算符（`hello AND` → `hello`）
 
 
 ## Session Lineage
 
-Sessions can form chains via `parent_session_id`. This happens when context
-compression triggers a session split in the gateway.
+会话可以通过 `parent_session_id` 形成链。这在网关中触发会话分割时发生。
 
-### Query: Find Session Lineage
+### 查询：查找会话谱系
 
 ```sql
--- Find all ancestors of a session
+-- 查找会话的所有祖先
 WITH RECURSIVE lineage AS (
     SELECT * FROM sessions WHERE id = ?
     UNION ALL
@@ -303,7 +323,7 @@ WITH RECURSIVE lineage AS (
 )
 SELECT id, title, started_at, parent_session_id FROM lineage;
 
--- Find all descendants of a session
+-- 查找会话的所有后代
 WITH RECURSIVE descendants AS (
     SELECT * FROM sessions WHERE id = ?
     UNION ALL
@@ -313,7 +333,7 @@ WITH RECURSIVE descendants AS (
 SELECT id, title, started_at FROM descendants;
 ```
 
-### Query: Recent Sessions with Preview
+### 查询：带有预览的最近会话
 
 ```sql
 SELECT s.*,
@@ -333,10 +353,10 @@ ORDER BY s.started_at DESC
 LIMIT 20;
 ```
 
-### Query: Token Usage Statistics
+### 查询：Token 使用统计
 
 ```sql
--- Total tokens by model
+-- 按模型分类的总 token
 SELECT model,
        COUNT(*) as session_count,
        SUM(input_tokens) as total_input,
@@ -359,30 +379,28 @@ LIMIT 10;
 ## Export and Cleanup
 
 ```python
-# Export a single session with messages
+# 导出单个会话及其消息
 data = db.export_session("sess_abc123")
 
-# Export all sessions (with messages) as list of dicts
+# 导出所有会话（带消息）为字典列表
 all_data = db.export_all(source="cli")
 
-# Delete old sessions (only ended sessions)
+# 删除旧会话（仅限已结束的会话）
 deleted_count = db.prune_sessions(older_than_days=90)
 deleted_count = db.prune_sessions(older_than_days=30, source="telegram")
 
-# Clear messages but keep the session record
+# 清除消息但保留会话记录
 db.clear_messages("sess_abc123")
 
-# Delete session and all messages
+# 删除会话及其所有消息
 db.delete_session("sess_abc123")
 ```
 
 
-## Database Location
+## 数据库位置
 
-Default path: `~/.hermes/state.db`
+默认路径：`~/.hermes/state.db`
 
-This is derived from `hermes_constants.get_hermes_home()` which resolves to
-`~/.hermes/` by default, or the value of `HERMES_HOME` environment variable.
+这由 `hermes_constants.get_hermes_home()` 解析而来，默认值为 `~/.hermes/`，或 `HERMES_HOME` 环境变量的值。
 
-The database file, WAL file (`state.db-wal`), and shared-memory file
-(`state.db-shm`) are all created in the same directory.
+数据库文件、WAL 文件（`state.db-wal`）和共享内存文件（`state.db-shm`）都在同一目录中创建。

@@ -136,10 +136,14 @@ Cron 作业现在有比创建/删除更完整的生命周期。
 
 ```bash
 hermes cron list
-hermes cron pause <job_id>
-hermes cron resume <job_id>
-hermes cron run <job_id>
-hermes cron remove <job_id>
+hermes cron pause &lt;job_id&gt;
+hermes cron resume &lt;job_id&gt;
+hermes cron run &lt;job_id&gt;
+hermes cron remove &lt;job_id&gt;
+```
+hermes cron resume &lt;job_id&gt;
+hermes cron run &lt;job_id&gt;
+hermes cron remove &lt;job_id&gt;
 hermes cron status
 hermes cron tick
 ```

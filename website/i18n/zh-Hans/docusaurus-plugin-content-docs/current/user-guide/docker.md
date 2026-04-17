@@ -1,21 +1,21 @@
 ---
 sidebar_position: 7
 title: "Docker"
-description: "Running Hermes Agent in Docker and using Docker as a terminal backend"
+description: "在 Docker 中运行 Hermes Agent 并使用 Docker 作为终端后端"
 ---
 
 # Hermes Agent — Docker
 
-There are two distinct ways Docker intersects with Hermes Agent:
+Docker 与 Hermes Agent 有两种不同的交互方式：
 
-1. **Running Hermes IN Docker** — the agent itself runs inside a container (this page's primary focus)
-2. **Docker as a terminal backend** — the agent runs on your host but executes commands inside a Docker sandbox (see [Configuration → terminal.backend](./configuration.md))
+1. **在 Docker 中运行 Hermes** — 智能体本身在容器内运行（本页的主要焦点）
+2. **Docker 作为终端后端** — 智能体在您的主机上运行，但在 Docker 沙箱中执行命令（参见 [配置 → terminal.backend](./configuration.md)）
 
-This page covers option 1. The container stores all user data (config, API keys, sessions, skills, memories) in a single directory mounted from the host at `/opt/data`. The image itself is stateless and can be upgraded by pulling a new version without losing any configuration.
+本页涵盖选项 1。容器将所有用户数据（配置、API 密钥、会话、技能、记忆）存储在从主机挂载到 `/opt/data` 的单个目录中。镜像本身是无状态的，可以通过拉取新版本进行升级，而不会丢失任何配置。
 
-## Quick start
+## 快速开始
 
-If this is your first time running Hermes Agent, create a data directory on the host and start the container interactively to run the setup wizard:
+如果您是第一次运行 Hermes Agent，请在主机上创建一个数据目录并以交互方式启动容器以运行设置向导：
 
 ```sh
 mkdir -p ~/.hermes
@@ -24,11 +24,11 @@ docker run -it --rm \
   nousresearch/hermes-agent setup
 ```
 
-This drops you into the setup wizard, which will prompt you for your API keys and write them to `~/.hermes/.env`. You only need to do this once. It is highly recommended to set up a chat system for the gateway to work with at this point.
+这将让您进入设置向导，它会提示您输入 API 密钥并将它们写入 `~/.hermes/.env`。您只需要执行一次。强烈建议此时设置一个聊天系统以供网关使用。
 
-## Running in gateway mode
+## 在网关模式下运行
 
-Once configured, run the container in the background as a persistent gateway (Telegram, Discord, Slack, WhatsApp, etc.):
+配置完成后，在后台运行容器作为持久网关（Telegram、Discord、Slack、WhatsApp 等）：
 
 ```sh
 docker run -d \
@@ -39,15 +39,15 @@ docker run -d \
   nousresearch/hermes-agent gateway run
 ```
 
-Port 8642 exposes the gateway's [OpenAI-compatible API server](./api-server.md) and health endpoint. It's optional if you only use chat platforms (Telegram, Discord, etc.), but required if you want the dashboard or external tools to reach the gateway.
+端口 8642 暴露网关的 [OpenAI 兼容 API 服务器](./features/api-server.md) 和健康端点。如果您只使用聊天平台（Telegram、Discord 等），这是可选的，但如果您希望仪表板或外部工具访问网关，则是必需的。
 
-Opening any port on an internet facing machine is a security risk. You should not do it unless you understand the risks.
+在面向互联网的机器上打开任何端口都是安全风险。除非您了解风险，否则不应这样做。
 
-## Running the dashboard
+## 运行仪表板
 
-The built-in web dashboard can run alongside the gateway as a separate container. 
+内置的 Web 仪表板可以与网关一起作为单独的容器运行。
 
-To run the dashboard as its own container, point it at the gateway's health endpoint so it can detect gateway status across containers:
+要将仪表板作为自己的容器运行，请将其指向网关的健康端点，以便它可以跨容器检测网关状态：
 
 ```sh
 docker run -d \
@@ -59,18 +59,18 @@ docker run -d \
   nousresearch/hermes-agent dashboard
 ```
 
-Replace `$HOST_IP` with the IP address of the machine running the gateway container (e.g. `192.168.1.100`), or use a Docker network hostname if both containers share a network (see the [Compose example](#docker-compose-example) below).
+将 `$HOST_IP` 替换为运行网关容器的机器的 IP 地址（例如 `192.168.1.100`），或者如果两个容器共享网络，则使用 Docker 网络主机名（参见下面的 [Compose 示例](#docker-compose-example)）。
 
-| Environment variable | Description | Default |
+| 环境变量 | 描述 | 默认值 |
 |---------------------|-------------|---------|
-| `GATEWAY_HEALTH_URL` | Base URL of the gateway's API server, e.g. `http://gateway:8642` | *(unset — local PID check only)* |
-| `GATEWAY_HEALTH_TIMEOUT` | Health probe timeout in seconds | `3` |
+| `GATEWAY_HEALTH_URL` | 网关 API 服务器的基本 URL，例如 `http://gateway:8642` | *(未设置 — 仅本地 PID 检查)* |
+| `GATEWAY_HEALTH_TIMEOUT` | 健康探测超时（秒） | `3` |
 
-Without `GATEWAY_HEALTH_URL`, the dashboard falls back to local process detection — which only works when the gateway runs in the same container or on the same host.
+如果没有 `GATEWAY_HEALTH_URL`，仪表板会回退到本地进程检测 — 这仅在网关在同一容器或同一主机上运行时有效。
 
-## Running interactively (CLI chat)
+## 交互式运行（CLI 聊天）
 
-To open an interactive chat session against a running data directory:
+要针对运行中的数据目录打开交互式聊天会话：
 
 ```sh
 docker run -it --rm \
@@ -78,30 +78,30 @@ docker run -it --rm \
   nousresearch/hermes-agent
 ```
 
-## Persistent volumes
+## 持久化卷
 
-The `/opt/data` volume is the single source of truth for all Hermes state. It maps to your host's `~/.hermes/` directory and contains:
+`/opt/data` 卷是所有 Hermes 状态的单一真实来源。它映射到主机的 `~/.hermes/` 目录，并包含：
 
-| Path | Contents |
+| 路径 | 内容 |
 |------|----------|
-| `.env` | API keys and secrets |
-| `config.yaml` | All Hermes configuration |
-| `SOUL.md` | Agent personality/identity |
-| `sessions/` | Conversation history |
-| `memories/` | Persistent memory store |
-| `skills/` | Installed skills |
-| `cron/` | Scheduled job definitions |
-| `hooks/` | Event hooks |
-| `logs/` | Runtime logs |
-| `skins/` | Custom CLI skins |
+| `.env` | API 密钥和机密信息 |
+| `config.yaml` | 所有 Hermes 配置 |
+| `SOUL.md` | 智能体个性/身份 |
+| `sessions/` | 对话历史 |
+| `memories/` | 持久化内存存储 |
+| `skills/` | 已安装的技能 |
+| `cron/` | 定时任务定义 |
+| `hooks/` | 事件钩子 |
+| `logs/` | 运行时日志 |
+| `skins/` | 自定义 CLI 皮肤 |
 
 :::warning
-Never run two Hermes **gateway** containers against the same data directory simultaneously — session files and memory stores are not designed for concurrent write access. Running a dashboard container alongside the gateway is safe since the dashboard only reads data.
+永远不要针对同一数据目录同时运行两个 Hermes **网关**容器 — 会话文件和内存存储不是为并发写入访问设计的。在网关旁边运行仪表板容器是安全的，因为仪表板只读取数据。
 :::
 
-## Environment variable forwarding
+## 环境变量转发
 
-API keys are read from `/opt/data/.env` inside the container. You can also pass environment variables directly:
+API 密钥从容器内的 `/opt/data/.env` 读取。您也可以直接传递环境变量：
 
 ```sh
 docker run -it --rm \
@@ -111,11 +111,11 @@ docker run -it --rm \
   nousresearch/hermes-agent
 ```
 
-Direct `-e` flags override values from `.env`. This is useful for CI/CD or secrets-manager integrations where you don't want keys on disk.
+直接的 `-e` 标志会覆盖 `.env` 中的值。这对于 CI/CD 或机密管理器集成很有用，因为您不希望密钥存储在磁盘上。
 
-## Docker Compose example
+## Docker Compose 示例
 
-For persistent deployment with both the gateway and dashboard, a `docker-compose.yaml` is convenient:
+对于包含网关和仪表板的持久部署，`docker-compose.yaml` 很方便：
 
 ```yaml
 services:
@@ -130,7 +130,7 @@ services:
       - ~/.hermes:/opt/data
     networks:
       - hermes-net
-    # Uncomment to forward specific env vars instead of using .env file:
+    # 取消注释以转发特定的环境变量而不是使用 .env 文件：
     # environment:
     #   - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     #   - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -167,21 +167,21 @@ networks:
     driver: bridge
 ```
 
-Start with `docker compose up -d` and view logs with `docker compose logs -f`.
+使用 `docker compose up -d` 启动，使用 `docker compose logs -f` 查看日志。
 
-## Resource limits
+## 资源限制
 
-The Hermes container needs moderate resources. Recommended minimums:
+Hermes 容器需要适度的资源。建议的最小值：
 
-| Resource | Minimum | Recommended |
+| 资源 | 最小值 | 推荐值 |
 |----------|---------|-------------|
-| Memory | 1 GB | 2–4 GB |
-| CPU | 1 core | 2 cores |
-| Disk (data volume) | 500 MB | 2+ GB (grows with sessions/skills) |
+| 内存 | 1 GB | 2–4 GB |
+| CPU | 1 核 | 2 核 |
+| 磁盘（数据卷） | 500 MB | 2+ GB（随着会话/技能增长） |
 
-Browser automation (Playwright/Chromium) is the most memory-hungry feature. If you don't need browser tools, 1 GB is sufficient. With browser tools active, allocate at least 2 GB.
+浏览器自动化（Playwright/Chromium）是最耗内存的功能。如果您不需要浏览器工具，1 GB 就足够了。使用浏览器工具时，至少分配 2 GB。
 
-Set limits in Docker:
+在 Docker 中设置限制：
 
 ```sh
 docker run -d \
@@ -192,27 +192,27 @@ docker run -d \
   nousresearch/hermes-agent gateway run
 ```
 
-## What the Dockerfile does
+## Dockerfile 的作用
 
-The official image is based on `debian:13.4` and includes:
+官方镜像基于 `debian:13.4`，包括：
 
-- Python 3 with all Hermes dependencies (`pip install -e ".[all]"`)
-- Node.js + npm (for browser automation and WhatsApp bridge)
-- Playwright with Chromium (`npx playwright install --with-deps chromium`)
-- ripgrep and ffmpeg as system utilities
-- The WhatsApp bridge (`scripts/whatsapp-bridge/`)
+- Python 3 和所有 Hermes 依赖项（`pip install -e ".[all]"`）
+- Node.js + npm（用于浏览器自动化和 WhatsApp 桥接）
+- Playwright 和 Chromium（`npx playwright install --with-deps chromium`）
+- ripgrep 和 ffmpeg 作为系统实用程序
+- WhatsApp 桥接（`scripts/whatsapp-bridge/`）
 
-The entrypoint script (`docker/entrypoint.sh`) bootstraps the data volume on first run:
-- Creates the directory structure (`sessions/`, `memories/`, `skills/`, etc.)
-- Copies `.env.example` → `.env` if no `.env` exists
-- Copies default `config.yaml` if missing
-- Copies default `SOUL.md` if missing
-- Syncs bundled skills using a manifest-based approach (preserves user edits)
-- Then runs `hermes` with whatever arguments you pass
+入口脚本（`docker/entrypoint.sh`）在首次运行时引导数据卷：
+- 创建目录结构（`sessions/`、`memories/`、`skills/` 等）
+- 如果不存在 `.env`，则复制 `.env.example` → `.env`
+- 如果缺少默认 `config.yaml`，则复制它
+- 如果缺少默认 `SOUL.md`，则复制它
+- 使用基于清单的方法同步捆绑的技能（保留用户编辑）
+- 然后使用您传递的任何参数运行 `hermes`
 
-## Upgrading
+## 升级
 
-Pull the latest image and recreate the container. Your data directory is untouched.
+拉取最新镜像并重新创建容器。您的数据目录保持不变。
 
 ```sh
 docker pull nousresearch/hermes-agent:latest
@@ -224,38 +224,38 @@ docker run -d \
   nousresearch/hermes-agent gateway run
 ```
 
-Or with Docker Compose:
+或使用 Docker Compose：
 
 ```sh
 docker compose pull
 docker compose up -d
 ```
 
-## Skills and credential files
+## 技能和凭据文件
 
-When using Docker as the execution environment (not the methods above, but when the agent runs commands inside a Docker sandbox), Hermes automatically bind-mounts the skills directory (`~/.hermes/skills/`) and any credential files declared by skills into the container as read-only volumes. This means skill scripts, templates, and references are available inside the sandbox without manual configuration.
+当使用 Docker 作为执行环境（不是上述方法，而是当智能体在 Docker 沙箱中运行命令时）时，Hermes 自动将技能目录（`~/.hermes/skills/`）和技能声明的任何凭据文件作为只读卷绑定挂载到容器中。这意味着技能脚本、模板和引用在沙箱内可用，无需手动配置。
 
-The same syncing happens for SSH and Modal backends — skills and credential files are uploaded via rsync or the Modal mount API before each command.
+对于 SSH 和 Modal 后端也会发生相同的同步 — 技能和凭据文件在每次命令之前通过 rsync 或 Modal 挂载 API 上传。
 
-## Troubleshooting
+## 故障排除
 
-### Container exits immediately
+### 容器立即退出
 
-Check logs: `docker logs hermes`. Common causes:
-- Missing or invalid `.env` file — run interactively first to complete setup
-- Port conflicts if running with exposed ports
+检查日志：`docker logs hermes`。常见原因：
+- 缺少或无效的 `.env` 文件 — 首先交互式运行以完成设置
+- 如果使用暴露端口运行，则存在端口冲突
 
-### "Permission denied" errors
+### "权限被拒绝"错误
 
-The container runs as root by default. If your host `~/.hermes/` was created by a non-root user, permissions should work. If you get errors, ensure the data directory is writable:
+容器默认以 root 身份运行。如果您的主机 `~/.hermes/` 是由非 root 用户创建的，权限应该可以正常工作。如果遇到错误，请确保数据目录可写：
 
 ```sh
 chmod -R 755 ~/.hermes
 ```
 
-### Browser tools not working
+### 浏览器工具不工作
 
-Playwright needs shared memory. Add `--shm-size=1g` to your Docker run command:
+Playwright 需要共享内存。将 `--shm-size=1g` 添加到您的 Docker run 命令：
 
 ```sh
 docker run -d \
@@ -265,18 +265,18 @@ docker run -d \
   nousresearch/hermes-agent gateway run
 ```
 
-### Gateway not reconnecting after network issues
+### 网络问题后网关未重新连接
 
-The `--restart unless-stopped` flag handles most transient failures. If the gateway is stuck, restart the container:
+`--restart unless-stopped` 标志处理大多数临时故障。如果网关卡住，请重新启动容器：
 
 ```sh
 docker restart hermes
 ```
 
-### Checking container health
+### 检查容器健康状态
 
 ```sh
-docker logs --tail 50 hermes          # Recent logs
-docker run -it --rm nousresearch/hermes-agent:latest version     # Verify version
-docker stats hermes                    # Resource usage
+docker logs --tail 50 hermes          # 最近的日志
+docker run -it --rm nousresearch/hermes-agent:latest version     # 验证版本
+docker stats hermes                    # 资源使用情况
 ```
