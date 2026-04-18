@@ -60,15 +60,15 @@ nix build
 
 ---
 
-## NixOS Module
+## NixOS 模块
 
-The flake exports `nixosModules.default` — a full NixOS service module that declaratively manages user creation, directories, config generation, secrets, documents, and service lifecycle.
+Flake 导出 `nixosModules.default` — 一个完整的 NixOS 服务模块，以声明式方式管理用户创建、目录、配置生成、密钥、文档和服务生命周期。
 
 :::note
-This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), use `nix profile install` and the standard CLI workflow above.
+此模块需要 NixOS。对于非 NixOS 系统（macOS、其他 Linux 发行版），请使用 `nix profile install` 和上面的标准 CLI 工作流。
 :::
 
-### Add the Flake Input
+### 添加 Flake 输入
 
 ```nix
 # /etc/nixos/flake.nix (or your system flake)
@@ -90,7 +90,7 @@ This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), 
 }
 ```
 
-### Minimal Configuration
+### 最小配置
 
 ```nix
 # configuration.nix
@@ -104,10 +104,10 @@ This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), 
 }
 ```
 
-That's it. `nixos-rebuild switch` creates the `hermes` user, generates `config.yaml`, wires up secrets, and starts the gateway — a long-running service that connects the agent to messaging platforms (Telegram, Discord, etc.) and listens for incoming messages.
+就是这样。`nixos-rebuild switch` 会创建 `hermes` 用户，生成 `config.yaml`，连接密钥，并启动网关 — 一个将智能体连接到消息平台（Telegram、Discord 等）并监听传入消息的长期运行服务。
 
-:::warning Secrets are required
-The `environmentFiles` line above assumes you have [sops-nix](https://github.com/Mic92/sops-nix) or [agenix](https://github.com/ryantm/agenix) configured. The file should contain at least one LLM provider key (e.g., `OPENROUTER_API_KEY=sk-or-...`). See [Secrets Management](#secrets-management) for full setup. If you don't have a secrets manager yet, you can use a plain file as a starting point — just ensure it's not world-readable:
+:::warning 需要密钥
+上面的 `environmentFiles` 行假设您已配置 [sops-nix](https://github.com/Mic92/sops-nix) 或 [agenix](https://github.com/ryantm/agenix)。该文件应包含至少一个 LLM 提供商密钥（例如，`OPENROUTER_API_KEY=sk-or-...`）。有关完整设置，请参阅[密钥管理](#secrets-management)。如果您还没有密钥管理器，可以使用纯文本文件作为起点 — 只需确保它不是世界可读的：
 
 ```bash
 echo "OPENROUTER_API_KEY=sk-or-your-key" | sudo install -m 0600 -o hermes /dev/stdin /var/lib/hermes/env
@@ -119,18 +119,18 @@ services.hermes-agent.environmentFiles = [ "/var/lib/hermes/env" ];
 :::
 
 :::tip addToSystemPackages
-Setting `addToSystemPackages = true` does two things: puts the `hermes` CLI on your system PATH **and** sets `HERMES_HOME` system-wide so the interactive CLI shares state (sessions, skills, cron) with the gateway service. Without it, running `hermes` in your shell creates a separate `~/.hermes/` directory.
+设置 `addToSystemPackages = true` 会做两件事：将 `hermes` CLI 放在系统 PATH 上 **并** 系统级设置 `HERMES_HOME`，这样交互式 CLI 就会与网关服务共享状态（会话、技能、cron）。如果没有设置，在 shell 中运行 `hermes` 会创建一个单独的 `~/.hermes/` 目录。
 :::
 
-:::info Container-aware CLI
-When `container.enable = true` and `addToSystemPackages = true`, **every** `hermes` command on the host automatically routes into the managed container. This means your interactive CLI session runs inside the same environment as the gateway service — with access to all container-installed packages and tools.
+:::info 容器感知 CLI
+当 `container.enable = true` 且 `addToSystemPackages = true` 时，主机上的 **每个** `hermes` 命令都会自动路由到托管容器中。这意味着您的交互式 CLI 会话在与网关服务相同的环境中运行 — 可以访问所有容器安装的包和工具。
 
-- The routing is transparent: `hermes chat`, `hermes sessions list`, `hermes version`, etc. all exec into the container under the hood
-- All CLI flags are forwarded as-is
-- If the container isn't running, the CLI retries briefly (5s with a spinner for interactive use, 10s silently for scripts) then fails with a clear error — no silent fallback
-- For developers working on the hermes codebase, set `HERMES_DEV=1` to bypass container routing and run the local checkout directly
+- 路由是透明的：`hermes chat`、`hermes sessions list`、`hermes version` 等都在后台执行到容器中
+- 所有 CLI 标志都按原样转发
+- 如果容器未运行，CLI 会短暂重试（交互式使用 5 秒带 spinner，脚本 10 秒静默），然后失败并显示明确的错误 — 无静默回退
+- 对于在 hermes 代码库上工作的开发人员，设置 `HERMES_DEV=1` 以绕过容器路由并直接运行本地检出
 
-Set `container.hostUsers` to create a `~/.hermes` symlink to the service state directory, so the host CLI and the container share sessions, config, and memories:
+设置 `container.hostUsers` 以创建指向服务状态目录的 `~/.hermes` 符号链接，这样主机 CLI 和容器就可以共享会话、配置和记忆：
 
 ```nix
 services.hermes-agent = {
@@ -140,9 +140,9 @@ services.hermes-agent = {
 };
 ```
 
-Users listed in `hostUsers` are automatically added to the `hermes` group for file permission access.
+`hostUsers` 中列出的用户会自动添加到 `hermes` 组以获取文件权限访问。
 
-**Podman users:** The NixOS service runs the container as root. Docker users get access via the `docker` group socket, but Podman's rootful containers require sudo. Grant passwordless sudo for your container runtime:
+**Podman 用户：** NixOS 服务以 root 身份运行容器。Docker 用户通过 `docker` 组套接字获得访问权限，但 Podman 的根容器需要 sudo。为容器运行时授予无密码 sudo：
 
 ```nix
 security.sudo.extraRules = [{
@@ -154,38 +154,38 @@ security.sudo.extraRules = [{
 }];
 ```
 
-The CLI auto-detects when sudo is needed and uses it transparently. Without this, you'll need to run `sudo hermes chat` manually.
+CLI 会自动检测何时需要 sudo 并透明地使用它。如果没有这个设置，您需要手动运行 `sudo hermes chat`。
 :::
 
-### Verify It Works
+### 验证运行状态
 
-After `nixos-rebuild switch`, check that the service is running:
+在 `nixos-rebuild switch` 之后，检查服务是否正在运行：
 
 ```bash
-# Check service status
+# 检查服务状态
 systemctl status hermes-agent
 
-# Watch logs (Ctrl+C to stop)
+# 查看日志（按 Ctrl+C 停止）
 journalctl -u hermes-agent -f
 
-# If addToSystemPackages is true, test the CLI
+# 如果 addToSystemPackages 为 true，测试 CLI
 hermes version
-hermes config       # shows the generated config
+hermes config       # 显示生成的配置
 ```
 
-### Choosing a Deployment Mode
+### 选择部署模式
 
-The module supports two modes, controlled by `container.enable`:
+模块支持两种模式，由 `container.enable` 控制：
 
-| | **Native** (default) | **Container** |
+| | **原生**（默认） | **容器** |
 |---|---|---|
-| How it runs | Hardened systemd service on the host | Persistent Ubuntu container with `/nix/store` bind-mounted |
-| Security | `NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp` | Container isolation, runs as unprivileged user inside |
-| Agent can self-install packages | No — only tools on the Nix-provided PATH | Yes — `apt`, `pip`, `npm` installs persist across restarts |
-| Config surface | Same | Same |
-| When to choose | Standard deployments, maximum security, reproducibility | Agent needs runtime package installation, mutable environment, experimental tools |
+| 运行方式 | 主机上的强化 systemd 服务 | 持久的 Ubuntu 容器，绑定挂载 `/nix/store` |
+| 安全性 | `NoNewPrivileges`、`ProtectSystem=strict`、`PrivateTmp` | 容器隔离，在内部以非特权用户运行 |
+| 智能体能否自行安装包 | 否 — 仅 Nix 提供的 PATH 上的工具 | 是 — `apt`、`pip`、`npm` 安装在重启后持久保存 |
+| 配置界面 | 相同 | 相同 |
+| 何时选择 | 标准部署、最大安全性、可重现性 | 智能体需要运行时包安装、可变环境、实验性工具 |
 
-To enable container mode, add one line:
+要启用容器模式，添加一行：
 
 ```nix
 {
@@ -198,16 +198,16 @@ To enable container mode, add one line:
 ```
 
 :::info
-Container mode auto-enables `virtualisation.docker.enable` via `mkDefault`. If you use Podman instead, set `container.backend = "podman"` and `virtualisation.docker.enable = false`.
+容器模式通过 `mkDefault` 自动启用 `virtualisation.docker.enable`。如果您使用 Podman，请设置 `container.backend = "podman"` 并设置 `virtualisation.docker.enable = false`。
 :::
 
 ---
 
-## Configuration
+## 配置
 
-### Declarative Settings
+### 声明式设置
 
-The `settings` option accepts an arbitrary attrset that is rendered as `config.yaml`. It supports deep merging across multiple module definitions (via `lib.recursiveUpdate`), so you can split config across files:
+`settings` 选项接受一个任意的属性集，该属性集被渲染为 `config.yaml`。它支持跨多个模块定义的深度合并（通过 `lib.recursiveUpdate`），因此您可以将配置拆分到多个文件中：
 
 ```nix
 # base.nix
@@ -224,14 +224,14 @@ services.hermes-agent.settings = {
 };
 ```
 
-Both are deep-merged at evaluation time. Nix-declared keys always win over keys in an existing `config.yaml` on disk, but **user-added keys that Nix doesn't touch are preserved**. This means if the agent or a manual edit adds keys like `skills.disabled` or `streaming.enabled`, they survive `nixos-rebuild switch`.
+两者在评估时会深度合并。Nix 声明的键始终优先于磁盘上现有 `config.yaml` 中的键，但 **Nix 未触及的用户添加的键会被保留**。这意味着如果智能体或手动编辑添加了诸如 `skills.disabled` 或 `streaming.enabled` 之类的键，它们会在 `nixos-rebuild switch` 后保留。
 
-:::note Model naming
-`settings.model.default` uses the model identifier your provider expects. With [OpenRouter](https://openrouter.ai) (the default), these look like `"anthropic/claude-sonnet-4"` or `"google/gemini-3-flash"`. If you're using a provider directly (Anthropic, OpenAI), set `settings.model.base_url` to point at their API and use their native model IDs (e.g., `"claude-sonnet-4-20250514"`). When no `base_url` is set, Hermes defaults to OpenRouter.
+:::note 模型命名
+`settings.model.default` 使用您的提供商期望的模型标识符。使用 [OpenRouter](https://openrouter.ai)（默认）时，这些看起来像 `"anthropic/claude-sonnet-4"` 或 `"google/gemini-3-flash"`。如果您直接使用提供商（Anthropic、OpenAI），请设置 `settings.model.base_url` 指向他们的 API 并使用他们的原生模型 ID（例如，`"claude-sonnet-4-20250514"`）。当未设置 `base_url` 时，Hermes 默认使用 OpenRouter。
 :::
 
-:::tip Discovering available config keys
-Run `nix build .#configKeys && cat result` to see every leaf config key extracted from Python's `DEFAULT_CONFIG`. You can paste your existing `config.yaml` into the `settings` attrset — the structure maps 1:1.
+:::tip 发现可用的配置键
+运行 `nix build .#configKeys && cat result` 查看从 Python 的 `DEFAULT_CONFIG` 中提取的每个叶子配置键。您可以将现有的 `config.yaml` 粘贴到 `settings` 属性集中 — 结构 1:1 映射。
 :::
 
 <details>
@@ -297,46 +297,46 @@ Run `nix build .#configKeys && cat result` to see every leaf config key extracte
 
 </details>
 
-### Escape Hatch: Bring Your Own Config
+### 逃生舱口：使用自定义配置
 
-If you'd rather manage `config.yaml` entirely outside Nix, use `configFile`:
+如果您希望完全在 Nix 外部管理 `config.yaml`，请使用 `configFile`：
 
 ```nix
 services.hermes-agent.configFile = /etc/hermes/config.yaml;
 ```
 
-This bypasses `settings` entirely — no merge, no generation. The file is copied as-is to `$HERMES_HOME/config.yaml` on each activation.
+这会完全绕过 `settings` — 无合并，无生成。文件会在每次激活时原样复制到 `$HERMES_HOME/config.yaml`。
 
-### Customization Cheatsheet
+### 自定义速查表
 
-Quick reference for the most common things Nix users want to customize:
+Nix 用户最常自定义的内容快速参考：
 
-| I want to... | Option | Example |
+| 我想要... | 选项 | 示例 |
 |---|---|---|
-| Change the LLM model | `settings.model.default` | `"anthropic/claude-sonnet-4"` |
-| Use a different provider endpoint | `settings.model.base_url` | `"https://openrouter.ai/api/v1"` |
-| Add API keys | `environmentFiles` | `[ config.sops.secrets."hermes-env".path ]` |
-| Give the agent a personality | `documents."SOUL.md"` | `builtins.readFile ./my-soul.md` |
-| Add MCP tool servers | `mcpServers.<name>` | See [MCP Servers](#mcp-servers) |
-| Mount host directories into container | `container.extraVolumes` | `[ "/data:/data:rw" ]` |
-| Pass GPU access to container | `container.extraOptions` | `[ "--gpus" "all" ]` |
-| Use Podman instead of Docker | `container.backend` | `"podman"` |
-| Share state between host CLI and container | `container.hostUsers` | `[ "sidbin" ]` |
-| Add tools to the service PATH (native only) | `extraPackages` | `[ pkgs.pandoc pkgs.imagemagick ]` |
-| Use a custom base image | `container.image` | `"ubuntu:24.04"` |
-| Override the hermes package | `package` | `inputs.hermes-agent.packages.${system}.default.override { ... }` |
-| Change state directory | `stateDir` | `"/opt/hermes"` |
-| Set the agent's working directory | `workingDirectory` | `"/home/user/projects"` |
+| 更改 LLM 模型 | `settings.model.default` | `"anthropic/claude-sonnet-4"` |
+| 使用不同的提供商端点 | `settings.model.base_url` | `"https://openrouter.ai/api/v1"` |
+| 添加 API 密钥 | `environmentFiles` | `[ config.sops.secrets."hermes-env".path ]` |
+| 为智能体设置个性 | `documents."SOUL.md"` | `builtins.readFile ./my-soul.md` |
+| 添加 MCP 工具服务器 | `mcpServers.<name>` | 参见 [MCP 服务器](#mcp-servers) |
+| 将主机目录挂载到容器 | `container.extraVolumes` | `[ "/data:/data:rw" ]` |
+| 向容器传递 GPU 访问权限 | `container.extraOptions` | `[ "--gpus" "all" ]` |
+| 使用 Podman 而非 Docker | `container.backend` | `"podman"` |
+| 在主机 CLI 和容器之间共享状态 | `container.hostUsers` | `[ "sidbin" ]` |
+| 向服务 PATH 添加工具（仅原生模式） | `extraPackages` | `[ pkgs.pandoc pkgs.imagemagick ]` |
+| 使用自定义基础镜像 | `container.image` | `"ubuntu:24.04"` |
+| 覆盖 hermes 包 | `package` | `inputs.hermes-agent.packages.${system}.default.override { ... }` |
+| 更改状态目录 | `stateDir` | `"/opt/hermes"` |
+| 设置智能体的工作目录 | `workingDirectory` | `"/home/user/projects"` |
 
 ---
 
-## Secrets Management
+## 密钥管理
 
-:::danger Never put API keys in `settings` or `environment`
-Values in Nix expressions end up in `/nix/store`, which is world-readable. Always use `environmentFiles` with a secrets manager.
+:::danger 切勿在 `settings` 或 `environment` 中放置 API 密钥
+Nix 表达式中的值会最终存储在 `/nix/store` 中，该目录是世界可读的。请始终使用 `environmentFiles` 和密钥管理器。
 :::
 
-Both `environment` (non-secret vars) and `environmentFiles` (secret files) are merged into `$HERMES_HOME/.env` at activation time (`nixos-rebuild switch`). Hermes reads this file on every startup, so changes take effect with a `systemctl restart hermes-agent` — no container recreation needed.
+`environment`（非密钥变量）和 `environmentFiles`（密钥文件）都会在激活时（`nixos-rebuild switch`）合并到 `$HERMES_HOME/.env` 中。Hermes 在每次启动时都会读取此文件，因此更改会在 `systemctl restart hermes-agent` 后生效 — 无需重新创建容器。
 
 ### sops-nix
 
@@ -354,10 +354,10 @@ Both `environment` (non-secret vars) and `environmentFiles` (secret files) are m
 }
 ```
 
-The secrets file contains key-value pairs:
+密钥文件包含键值对：
 
 ```yaml
-# secrets/hermes.yaml (encrypted with sops)
+# secrets/hermes.yaml (使用 sops 加密)
 hermes-env: |
     OPENROUTER_API_KEY=sk-or-...
     TELEGRAM_BOT_TOKEN=123456:ABC...
@@ -376,52 +376,52 @@ hermes-env: |
 }
 ```
 
-### OAuth / Auth Seeding
+### OAuth / 认证种子
 
-For platforms requiring OAuth (e.g., Discord), use `authFile` to seed credentials on first deploy:
+对于需要 OAuth 的平台（例如 Discord），使用 `authFile` 在首次部署时植入凭证：
 
 ```nix
 {
   services.hermes-agent = {
     authFile = config.sops.secrets."hermes/auth.json".path;
-    # authFileForceOverwrite = true;  # overwrite on every activation
+    # authFileForceOverwrite = true;  # 在每次激活时覆盖
   };
 }
 ```
 
-The file is only copied if `auth.json` doesn't already exist (unless `authFileForceOverwrite = true`). Runtime OAuth token refreshes are written to the state directory and preserved across rebuilds.
+只有当 `auth.json` 不存在时才会复制该文件（除非设置了 `authFileForceOverwrite = true`）。运行时 OAuth 令牌刷新会写入状态目录，并在重建时保留。
 
 ---
 
-## Documents
+## 文档
 
-The `documents` option installs files into the agent's working directory (the `workingDirectory`, which the agent reads as its workspace). Hermes looks for specific filenames by convention:
+`documents` 选项将文件安装到智能体的工作目录（`workingDirectory`，智能体将其视为工作区）中。Hermes 按惯例查找特定的文件名：
 
-- **`SOUL.md`** — the agent's system prompt / personality. Hermes reads this on startup and uses it as persistent instructions that shape its behavior across all conversations.
-- **`USER.md`** — context about the user the agent is interacting with.
-- Any other files you place here are visible to the agent as workspace files.
+- **`SOUL.md`** — 智能体的系统提示 / 个性。Hermes 在启动时读取此文件，并将其用作持久指令，影响其在所有对话中的行为。
+- **`USER.md`** — 关于智能体正在交互的用户的上下文信息。
+- 您放置在此处的任何其他文件都会作为工作区文件对智能体可见。
 
 ```nix
 {
   services.hermes-agent.documents = {
     "SOUL.md" = ''
-      You are a helpful research assistant specializing in NixOS packaging.
-      Always cite sources and prefer reproducible solutions.
+      您是一位专注于 NixOS 打包的乐于助人的研究助手。
+      始终引用来源并优先选择可重现的解决方案。
     '';
-    "USER.md" = ./documents/USER.md;  # path reference, copied from Nix store
+    "USER.md" = ./documents/USER.md;  # 路径引用，从 Nix store 复制
   };
 }
 ```
 
-Values can be inline strings or path references. Files are installed on every `nixos-rebuild switch`.
+值可以是内联字符串或路径引用。文件会在每次 `nixos-rebuild switch` 时安装。
 
 ---
 
-## MCP Servers
+## MCP 服务器
 
-The `mcpServers` option declaratively configures [MCP (Model Context Protocol)](https://modelcontextprotocol.io) servers. Each server uses either **stdio** (local command) or **HTTP** (remote URL) transport.
+`mcpServers` 选项以声明式方式配置 [MCP (Model Context Protocol)](https://modelcontextprotocol.io) 服务器。每个服务器使用 **stdio**（本地命令）或 **HTTP**（远程 URL）传输。
 
-### Stdio Transport (Local Servers)
+### Stdio 传输（本地服务器）
 
 ```nix
 {
@@ -433,17 +433,17 @@ The `mcpServers` option declaratively configures [MCP (Model Context Protocol)](
     github = {
       command = "npx";
       args = [ "-y" "@modelcontextprotocol/server-github" ];
-      env.GITHUB_PERSONAL_ACCESS_TOKEN = "\${GITHUB_TOKEN}"; # resolved from .env
+      env.GITHUB_PERSONAL_ACCESS_TOKEN = "\${GITHUB_TOKEN}"; # 从 .env 解析
     };
   };
 }
 ```
 
 :::tip
-Environment variables in `env` values are resolved from `$HERMES_HOME/.env` at runtime. Use `environmentFiles` to inject secrets — never put tokens directly in Nix config.
+`env` 值中的环境变量在运行时从 `$HERMES_HOME/.env` 解析。使用 `environmentFiles` 注入密钥 — 切勿将令牌直接放在 Nix 配置中。
 :::
 
-### HTTP Transport (Remote Servers)
+### HTTP 传输（远程服务器）
 
 ```nix
 {
@@ -455,9 +455,9 @@ Environment variables in `env` values are resolved from `$HERMES_HOME/.env` at r
 }
 ```
 
-### HTTP Transport with OAuth
+### 带 OAuth 的 HTTP 传输
 
-Set `auth = "oauth"` for servers using OAuth 2.1. Hermes implements the full PKCE flow — metadata discovery, dynamic client registration, token exchange, and automatic refresh.
+对于使用 OAuth 2.1 的服务器，设置 `auth = "oauth"`。Hermes 实现了完整的 PKCE 流程 — 元数据发现、动态客户端注册、令牌交换和自动刷新。
 
 ```nix
 {
@@ -468,41 +468,41 @@ Set `auth = "oauth"` for servers using OAuth 2.1. Hermes implements the full PKC
 }
 ```
 
-Tokens are stored in `$HERMES_HOME/mcp-tokens/<server-name>.json` and persist across restarts and rebuilds.
+令牌存储在 `$HERMES_HOME/mcp-tokens/<server-name>.json` 中，并在重启和重建时保留。
 
 <details>
-<summary><strong>Initial OAuth authorization on headless servers</strong></summary>
+<summary><strong>无头服务器上的初始 OAuth 授权</strong></summary>
 
-The first OAuth authorization requires a browser-based consent flow. In a headless deployment, Hermes prints the authorization URL to stdout/logs instead of opening a browser.
+首次 OAuth 授权需要基于浏览器的同意流程。在无头部署中，Hermes 会将授权 URL 打印到标准输出/日志中，而不是打开浏览器。
 
-**Option A: Interactive bootstrap** — run the flow once via `docker exec` (container) or `sudo -u hermes` (native):
+**选项 A：交互式引导** — 通过 `docker exec`（容器）或 `sudo -u hermes`（原生）运行一次流程：
 
 ```bash
-# Container mode
+# 容器模式
 docker exec -it hermes-agent \
   hermes mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
 
-# Native mode
+# 原生模式
 sudo -u hermes HERMES_HOME=/var/lib/hermes/.hermes \
   hermes mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
 ```
 
-The container uses `--network=host`, so the OAuth callback listener on `127.0.0.1` is reachable from the host browser.
+容器使用 `--network=host`，因此 `127.0.0.1` 上的 OAuth 回调监听器可从主机浏览器访问。
 
-**Option B: Pre-seed tokens** — complete the flow on a workstation, then copy tokens:
+**选项 B：预植入令牌** — 在工作站上完成流程，然后复制令牌：
 
 ```bash
 hermes mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
 scp ~/.hermes/mcp-tokens/my-oauth-server{,.client}.json \
     server:/var/lib/hermes/.hermes/mcp-tokens/
-# Ensure: chown hermes:hermes, chmod 0600
+# 确保：chown hermes:hermes, chmod 0600
 ```
 
 </details>
 
-### Sampling (Server-Initiated LLM Requests)
+### 采样（服务器发起的 LLM 请求）
 
-Some MCP servers can request LLM completions from the agent:
+一些 MCP 服务器可以向智能体请求 LLM 完成：
 
 ```nix
 {
@@ -522,294 +522,294 @@ Some MCP servers can request LLM completions from the agent:
 
 ---
 
-## Managed Mode
+## 托管模式
 
-When hermes runs via the NixOS module, the following CLI commands are **blocked** with a descriptive error pointing you to `configuration.nix`:
+当 hermes 通过 NixOS 模块运行时，以下 CLI 命令会被**阻止**，并显示指向 `configuration.nix` 的描述性错误：
 
-| Blocked command | Why |
+| 被阻止的命令 | 原因 |
 |---|---|
-| `hermes setup` | Config is declarative — edit `settings` in your Nix config |
-| `hermes config edit` | Config is generated from `settings` |
-| `hermes config set <key> <value>` | Config is generated from `settings` |
-| `hermes gateway install` | The systemd service is managed by NixOS |
-| `hermes gateway uninstall` | The systemd service is managed by NixOS |
+| `hermes setup` | 配置是声明式的 — 请在 Nix 配置中编辑 `settings` |
+| `hermes config edit` | 配置从 `settings` 生成 |
+| `hermes config set <key> <value>` | 配置从 `settings` 生成 |
+| `hermes gateway install` | systemd 服务由 NixOS 管理 |
+| `hermes gateway uninstall` | systemd 服务由 NixOS 管理 |
 
-This prevents drift between what Nix declares and what's on disk. Detection uses two signals:
+这可以防止 Nix 声明的内容与磁盘上的内容之间出现偏差。检测使用两个信号：
 
-1. **`HERMES_MANAGED=true`** environment variable — set by the systemd service, visible to the gateway process
-2. **`.managed` marker file** in `HERMES_HOME` — set by the activation script, visible to interactive shells (e.g., `docker exec -it hermes-agent hermes config set ...` is also blocked)
+1. **`HERMES_MANAGED=true`** 环境变量 — 由 systemd 服务设置，对网关进程可见
+2. **`HERMES_HOME` 中的 `.managed` 标记文件** — 由激活脚本设置，对交互式 shell 可见（例如，`docker exec -it hermes-agent hermes config set ...` 也会被阻止）
 
-To change configuration, edit your Nix config and run `sudo nixos-rebuild switch`.
+要更改配置，请编辑 Nix 配置并运行 `sudo nixos-rebuild switch`。
 
 ---
 
-## Container Architecture
+## 容器架构
 
 :::info
-This section is only relevant if you're using `container.enable = true`. Skip it for native mode deployments.
+本部分仅适用于使用 `container.enable = true` 的情况。原生模式部署请跳过。
 :::
 
-When container mode is enabled, hermes runs inside a persistent Ubuntu container with the Nix-built binary bind-mounted read-only from the host:
+当启用容器模式时，hermes 在一个持久的 Ubuntu 容器中运行，Nix 构建的二进制文件从主机以只读方式绑定挂载：
 
 ```
-Host                                    Container
+主机                                    容器
 ────                                    ─────────
 /nix/store/...-hermes-agent-0.1.0  ──►  /nix/store/... (ro)
-~/.hermes -> /var/lib/hermes/.hermes       (symlink bridge, per hostUsers)
+~/.hermes -> /var/lib/hermes/.hermes       (符号链接桥接，按 hostUsers 配置)
 /var/lib/hermes/                    ──►  /data/          (rw)
-  ├── current-package -> /nix/store/...    (symlink, updated each rebuild)
-  ├── .gc-root -> /nix/store/...           (prevents nix-collect-garbage)
-  ├── .container-identity                  (sha256 hash, triggers recreation)
+  ├── current-package -> /nix/store/...    (符号链接，每次重建时更新)
+  ├── .gc-root -> /nix/store/...           (防止 nix-collect-garbage 清理)
+  ├── .container-identity                  (sha256 哈希，触发重建)
   ├── .hermes/                             (HERMES_HOME)
-  │   ├── .env                             (merged from environment + environmentFiles)
-  │   ├── config.yaml                      (Nix-generated, deep-merged by activation)
-  │   ├── .managed                         (marker file)
-  │   ├── .container-mode                  (routing metadata: backend, exec_user, etc.)
-  │   ├── state.db, sessions/, memories/   (runtime state)
-  │   └── mcp-tokens/                      (OAuth tokens for MCP servers)
+  │   ├── .env                             (从 environment + environmentFiles 合并)
+  │   ├── config.yaml                      (Nix 生成，激活时深度合并)
+  │   ├── .managed                         (标记文件)
+  │   ├── .container-mode                  (路由元数据：backend, exec_user 等)
+  │   ├── state.db, sessions/, memories/   (运行时状态)
+  │   └── mcp-tokens/                      (MCP 服务器的 OAuth 令牌)
   ├── home/                                ──►  /home/hermes    (rw)
   └── workspace/                           (MESSAGING_CWD)
-      ├── SOUL.md                          (from documents option)
-      └── (agent-created files)
+      ├── SOUL.md                          (来自 documents 选项)
+      └── (智能体创建的文件)
 
-Container writable layer (apt/pip/npm):   /usr, /usr/local, /tmp
+容器可写层 (apt/pip/npm)：   /usr, /usr/local, /tmp
 ```
 
-The Nix-built binary works inside the Ubuntu container because `/nix/store` is bind-mounted — it brings its own interpreter and all dependencies, so there's no reliance on the container's system libraries. The container entrypoint resolves through a `current-package` symlink: `/data/current-package/bin/hermes gateway run --replace`. On `nixos-rebuild switch`, only the symlink is updated — the container keeps running.
+Nix 构建的二进制文件在 Ubuntu 容器中工作，因为 `/nix/store` 被绑定挂载 — 它自带解释器和所有依赖项，因此不依赖容器的系统库。容器入口点通过 `current-package` 符号链接解析：`/data/current-package/bin/hermes gateway run --replace`。在 `nixos-rebuild switch` 时，只有符号链接被更新 — 容器保持运行。
 
-### What Persists Across What
+### 什么在什么情况下持久化
 
-| Event | Container recreated? | `/data` (state) | `/home/hermes` | Writable layer (`apt`/`pip`/`npm`) |
+| 事件 | 容器是否重建？ | `/data`（状态） | `/home/hermes` | 可写层（`apt`/`pip`/`npm`） |
 |---|---|---|---|---|
-| `systemctl restart hermes-agent` | No | Persists | Persists | Persists |
-| `nixos-rebuild switch` (code change) | No (symlink updated) | Persists | Persists | Persists |
-| Host reboot | No | Persists | Persists | Persists |
-| `nix-collect-garbage` | No (GC root) | Persists | Persists | Persists |
-| Image change (`container.image`) | **Yes** | Persists | Persists | **Lost** |
-| Volume/options change | **Yes** | Persists | Persists | **Lost** |
-| `environment`/`environmentFiles` change | No | Persists | Persists | Persists |
+| `systemctl restart hermes-agent` | 否 | 持久化 | 持久化 | 持久化 |
+| `nixos-rebuild switch`（代码更改） | 否（符号链接更新） | 持久化 | 持久化 | 持久化 |
+| 主机重启 | 否 | 持久化 | 持久化 | 持久化 |
+| `nix-collect-garbage` | 否（GC 根保护） | 持久化 | 持久化 | 持久化 |
+| 镜像更改（`container.image`） | **是** | 持久化 | 持久化 | **丢失** |
+| 卷/选项更改 | **是** | 持久化 | 持久化 | **丢失** |
+| `environment`/`environmentFiles` 更改 | 否 | 持久化 | 持久化 | 持久化 |
 
-The container is only recreated when its **identity hash** changes. The hash covers: schema version, image, `extraVolumes`, `extraOptions`, and the entrypoint script. Changes to environment variables, settings, documents, or the hermes package itself do **not** trigger recreation.
+容器仅在其**身份哈希**更改时才会重建。哈希覆盖：架构版本、镜像、`extraVolumes`、`extraOptions` 和入口点脚本。环境变量、设置、文档或 hermes 包本身的更改**不会**触发重建。
 
-:::warning Writable layer loss
-When the identity hash changes (image upgrade, new volumes, new container options), the container is destroyed and recreated from a fresh pull of `container.image`. Any `apt install`, `pip install`, or `npm install` packages in the writable layer are lost. State in `/data` and `/home/hermes` is preserved (these are bind mounts).
+:::warning 可写层丢失
+当身份哈希更改时（镜像升级、新卷、新容器选项），容器会被销毁并从 `container.image` 的新拉取中重新创建。可写层中的任何 `apt install`、`pip install` 或 `npm install` 包都会丢失。`/data` 和 `/home/hermes` 中的状态会保留（这些是绑定挂载）。
 
-If the agent relies on specific packages, consider baking them into a custom image (`container.image = "my-registry/hermes-base:latest"`) or scripting their installation in the agent's SOUL.md.
+如果智能体依赖特定包，考虑将它们烘焙到自定义镜像中（`container.image = "my-registry/hermes-base:latest"`）或在智能体的 SOUL.md 中编写安装脚本。
 :::
 
-### GC Root Protection
+### GC 根保护
 
-The `preStart` script creates a GC root at `${stateDir}/.gc-root` pointing to the current hermes package. This prevents `nix-collect-garbage` from removing the running binary. If the GC root somehow breaks, restarting the service recreates it.
+`preStart` 脚本在 `${stateDir}/.gc-root` 创建一个指向当前 hermes 包的 GC 根。这可以防止 `nix-collect-garbage` 删除运行中的二进制文件。如果 GC 根以某种方式损坏，重启服务会重新创建它。
 
 ---
 
-## Development
+## 开发
 
-### Dev Shell
+### 开发 Shell
 
-The flake provides a development shell with Python 3.11, uv, Node.js, and all runtime tools:
+Flake 提供了一个包含 Python 3.11、uv、Node.js 和所有运行时工具的开发 shell：
 
 ```bash
 cd hermes-agent
 nix develop
 
-# Shell provides:
-#   - Python 3.11 + uv (deps installed into .venv on first entry)
-#   - Node.js 20, ripgrep, git, openssh, ffmpeg on PATH
-#   - Stamp-file optimization: re-entry is near-instant if deps haven't changed
+# Shell 提供：
+#   - Python 3.11 + uv（首次进入时将依赖项安装到 .venv）
+#   - Node.js 20、ripgrep、git、openssh、ffmpeg 在 PATH 上
+#   - 戳记文件优化：如果依赖项未更改，重新进入几乎是即时的
 
 hermes setup
 hermes chat
 ```
 
-### direnv (Recommended)
+### direnv（推荐）
 
-The included `.envrc` activates the dev shell automatically:
+包含的 `.envrc` 会自动激活开发 shell：
 
 ```bash
 cd hermes-agent
-direnv allow    # one-time
-# Subsequent entries are near-instant (stamp file skips dep install)
+direnv allow    # 一次性操作
+# 后续进入几乎是即时的（戳记文件跳过依赖项安装）
 ```
 
-### Flake Checks
+### Flake 检查
 
-The flake includes build-time verification that runs in CI and locally:
+Flake 包含在 CI 和本地运行的构建时验证：
 
 ```bash
-# Run all checks
+# 运行所有检查
 nix flake check
 
-# Individual checks
-nix build .#checks.x86_64-linux.package-contents   # binaries exist + version
-nix build .#checks.x86_64-linux.entry-points-sync  # pyproject.toml ↔ Nix package sync
-nix build .#checks.x86_64-linux.cli-commands        # gateway/config subcommands
-nix build .#checks.x86_64-linux.managed-guard       # HERMES_MANAGED blocks mutation
-nix build .#checks.x86_64-linux.bundled-skills      # skills present in package
-nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves user keys
+# 单独检查
+nix build .#checks.x86_64-linux.package-contents   # 二进制文件存在 + 版本
+nix build .#checks.x86_64-linux.entry-points-sync  # pyproject.toml ↔ Nix 包同步
+nix build .#checks.x86_64-linux.cli-commands        # gateway/config 子命令
+nix build .#checks.x86_64-linux.managed-guard       # HERMES_MANAGED 阻止修改
+nix build .#checks.x86_64-linux.bundled-skills      # 包中存在技能
+nix build .#checks.x86_64-linux.config-roundtrip    # 合并脚本保留用户键
 ```
 
 <details>
-<summary><strong>What each check verifies</strong></summary>
+<summary><strong>每个检查验证什么</strong></summary>
 
-| Check | What it tests |
+| 检查 | 测试内容 |
 |---|---|
-| `package-contents` | `hermes` and `hermes-agent` binaries exist and `hermes version` runs |
-| `entry-points-sync` | Every `[project.scripts]` entry in `pyproject.toml` has a wrapped binary in the Nix package |
-| `cli-commands` | `hermes --help` exposes `gateway` and `config` subcommands |
-| `managed-guard` | `HERMES_MANAGED=true hermes config set ...` prints the NixOS error |
-| `bundled-skills` | Skills directory exists, contains SKILL.md files, `HERMES_BUNDLED_SKILLS` is set in wrapper |
-| `config-roundtrip` | 7 merge scenarios: fresh install, Nix override, user key preservation, mixed merge, MCP additive merge, nested deep merge, idempotency |
+| `package-contents` | `hermes` 和 `hermes-agent` 二进制文件存在且 `hermes version` 可运行 |
+| `entry-points-sync` | `pyproject.toml` 中的每个 `[project.scripts]` 条目在 Nix 包中都有包装二进制文件 |
+| `cli-commands` | `hermes --help` 显示 `gateway` 和 `config` 子命令 |
+| `managed-guard` | `HERMES_MANAGED=true hermes config set ...` 打印 NixOS 错误 |
+| `bundled-skills` | 技能目录存在，包含 SKILL.md 文件，包装器中设置了 `HERMES_BUNDLED_SKILLS` |
+| `config-roundtrip` | 7 种合并场景：全新安装、Nix 覆盖、用户键保留、混合合并、MCP 附加合并、嵌套深度合并、幂等性 |
 
 </details>
 
 ---
 
-## Options Reference
+## 选项参考
 
-### Core
+### 核心
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `enable` | `bool` | `false` | Enable the hermes-agent service |
-| `package` | `package` | `hermes-agent` | The hermes-agent package to use |
-| `user` | `str` | `"hermes"` | System user |
-| `group` | `str` | `"hermes"` | System group |
-| `createUser` | `bool` | `true` | Auto-create user/group |
-| `stateDir` | `str` | `"/var/lib/hermes"` | State directory (`HERMES_HOME` parent) |
-| `workingDirectory` | `str` | `"${stateDir}/workspace"` | Agent working directory (`MESSAGING_CWD`) |
-| `addToSystemPackages` | `bool` | `false` | Add `hermes` CLI to system PATH and set `HERMES_HOME` system-wide |
+| `enable` | `bool` | `false` | 启用 hermes-agent 服务 |
+| `package` | `package` | `hermes-agent` | 要使用的 hermes-agent 包 |
+| `user` | `str` | `"hermes"` | 系统用户 |
+| `group` | `str` | `"hermes"` | 系统组 |
+| `createUser` | `bool` | `true` | 自动创建用户/组 |
+| `stateDir` | `str` | `"/var/lib/hermes"` | 状态目录（`HERMES_HOME` 的父目录） |
+| `workingDirectory` | `str` | `"${stateDir}/workspace"` | 智能体工作目录（`MESSAGING_CWD`） |
+| `addToSystemPackages` | `bool` | `false` | 将 `hermes` CLI 添加到系统 PATH 并在系统范围内设置 `HERMES_HOME` |
 
-### Configuration
+### 配置
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `settings` | `attrs` (deep-merged) | `{}` | Declarative config rendered as `config.yaml`. Supports arbitrary nesting; multiple definitions are merged via `lib.recursiveUpdate` |
-| `configFile` | `null` or `path` | `null` | Path to an existing `config.yaml`. Overrides `settings` entirely if set |
+| `settings` | `attrs`（深度合并） | `{}` | 声明式配置，渲染为 `config.yaml`。支持任意嵌套；多个定义通过 `lib.recursiveUpdate` 合并 |
+| `configFile` | `null` 或 `path` | `null` | 现有 `config.yaml` 的路径。如果设置，完全覆盖 `settings` |
 
-### Secrets & Environment
+### 密钥与环境
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `environmentFiles` | `listOf str` | `[]` | Paths to env files with secrets. Merged into `$HERMES_HOME/.env` at activation time |
-| `environment` | `attrsOf str` | `{}` | Non-secret env vars. **Visible in Nix store** — do not put secrets here |
-| `authFile` | `null` or `path` | `null` | OAuth credentials seed. Only copied on first deploy |
-| `authFileForceOverwrite` | `bool` | `false` | Always overwrite `auth.json` from `authFile` on activation |
+| `environmentFiles` | `listOf str` | `[]` | 包含密钥的环境文件路径。在激活时合并到 `$HERMES_HOME/.env` |
+| `environment` | `attrsOf str` | `{}` | 非密钥环境变量。**在 Nix store 中可见** — 不要在此处放置密钥 |
+| `authFile` | `null` 或 `path` | `null` | OAuth 凭证种子。仅在首次部署时复制 |
+| `authFileForceOverwrite` | `bool` | `false` | 在每次激活时始终从 `authFile` 覆盖 `auth.json` |
 
-### Documents
+### 文档
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `documents` | `attrsOf (either str path)` | `{}` | Workspace files. Keys are filenames, values are inline strings or paths. Installed into `workingDirectory` on activation |
+| `documents` | `attrsOf (either str path)` | `{}` | 工作区文件。键是文件名，值是内联字符串或路径。在激活时安装到 `workingDirectory` |
 
-### MCP Servers
+### MCP 服务器
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `mcpServers` | `attrsOf submodule` | `{}` | MCP server definitions, merged into `settings.mcp_servers` |
-| `mcpServers.<name>.command` | `null` or `str` | `null` | Server command (stdio transport) |
-| `mcpServers.<name>.args` | `listOf str` | `[]` | Command arguments |
-| `mcpServers.<name>.env` | `attrsOf str` | `{}` | Environment variables for the server process |
-| `mcpServers.<name>.url` | `null` or `str` | `null` | Server endpoint URL (HTTP/StreamableHTTP transport) |
-| `mcpServers.<name>.headers` | `attrsOf str` | `{}` | HTTP headers, e.g. `Authorization` |
-| `mcpServers.<name>.auth` | `null` or `"oauth"` | `null` | Authentication method. `"oauth"` enables OAuth 2.1 PKCE |
-| `mcpServers.<name>.enabled` | `bool` | `true` | Enable or disable this server |
-| `mcpServers.<name>.timeout` | `null` or `int` | `null` | Tool call timeout in seconds (default: 120) |
-| `mcpServers.<name>.connect_timeout` | `null` or `int` | `null` | Connection timeout in seconds (default: 60) |
-| `mcpServers.<name>.tools` | `null` or `submodule` | `null` | Tool filtering (`include`/`exclude` lists) |
-| `mcpServers.<name>.sampling` | `null` or `submodule` | `null` | Sampling config for server-initiated LLM requests |
+| `mcpServers` | `attrsOf submodule` | `{}` | MCP 服务器定义，合并到 `settings.mcp_servers` |
+| `mcpServers.<name>.command` | `null` 或 `str` | `null` | 服务器命令（stdio 传输） |
+| `mcpServers.<name>.args` | `listOf str` | `[]` | 命令参数 |
+| `mcpServers.<name>.env` | `attrsOf str` | `{}` | 服务器进程的环境变量 |
+| `mcpServers.<name>.url` | `null` 或 `str` | `null` | 服务器端点 URL（HTTP/StreamableHTTP 传输） |
+| `mcpServers.<name>.headers` | `attrsOf str` | `{}` | HTTP 标头，例如 `Authorization` |
+| `mcpServers.<name>.auth` | `null` 或 `"oauth"` | `null` | 认证方法。`"oauth"` 启用 OAuth 2.1 PKCE |
+| `mcpServers.<name>.enabled` | `bool` | `true` | 启用或禁用此服务器 |
+| `mcpServers.<name>.timeout` | `null` 或 `int` | `null` | 工具调用超时（秒）（默认：120） |
+| `mcpServers.<name>.connect_timeout` | `null` 或 `int` | `null` | 连接超时（秒）（默认：60） |
+| `mcpServers.<name>.tools` | `null` 或 `submodule` | `null` | 工具过滤（`include`/`exclude` 列表） |
+| `mcpServers.<name>.sampling` | `null` 或 `submodule` | `null` | 服务器发起的 LLM 请求的采样配置 |
 
-### Service Behavior
+### 服务行为
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `extraArgs` | `listOf str` | `[]` | Extra args for `hermes gateway` |
-| `extraPackages` | `listOf package` | `[]` | Extra packages on service PATH (native mode only) |
-| `restart` | `str` | `"always"` | systemd `Restart=` policy |
-| `restartSec` | `int` | `5` | systemd `RestartSec=` value |
+| `extraArgs` | `listOf str` | `[]` | `hermes gateway` 的额外参数 |
+| `extraPackages` | `listOf package` | `[]` | 服务 PATH 上的额外包（仅原生模式） |
+| `restart` | `str` | `"always"` | systemd `Restart=` 策略 |
+| `restartSec` | `int` | `5` | systemd `RestartSec=` 值 |
 
-### Container
+### 容器
 
-| Option | Type | Default | Description |
+| 选项 | 类型 | 默认值 | 描述 |
 |---|---|---|---|
-| `container.enable` | `bool` | `false` | Enable OCI container mode |
-| `container.backend` | `enum ["docker" "podman"]` | `"docker"` | Container runtime |
-| `container.image` | `str` | `"ubuntu:24.04"` | Base image (pulled at runtime) |
-| `container.extraVolumes` | `listOf str` | `[]` | Extra volume mounts (`host:container:mode`) |
-| `container.extraOptions` | `listOf str` | `[]` | Extra args passed to `docker create` |
-| `container.hostUsers` | `listOf str` | `[]` | Interactive users who get a `~/.hermes` symlink to the service stateDir and are auto-added to the `hermes` group |
+| `container.enable` | `bool` | `false` | 启用 OCI 容器模式 |
+| `container.backend` | `enum ["docker" "podman"]` | `"docker"` | 容器运行时 |
+| `container.image` | `str` | `"ubuntu:24.04"` | 基础镜像（运行时拉取） |
+| `container.extraVolumes` | `listOf str` | `[]` | 额外卷挂载（`host:container:mode`） |
+| `container.extraOptions` | `listOf str` | `[]` | 传递给 `docker create` 的额外参数 |
+| `container.hostUsers` | `listOf str` | `[]` | 交互式用户，获得指向服务 stateDir 的 `~/.hermes` 符号链接，并自动添加到 `hermes` 组 |
 
 ---
 
-## Directory Layout
+## 目录布局
 
-### Native Mode
+### 原生模式
 
 ```
-/var/lib/hermes/                     # stateDir (owned by hermes:hermes, 0750)
+/var/lib/hermes/                     # stateDir (由 hermes:hermes 拥有，权限 0750)
 ├── .hermes/                         # HERMES_HOME
-│   ├── config.yaml                  # Nix-generated (deep-merged each rebuild)
-│   ├── .managed                     # Marker: CLI config mutation blocked
-│   ├── .env                         # Merged from environment + environmentFiles
-│   ├── auth.json                    # OAuth credentials (seeded, then self-managed)
+│   ├── config.yaml                  # Nix 生成（每次重建时深度合并）
+│   ├── .managed                     # 标记：CLI 配置修改被阻止
+│   ├── .env                         # 从 environment + environmentFiles 合并
+│   ├── auth.json                    # OAuth 凭证（植入后自我管理）
 │   ├── gateway.pid
 │   ├── state.db
-│   ├── mcp-tokens/                  # OAuth tokens for MCP servers
+│   ├── mcp-tokens/                  # MCP 服务器的 OAuth 令牌
 │   ├── sessions/
 │   ├── memories/
 │   ├── skills/
 │   ├── cron/
 │   └── logs/
-├── home/                            # Agent HOME
+├── home/                            # 智能体 HOME
 └── workspace/                       # MESSAGING_CWD
-    ├── SOUL.md                      # From documents option
-    └── (agent-created files)
+    ├── SOUL.md                      # 来自 documents 选项
+    └── (智能体创建的文件)
 ```
 
-### Container Mode
+### 容器模式
 
-Same layout, mounted into the container:
+相同布局，挂载到容器中：
 
-| Container path | Host path | Mode | Notes |
+| 容器路径 | 主机路径 | 模式 | 说明 |
 |---|---|---|---|
-| `/nix/store` | `/nix/store` | `ro` | Hermes binary + all Nix deps |
-| `/data` | `/var/lib/hermes` | `rw` | All state, config, workspace |
-| `/home/hermes` | `${stateDir}/home` | `rw` | Persistent agent home — `pip install --user`, tool caches |
-| `/usr`, `/usr/local`, `/tmp` | (writable layer) | `rw` | `apt`/`pip`/`npm` installs — persists across restarts, lost on recreation |
+| `/nix/store` | `/nix/store` | `ro` | Hermes 二进制文件 + 所有 Nix 依赖项 |
+| `/data` | `/var/lib/hermes` | `rw` | 所有状态、配置、工作区 |
+| `/home/hermes` | `${stateDir}/home` | `rw` | 持久智能体主目录 — `pip install --user`、工具缓存 |
+| `/usr`, `/usr/local`, `/tmp` | (可写层) | `rw` | `apt`/`pip`/`npm` 安装 — 跨重启持久化，重建时丢失 |
 
 ---
 
-## Updating
+## 更新
 
 ```bash
-# Update the flake input
+# 更新 flake 输入
 nix flake update hermes-agent --flake /etc/nixos
 
-# Rebuild
+# 重建
 sudo nixos-rebuild switch
 ```
 
-In container mode, the `current-package` symlink is updated and the agent picks up the new binary on restart. No container recreation, no loss of installed packages.
+在容器模式下，`current-package` 符号链接会被更新，智能体在重启时会使用新的二进制文件。无需重新创建容器，也不会丢失已安装的包。
 
 ---
 
-## Troubleshooting
+## 故障排除
 
-:::tip Podman users
-All `docker` commands below work the same with `podman`. Substitute accordingly if you set `container.backend = "podman"`.
+:::tip Podman 用户
+以下所有 `docker` 命令在 `podman` 中同样有效。如果您设置了 `container.backend = "podman"`，请相应地替换。
 :::
 
-### Service Logs
+### 服务日志
 
 ```bash
-# Both modes use the same systemd unit
+# 两种模式使用相同的 systemd 单元
 journalctl -u hermes-agent -f
 
-# Container mode: also available directly
+# 容器模式：也可直接查看
 docker logs -f hermes-agent
 ```
 
-### Container Inspection
+### 容器检查
 
 ```bash
 systemctl status hermes-agent
@@ -820,9 +820,9 @@ docker exec hermes-agent readlink /data/current-package
 docker exec hermes-agent cat /data/.container-identity
 ```
 
-### Force Container Recreation
+### 强制容器重建
 
-If you need to reset the writable layer (fresh Ubuntu):
+如果需要重置可写层（全新 Ubuntu）：
 
 ```bash
 sudo systemctl stop hermes-agent
@@ -831,32 +831,32 @@ sudo rm /var/lib/hermes/.container-identity
 sudo systemctl start hermes-agent
 ```
 
-### Verify Secrets Are Loaded
+### 验证密钥已加载
 
-If the agent starts but can't authenticate with the LLM provider, check that the `.env` file was merged correctly:
+如果智能体启动但无法通过 LLM 提供商的认证，请检查 `.env` 文件是否正确合并：
 
 ```bash
-# Native mode
+# 原生模式
 sudo -u hermes cat /var/lib/hermes/.hermes/.env
 
-# Container mode
+# 容器模式
 docker exec hermes-agent cat /data/.hermes/.env
 ```
 
-### GC Root Verification
+### GC 根验证
 
 ```bash
 nix-store --query --roots $(docker exec hermes-agent readlink /data/current-package)
 ```
 
-### Common Issues
+### 常见问题
 
-| Symptom | Cause | Fix |
+| 症状 | 原因 | 解决方案 |
 |---|---|---|
-| `Cannot save configuration: managed by NixOS` | CLI guards active | Edit `configuration.nix` and `nixos-rebuild switch` |
-| Container recreated unexpectedly | `extraVolumes`, `extraOptions`, or `image` changed | Expected — writable layer resets. Reinstall packages or use a custom image |
-| `hermes version` shows old version | Container not restarted | `systemctl restart hermes-agent` |
-| Permission denied on `/var/lib/hermes` | State dir is `0750 hermes:hermes` | Use `docker exec` or `sudo -u hermes` |
-| `nix-collect-garbage` removed hermes | GC root missing | Restart the service (preStart recreates the GC root) |
-| `no container with name or ID "hermes-agent"` (Podman) | Podman rootful container not visible to regular user | Add passwordless sudo for podman (see [Container-aware CLI](#container-aware-cli) section) |
-| `unable to find user hermes` | Container still starting (entrypoint hasn't created user yet) | Wait a few seconds and retry — the CLI retries automatically |
+| `Cannot save configuration: managed by NixOS` | CLI 保护已激活 | 编辑 `configuration.nix` 并运行 `nixos-rebuild switch` |
+| 容器意外重建 | `extraVolumes`、`extraOptions` 或 `image` 已更改 | 预期行为 — 可写层重置。重新安装包或使用自定义镜像 |
+| `hermes version` 显示旧版本 | 容器未重启 | `systemctl restart hermes-agent` |
+| `/var/lib/hermes` 权限被拒绝 | 状态目录权限为 `0750 hermes:hermes` | 使用 `docker exec` 或 `sudo -u hermes` |
+| `nix-collect-garbage` 删除了 hermes | GC 根丢失 | 重启服务（preStart 会重新创建 GC 根） |
+| `no container with name or ID "hermes-agent"`（Podman） | Podman 根容器对普通用户不可见 | 为 podman 添加无密码 sudo（参见 [容器感知 CLI](#container-aware-cli) 部分） |
+| `unable to find user hermes` | 容器仍在启动（入口点尚未创建用户） | 等待几秒钟后重试 — CLI 会自动重试 |

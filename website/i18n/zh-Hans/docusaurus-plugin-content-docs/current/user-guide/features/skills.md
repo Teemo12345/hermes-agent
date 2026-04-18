@@ -287,27 +287,27 @@ hermes skills snapshot export setup.json          # 导出技能配置
 hermes skills tap add myorg/skills-repo           # 添加自定义 GitHub 来源
 ```
 
-### Supported hub sources
+### 支持的中心来源
 
-| Source | Example | Notes |
+| 来源 | 示例 | 说明 |
 |--------|---------|-------|
-| `official` | `official/security/1password` | Optional skills shipped with Hermes. |
-| `skills-sh` | `skills-sh/vercel-labs/agent-skills/vercel-react-best-practices` | Searchable via `hermes skills search <query> --source skills-sh`. Hermes resolves alias-style skills when the skills.sh slug differs from the repo folder. |
-| `well-known` | `well-known:https://mintlify.com/docs/.well-known/skills/mintlify` | Skills served directly from `/.well-known/skills/index.json` on a website. Search using the site or docs URL. |
-| `github` | `openai/skills/k8s` | Direct GitHub repo/path installs and custom taps. |
-| `clawhub`, `lobehub`, `claude-marketplace` | Source-specific identifiers | Community or marketplace integrations. |
+| `official` | `official/security/1password` | Hermes 附带的可选技能。 |
+| `skills-sh` | `skills-sh/vercel-labs/agent-skills/vercel-react-best-practices` | 可通过 `hermes skills search <query> --source skills-sh` 搜索。当 skills.sh slug 与 repo 文件夹不同时，Hermes 会解析别名风格的技能。 |
+| `well-known` | `well-known:https://mintlify.com/docs/.well-known/skills/mintlify` | 直接从网站上的 `/.well-known/skills/index.json` 提供的技能。使用站点或文档 URL 进行搜索。 |
+| `github` | `openai/skills/k8s` | 直接 GitHub 仓库/路径安装和自定义源。 |
+| `clawhub`, `lobehub`, `claude-marketplace` | 特定来源的标识符 | 社区或市场集成。 |
 
-### Integrated hubs and registries
+### 集成的中心和注册表
 
-Hermes currently integrates with these skills ecosystems and discovery sources:
+Hermes 目前集成了以下技能生态系统和发现源：
 
-#### 1. Official optional skills (`official`)
+#### 1. 官方可选技能 (`official`)
 
-These are maintained in the Hermes repository itself and install with builtin trust.
+这些技能在 Hermes 仓库本身中维护，并以内置信任安装。
 
-- Catalog: [Official Optional Skills Catalog](../../reference/optional-skills-catalog)
-- Source in repo: `optional-skills/`
-- Example:
+- 目录：[官方可选技能目录](../../reference/optional-skills-catalog)
+- 仓库中的来源：`optional-skills/`
+- 示例：
 
 ```bash
 hermes skills browse --source official
@@ -316,12 +316,12 @@ hermes skills install official/security/1password
 
 #### 2. skills.sh (`skills-sh`)
 
-This is Vercel's public skills directory. Hermes can search it directly, inspect skill detail pages, resolve alias-style slugs, and install from the underlying source repo.
+这是 Vercel 的公共技能目录。Hermes 可以直接搜索它，检查技能详细页面，解析别名风格的 slug，并从底层源仓库安装。
 
-- Directory: [skills.sh](https://skills.sh/)
-- CLI/tooling repo: [vercel-labs/skills](https://github.com/vercel-labs/skills)
-- Official Vercel skills repo: [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)
-- Example:
+- 目录：[skills.sh](https://skills.sh/)
+- CLI/工具仓库：[vercel-labs/skills](https://github.com/vercel-labs/skills)
+- 官方 Vercel 技能仓库：[vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)
+- 示例：
 
 ```bash
 hermes skills search react --source skills-sh
@@ -329,13 +329,13 @@ hermes skills inspect skills-sh/vercel-labs/json-render/json-render-react
 hermes skills install skills-sh/vercel-labs/json-render/json-render-react --force
 ```
 
-#### 3. Well-known skill endpoints (`well-known`)
+#### 3. 知名技能端点 (`well-known`)
 
-This is URL-based discovery from sites that publish `/.well-known/skills/index.json`. It is not a single centralized hub — it is a web discovery convention.
+这是基于 URL 的发现机制，来自发布 `/.well-known/skills/index.json` 的站点。它不是单个中心化的中心 — 而是一种网络发现约定。
 
-- Example live endpoint: [Mintlify docs skills index](https://mintlify.com/docs/.well-known/skills/index.json)
-- Reference server implementation: [vercel-labs/skills-handler](https://github.com/vercel-labs/skills-handler)
-- Example:
+- 示例实时端点：[Mintlify 文档技能索引](https://mintlify.com/docs/.well-known/skills/index.json)
+- 参考服务器实现：[vercel-labs/skills-handler](https://github.com/vercel-labs/skills-handler)
+- 示例：
 
 ```bash
 hermes skills search https://mintlify.com/docs --source well-known
@@ -343,17 +343,17 @@ hermes skills inspect well-known:https://mintlify.com/docs/.well-known/skills/mi
 hermes skills install well-known:https://mintlify.com/docs/.well-known/skills/mintlify
 ```
 
-#### 4. Direct GitHub skills (`github`)
+#### 4. 直接 GitHub 技能 (`github`)
 
-Hermes can install directly from GitHub repositories and GitHub-based taps. This is useful when you already know the repo/path or want to add your own custom source repo.
+Hermes 可以直接从 GitHub 仓库和基于 GitHub 的源安装技能。当您已经知道仓库/路径或想要添加自己的自定义源仓库时，这很有用。
 
-Default taps (browsable without any setup):
+默认源（无需任何设置即可浏览）：
 - [openai/skills](https://github.com/openai/skills)
 - [anthropics/skills](https://github.com/anthropics/skills)
 - [VoltAgent/awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills)
 - [garrytan/gstack](https://github.com/garrytan/gstack)
 
-- Example:
+- 示例：
 
 ```bash
 hermes skills install openai/skills/k8s
@@ -362,81 +362,81 @@ hermes skills tap add myorg/skills-repo
 
 #### 5. ClawHub (`clawhub`)
 
-A third-party skills marketplace integrated as a community source.
+作为社区源集成的第三方技能市场。
 
-- Site: [clawhub.ai](https://clawhub.ai/)
-- Hermes source id: `clawhub`
+- 站点：[clawhub.ai](https://clawhub.ai/)
+- Hermes 源 ID：`clawhub`
 
-#### 6. Claude marketplace-style repos (`claude-marketplace`)
+#### 6. Claude 市场风格仓库 (`claude-marketplace`)
 
-Hermes supports marketplace repos that publish Claude-compatible plugin/marketplace manifests.
+Hermes 支持发布 Claude 兼容的插件/市场清单的市场仓库。
 
-Known integrated sources include:
+已知的集成源包括：
 - [anthropics/skills](https://github.com/anthropics/skills)
 - [aiskillstore/marketplace](https://github.com/aiskillstore/marketplace)
 
-Hermes source id: `claude-marketplace`
+Hermes 源 ID：`claude-marketplace`
 
 #### 7. LobeHub (`lobehub`)
 
-Hermes can search and convert agent entries from LobeHub's public catalog into installable Hermes skills.
+Hermes 可以搜索 LobeHub 公共目录中的智能体条目并将其转换为可安装的 Hermes 技能。
 
-- Site: [LobeHub](https://lobehub.com/)
-- Public agents index: [chat-agents.lobehub.com](https://chat-agents.lobehub.com/)
-- Backing repo: [lobehub/lobe-chat-agents](https://github.com/lobehub/lobe-chat-agents)
-- Hermes source id: `lobehub`
+- 站点：[LobeHub](https://lobehub.com/)
+- 公共智能体索引：[chat-agents.lobehub.com](https://chat-agents.lobehub.com/)
+- 支持仓库：[lobehub/lobe-chat-agents](https://github.com/lobehub/lobe-chat-agents)
+- Hermes 源 ID：`lobehub`
 
-### Security scanning and `--force`
+### 安全扫描和 `--force`
 
-All hub-installed skills go through a **security scanner** that checks for data exfiltration, prompt injection, destructive commands, supply-chain signals, and other threats.
+所有从中心安装的技能都要经过**安全扫描器**检查，以检测数据泄露、提示注入、破坏性命令、供应链信号和其他威胁。
 
-`hermes skills inspect ...` now also surfaces upstream metadata when available:
-- repo URL
-- skills.sh detail page URL
-- install command
-- weekly installs
-- upstream security audit statuses
-- well-known index/endpoint URLs
+`hermes skills inspect ...` 现在还会在可用时显示上游元数据：
+- 仓库 URL
+- skills.sh 详细页面 URL
+- 安装命令
+- 每周安装量
+- 上游安全审计状态
+- 知名索引/端点 URL
 
-Use `--force` when you have reviewed a third-party skill and want to override a non-dangerous policy block:
+当您已审核第三方技能并希望覆盖非危险的策略阻止时，使用 `--force`：
 
 ```bash
 hermes skills install skills-sh/anthropics/skills/pdf --force
 ```
 
-Important behavior:
-- `--force` can override policy blocks for caution/warn-style findings.
-- `--force` does **not** override a `dangerous` scan verdict.
-- Official optional skills (`official/...`) are treated as builtin trust and do not show the third-party warning panel.
+重要行为：
+- `--force` 可以覆盖警告/提示风格发现的策略阻止。
+- `--force` **不会**覆盖 `dangerous` 扫描 verdict。
+- 官方可选技能 (`official/...`) 被视为内置信任，不会显示第三方警告面板。
 
-### Trust levels
+### 信任级别
 
-| Level | Source | Policy |
+| 级别 | 来源 | 策略 |
 |-------|--------|--------|
-| `builtin` | Ships with Hermes | Always trusted |
-| `official` | `optional-skills/` in the repo | Builtin trust, no third-party warning |
-| `trusted` | Trusted registries/repos such as `openai/skills`, `anthropics/skills` | More permissive policy than community sources |
-| `community` | Everything else (`skills.sh`, well-known endpoints, custom GitHub repos, most marketplaces) | Non-dangerous findings can be overridden with `--force`; `dangerous` verdicts stay blocked |
+| `builtin` | 随 Hermes 一起提供 | 始终受信任 |
+| `official` | 仓库中的 `optional-skills/` | 内置信任，无第三方警告 |
+| `trusted` | 受信任的注册表/仓库，如 `openai/skills`、`anthropics/skills` | 比社区源更宽松的策略 |
+| `community` | 其他所有来源（`skills.sh`、知名端点、自定义 GitHub 仓库、大多数市场） | 非危险发现可以通过 `--force` 覆盖；`dangerous` 判定保持阻止 |
 
-### Update lifecycle
+### 更新生命周期
 
-The hub now tracks enough provenance to re-check upstream copies of installed skills:
+中心现在跟踪足够的来源信息，可以重新检查已安装技能的上游副本：
 
 ```bash
-hermes skills check          # Report which installed hub skills changed upstream
-hermes skills update         # Reinstall only the skills with updates available
-hermes skills update react   # Update one specific installed hub skill
+hermes skills check          # 报告哪些已安装的中心技能在 upstream 发生了变化
+hermes skills update         # 仅重新安装有可用更新的技能
+hermes skills update react   # 更新一个特定的已安装中心技能
 ```
 
-This uses the stored source identifier plus the current upstream bundle content hash to detect drift.
+这使用存储的源标识符加上当前上游包内容哈希来检测漂移。
 
-:::tip GitHub rate limits
-Skills hub operations use the GitHub API, which has a rate limit of 60 requests/hour for unauthenticated users. If you see rate-limit errors during install or search, set `GITHUB_TOKEN` in your `.env` file to increase the limit to 5,000 requests/hour. The error message includes an actionable hint when this happens.
+:::tip GitHub 速率限制
+技能中心操作使用 GitHub API，未认证用户的速率限制为每小时 60 个请求。如果您在安装或搜索期间看到速率限制错误，请在 `.env` 文件中设置 `GITHUB_TOKEN` 以将限制增加到每小时 5,000 个请求。当发生这种情况时，错误消息会包含可操作的提示。
 :::
 
-### Slash commands (inside chat)
+### 斜杠命令（聊天内）
 
-All the same commands work with `/skills`:
+所有相同的命令都可以使用 `/skills`：
 
 ```text
 /skills browse
@@ -449,4 +449,4 @@ All the same commands work with `/skills`:
 /skills list
 ```
 
-Official optional skills still use identifiers like `official/security/1password` and `official/migration/openclaw-migration`.
+官方可选技能仍然使用类似 `official/security/1password` 和 `official/migration/openclaw-migration` 的标识符。

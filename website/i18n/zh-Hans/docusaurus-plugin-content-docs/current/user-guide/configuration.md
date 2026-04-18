@@ -482,13 +482,13 @@ auxiliary:
 ```
 指向自定义 OpenAI 兼容端点。使用 `OPENAI_API_KEY` 进行认证。
 
-### How the three knobs interact
+### 三个旋钮如何交互
 
-| `auxiliary.compression.provider` | `auxiliary.compression.base_url` | Result |
+| `auxiliary.compression.provider` | `auxiliary.compression.base_url` | 结果 |
 |---------------------|---------------------|--------|
-| `auto` (default) | not set | Auto-detect best available provider |
-| `nous` / `openrouter` / etc. | not set | Force that provider, use its auth |
-| any | set | Use the custom endpoint directly (provider ignored) |
+| `auto` (默认) | 未设置 | 自动检测最佳可用提供商 |
+| `nous` / `openrouter` / 等 | 未设置 | 强制使用该提供商，使用其认证 |
+| 任何值 | 设置 | 直接使用自定义端点（提供商被忽略） |
 
 :::warning Summary model context length requirement
 摘要模型**必须**具有至少与您主智能体模型一样大的上下文窗口。压缩器将对话的完整中间部分发送到摘要模型 — 如果该模型的上下文窗口小于主模型的，摘要调用将因上下文长度错误而失败。发生这种情况时，中间轮次**会在没有摘要的情况下被丢弃**，静默丢失对话上下文。如果您覆盖了模型，请验证其上下文长度是否满足或超过您主模型的。
@@ -544,26 +544,26 @@ LLM 流式传输连接有两层超时。两者都会为本地提供商（localho
 | Stale stream detection | 180s | Auto-disabled | `HERMES_STREAM_STALE_TIMEOUT` |
 | API call (non-streaming) | 1800s | Unchanged | `HERMES_API_TIMEOUT` |
 
-The **socket read timeout** controls how long httpx waits for the next chunk of data from the provider. Local LLMs can take minutes for prefill on large contexts before producing the first token, so Hermes raises this to 30 minutes when it detects a local endpoint. If you explicitly set `HERMES_STREAM_READ_TIMEOUT`, that value is always used regardless of endpoint detection.
+**套接字读取超时**控制 httpx 等待提供商下一个数据块的时间。本地 LLM 在生成第一个令牌之前，可能需要几分钟时间来处理大上下文的预填充，因此当 Hermes 检测到本地端点时，会将此值提高到 30 分钟。如果您明确设置了 `HERMES_STREAM_READ_TIMEOUT`，则无论端点检测如何，始终使用该值。
 
-The **stale stream detection** kills connections that receive SSE keep-alive pings but no actual content. This is disabled entirely for local providers since they don't send keep-alive pings during prefill.
+** stale 流检测**会终止接收 SSE 保活 ping 但无实际内容的连接。对于本地提供商，这完全被禁用，因为它们在预填充期间不会发送保活 ping。
 
-## Context Pressure Warnings
+## 上下文压力警告
 
-Separate from iteration budget pressure, context pressure tracks how close the conversation is to the **compaction threshold** — the point where context compression fires to summarize older messages. This helps both you and the agent understand when the conversation is getting long.
+与迭代预算压力分开，上下文压力跟踪对话距离**压缩阈值**的接近程度 — 即上下文压缩触发以总结旧消息的点。这有助于您和智能体了解对话何时变得过长。
 
-| Progress | Level | What happens |
+| 进度 | 级别 | 发生什么 |
 |----------|-------|-------------|
-| **≥ 60%** to threshold | Info | CLI shows a cyan progress bar; gateway sends an informational notice |
-| **≥ 85%** to threshold | Warning | CLI shows a bold yellow bar; gateway warns compaction is imminent |
+| **≥ 60%** 到阈值 | 信息 | CLI 显示青色进度条；网关发送信息性通知 |
+| **≥ 85%** 到阈值 | 警告 | CLI 显示粗体黄色条；网关警告压缩即将发生 |
 
-In the CLI, context pressure appears as a progress bar in the tool output feed:
+在 CLI 中，上下文压力在工具输出流中显示为进度条：
 
 ```
   ◐ context ████████████░░░░░░░░ 62% to compaction  48k threshold (50%) · approaching compaction
 ```
 
-On messaging platforms, a plain-text notification is sent:
+在消息平台上，会发送纯文本通知：
 
 ```
 ◐ Context: ████████████░░░░░░░░ 62% to compaction (threshold: 50% of window).
@@ -768,22 +768,22 @@ auxiliary:
 **Vision 需要多模态模型。**如果您设置 `provider: "main"`，请确保您的端点支持多模态/vision — 否则图像分析将失败。
 :::
 
-### Environment Variables (legacy)
+### 环境变量（旧版）
 
-Auxiliary models can also be configured via environment variables. However, `config.yaml` is the preferred method — it's easier to manage and supports all options including `base_url` and `api_key`.
+辅助模型也可以通过环境变量配置。但是，`config.yaml` 是首选方法 — 它更易于管理，并支持所有选项，包括 `base_url` 和 `api_key`。
 
-| Setting | Environment Variable |
+| 设置 | 环境变量 |
 |---------|---------------------|
-| Vision provider | `AUXILIARY_VISION_PROVIDER` |
-| Vision model | `AUXILIARY_VISION_MODEL` |
-| Vision endpoint | `AUXILIARY_VISION_BASE_URL` |
-| Vision API key | `AUXILIARY_VISION_API_KEY` |
-| Web extract provider | `AUXILIARY_WEB_EXTRACT_PROVIDER` |
-| Web extract model | `AUXILIARY_WEB_EXTRACT_MODEL` |
-| Web extract endpoint | `AUXILIARY_WEB_EXTRACT_BASE_URL` |
-| Web extract API key | `AUXILIARY_WEB_EXTRACT_API_KEY` |
+| Vision 提供商 | `AUXILIARY_VISION_PROVIDER` |
+| Vision 模型 | `AUXILIARY_VISION_MODEL` |
+| Vision 端点 | `AUXILIARY_VISION_BASE_URL` |
+| Vision API 密钥 | `AUXILIARY_VISION_API_KEY` |
+| Web 提取提供商 | `AUXILIARY_WEB_EXTRACT_PROVIDER` |
+| Web 提取模型 | `AUXILIARY_WEB_EXTRACT_MODEL` |
+| Web 提取端点 | `AUXILIARY_WEB_EXTRACT_BASE_URL` |
+| Web 提取 API 密钥 | `AUXILIARY_WEB_EXTRACT_API_KEY` |
 
-Compression and fallback model settings are config.yaml-only.
+压缩和备用模型设置仅在 config.yaml 中可用。
 
 :::tip
 运行 `hermes config` 查看您当前的辅助模型设置。覆盖只在与默认值不同时才会显示。
@@ -836,37 +836,37 @@ agent:
 
 3. **Google 操作指导**（仅限 Gemini 和 Gemma 模型）— 简洁性、绝对路径、并行工具调用和验证后编辑模式。
 
-These are transparent to the user and only affect the system prompt. Models that already use tools reliably (like Claude) don't need this guidance, which is why `"auto"` excludes them.
+这些对用户是透明的，仅影响系统提示。已经可靠使用工具的模型（如 Claude）不需要此指导，这就是为什么 "auto" 会排除它们。
 
-### When to turn it on
+### 何时启用它
 
-If you're using a model not in the default auto list and notice it frequently describes what it *would* do instead of doing it, set `tool_use_enforcement: true` or add the model substring to the list:
+如果您使用的模型不在默认自动列表中，并且注意到它经常描述它*会*做什么而不是实际去做，请设置 `tool_use_enforcement: true` 或将模型子字符串添加到列表中：
 
 ```yaml
 agent:
   tool_use_enforcement: ["gpt", "codex", "gemini", "grok", "my-custom-model"]
 ```
 
-## TTS Configuration
+## TTS 配置
 
 ```yaml
 tts:
   provider: "edge"              # "edge" | "elevenlabs" | "openai" | "minimax" | "mistral" | "neutts"
-  speed: 1.0                    # Global speed multiplier (fallback for all providers)
+  speed: 1.0                    # 全局速度乘数（所有提供商的回退值）
   edge:
-    voice: "en-US-AriaNeural"   # 322 voices, 74 languages
-    speed: 1.0                  # Speed multiplier (converted to rate percentage, e.g. 1.5 → +50%)
+    voice: "en-US-AriaNeural"   # 322 个语音，74 种语言
+    speed: 1.0                  # 速度乘数（转换为速率百分比，例如 1.5 → +50%）
   elevenlabs:
     voice_id: "pNInz6obpgDQGcFmaJgB"
     model_id: "eleven_multilingual_v2"
   openai:
     model: "gpt-4o-mini-tts"
     voice: "alloy"              # alloy, echo, fable, onyx, nova, shimmer
-    speed: 1.0                  # Speed multiplier (clamped to 0.25–4.0 by the API)
-    base_url: "https://api.openai.com/v1"  # Override for OpenAI-compatible TTS endpoints
+    speed: 1.0                  # 速度乘数（API 限制在 0.25–4.0 之间）
+    base_url: "https://api.openai.com/v1"  # 覆盖 OpenAI 兼容的 TTS 端点
   minimax:
-    speed: 1.0                  # Speech speed multiplier
-    # base_url: ""              # Optional: override for OpenAI-compatible TTS endpoints
+    speed: 1.0                  # 语音速度乘数
+    # base_url: ""              # 可选：覆盖 OpenAI 兼容的 TTS 端点
   neutts:
     ref_audio: ''
     ref_text: ''
@@ -874,11 +874,11 @@ tts:
     device: cpu
 ```
 
-This controls both the `text_to_speech` tool and spoken replies in voice mode (`/voice tts` in the CLI or messaging gateway).
+这控制 `text_to_speech` 工具和语音模式下的语音回复（CLI 或消息网关中的 `/voice tts`）。
 
 **速度回退层次结构：** 提供商特定速度（例如 `tts.edge.speed`）→ 全局 `tts.speed` → `1.0` 默认值。设置全局 `tts.speed` 以在所有提供商之间应用统一速度，或为每个提供商覆盖以进行细粒度控制。
 
-## Display Settings
+## 显示设置
 
 ```yaml
 display:
@@ -923,11 +923,11 @@ display:
 
 `interim_assistant_messages` 仅限网关。当启用时，Hermes 会将完成的回合中助手更新作为单独的聊天消息发送。这独立于 `tool_progress`，不需要网关流式传输。
 
-## Privacy
+## 隐私
 
 ```yaml
 privacy:
-  redact_pii: false  # Strip PII from LLM context (gateway only)
+  redact_pii: false  # 从 LLM 上下文中剥离 PII（仅网关）
 ```
 
 当 `redact_pii` 为 `true` 时，网关会在将系统提示发送到支持的平台上的 LLM 之前，对其进行个人身份信息编辑：
@@ -936,7 +936,7 @@ privacy:
 |-------|-----------|
 | 电话号码（WhatsApp/Signal 上的用户 ID）| 哈希为 `user_<12-char-sha256>` |
 | 用户 ID | 哈希为 `user_<12-char-sha256>` |
-| 聊天 ID | 数字部分哈希，保留平台前缀（`telegram:<hash>`）|
+| 聊天 ID | 数字部分哈希，保留平台前缀（`telegram:<hash>`）| 
 | 主页频道 ID | 数字部分哈希 |
 | 用户名 / 用户昵称 | **不受影响**（用户选择、公开可见）|
 

@@ -7,8 +7,8 @@ const config: Config = {
   tagline: 'The self-improving AI agent',
   favicon: 'img/favicon.ico',
 
-  url: 'https://hermes-agent.nousresearch.com',
-  baseUrl: '/docs/',
+  url: 'http://hermes-agent-zh.xyz',
+  baseUrl: '/',
 
   organizationName: 'NousResearch',
   projectName: 'hermes-agent',
@@ -23,7 +23,7 @@ const config: Config = {
   },
 
   i18n: {
-    defaultLocale: 'en',
+    defaultLocale: 'zh-Hans',
     locales: ['en', 'zh-Hans'],
   },
 
